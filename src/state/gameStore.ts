@@ -1,0 +1,112 @@
+import { create } from "zustand";
+import type { Chess } from "chess.js";
+import type { Square } from "chess.js";
+import { createGame, legalTargets, snapshot, tryMove } from "@/domain/chess/engine";
+import type { GameSnapshot } from "@/domain/chess/types";
+import { loadActiveGame, saveActiveGame } from "@/data/gameRepository";
+
+interface GameState {
+  /** Mutable source of truth; never read directly in render — read `snap` instead. */
+  game: Chess;
+  snap: GameSnapshot;
+  selected: Square | null;
+  targets: Square[];
+  hydrated: boolean;
+
+  /** Tap behaviour: select / deselect / move depending on context. */
+  selectSquare: (sq: Square) => void;
+  /** Force-select a piece (used when a drag begins). */
+  grab: (sq: Square) => void;
+  /** Direct from→to move (used on drag-drop). Returns true if the move was legal. */
+  move: (from: Square, to: Square) => boolean;
+  clearSelection: () => void;
+  reset: () => void;
+  undo: () => void;
+  hydrate: () => Promise<void>;
+}
+
+const initialGame = createGame();
+
+export const useGameStore = create<GameState>((set, get) => ({
+  game: initialGame,
+  snap: snapshot(initialGame),
+  selected: null,
+  targets: [],
+  hydrated: false,
+
+  selectSquare: (sq) => {
+    const { game, selected, targets } = get();
+
+    if (selected === sq) {
+      set({ selected: null, targets: [] });
+      return;
+    }
+
+    if (selected && targets.includes(sq)) {
+      if (tryMove(game, selected, sq)) {
+        const snap = snapshot(game);
+        set({ snap, selected: null, targets: [] });
+        void saveActiveGame(snap.pgn);
+      } else {
+        set({ selected: null, targets: [] });
+      }
+      return;
+    }
+
+    const piece = game.get(sq);
+    if (piece && piece.color === game.turn()) {
+      set({ selected: sq, targets: legalTargets(game, sq) });
+    } else {
+      set({ selected: null, targets: [] });
+    }
+  },
+
+  grab: (sq) => {
+    const { game } = get();
+    const piece = game.get(sq);
+    if (piece && piece.color === game.turn()) {
+      set({ selected: sq, targets: legalTargets(game, sq) });
+    }
+  },
+
+  move: (from, to) => {
+    const { game } = get();
+    if (tryMove(game, from, to)) {
+      const snap = snapshot(game);
+      set({ snap, selected: null, targets: [] });
+      void saveActiveGame(snap.pgn);
+      return true;
+    }
+    set({ selected: null, targets: [] });
+    return false;
+  },
+
+  clearSelection: () => set({ selected: null, targets: [] }),
+
+  reset: () => {
+    const game = createGame();
+    const snap = snapshot(game);
+    set({ game, snap, selected: null, targets: [] });
+    void saveActiveGame(snap.pgn);
+  },
+
+  undo: () => {
+    const { game } = get();
+    const undone = game.undo();
+    if (!undone) return;
+    const snap = snapshot(game);
+    set({ snap, selected: null, targets: [] });
+    void saveActiveGame(snap.pgn);
+  },
+
+  hydrate: async () => {
+    if (get().hydrated) return;
+    const pgn = await loadActiveGame();
+    if (pgn) {
+      const game = createGame(pgn);
+      set({ game, snap: snapshot(game), hydrated: true });
+    } else {
+      set({ hydrated: true });
+    }
+  },
+}));

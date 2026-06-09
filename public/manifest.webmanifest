@@ -1,0 +1,11 @@
+{
+  "name": "Tabiya — Chess Mastery",
+  "short_name": "Tabiya",
+  "description": "A premium, structured chess training experience.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#17120c",
+  "theme_color": "#17120c",
+  "orientation": "portrait",
+  "icons": [{ "src": "/favicon.ico", "sizes": "48x48", "type": "image/x-icon" }]
+}
