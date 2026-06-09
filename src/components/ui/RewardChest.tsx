@@ -9,10 +9,10 @@ export default function RewardChest({
   state?: "locked" | "ready" | "claimed";
   size?: number;
 }) {
-  const body = state === "locked" ? "#3a3024" : "#b8923c";
-  const lid = state === "locked" ? "#4a3d2c" : "#d9b25a";
-  const band = state === "locked" ? "#2a2118" : "#8a6a28";
-  const latch = state === "locked" ? "#6a5a3e" : "#f0cf80";
+  const body = state === "locked" ? "#cbd5e1" : "#fcd34d";
+  const lid = state === "locked" ? "#e2e8f0" : "#fde68a";
+  const band = state === "locked" ? "#94a3b8" : "#f59e0b";
+  const latch = state === "locked" ? "#e2e8f0" : "#ffffff";
 
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" aria-hidden>
@@ -26,7 +26,7 @@ export default function RewardChest({
       <rect x="21" y="24" width="6" height="7" rx="1.5" fill={band} />
       <circle cx="24" cy="27.5" r="1.7" fill={latch} />
       {state === "ready" ? (
-        <circle cx="24" cy="13" r="2.2" fill="#f0cf80" className="tab-flame-icon" />
+        <circle cx="24" cy="12" r="2.4" fill="#fde68a" className="tab-flame-icon" />
       ) : null}
     </svg>
   );

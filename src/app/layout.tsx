@@ -10,11 +10,11 @@ export const metadata: Metadata = {
   title: "Tabiya — Chess Mastery",
   description: "A premium, structured chess training experience.",
   manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Tabiya" },
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "Tabiya" },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#17120c",
+  themeColor: "#f8fafc",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,

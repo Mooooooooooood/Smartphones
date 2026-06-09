@@ -16,11 +16,11 @@ export default function FlameIcon({
     >
       <path
         d="M12 2c1 3-1 4.5-2.5 6.5C8 10.3 7 11.8 7 14a5 5 0 0 0 10 0c0-2-1-3.6-2-5-1 1-2 1.4-2.6.4C11.6 8 13 6 12 2z"
-        fill={active ? "#d9b25a" : "#5a4d35"}
+        fill={active ? "#fb923c" : "#cbd5e1"}
       />
       <path
         d="M12 12c.7 1 .4 2-.2 2.7-.5.6-.8 1.3-.8 2a2 2 0 0 0 4 0c0-1.4-1-2-1.4-3-.4.5-1 .6-1.3 0z"
-        fill={active ? "#f0cf80" : "#7a6a48"}
+        fill={active ? "#fde68a" : "#e2e8f0"}
       />
     </svg>
   );

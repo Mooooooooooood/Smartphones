@@ -66,7 +66,7 @@ export default function BottomNav() {
   const path = usePathname();
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50">
-      <div className="mx-auto max-w-md border-t border-line bg-panel/95 px-1 pb-[env(safe-area-inset-bottom)] backdrop-blur">
+      <div className="mx-auto max-w-md border-t border-line bg-panel/95 px-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-6px_18px_-12px_rgba(30,41,59,0.25)] backdrop-blur">
         <ul className="flex items-stretch justify-between">
           {TABS.map(({ href, label, Icon }) => {
             const active = href === "/" ? path === "/" : path.startsWith(href);

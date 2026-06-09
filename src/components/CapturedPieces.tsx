@@ -26,8 +26,8 @@ export default function CapturedPieces({ side }: { side: Color }) {
           <span
             key={i}
             style={{
-              color: pieceColor === "w" ? "#f3ecdd" : "#241a12",
-              WebkitTextStroke: pieceColor === "w" ? "0.8px #2a1f14" : "0.7px #0c0805",
+              color: pieceColor === "w" ? "#ffffff" : "#334155",
+              WebkitTextStroke: pieceColor === "w" ? "1px #94a3b8" : "0.7px #1e293b",
             }}
           >
             {GLYPH[p]}

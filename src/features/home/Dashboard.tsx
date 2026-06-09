@@ -142,8 +142,14 @@ export default function Dashboard() {
       </header>
 
       {/* Hero */}
-      <GameCard variant="accent" glow className="p-5">
-        <div className="flex items-center gap-4">
+      <GameCard variant="accent" glow className="relative overflow-hidden p-5">
+        {/* playful floating chess motifs */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 select-none">
+          <span className="absolute -right-2 -top-3 text-7xl text-sky/10">♞</span>
+          <span className="absolute right-10 bottom-1 text-4xl text-lav/20">♟</span>
+          <span className="absolute left-2 -bottom-3 text-5xl text-mint/20">★</span>
+        </div>
+        <div className="relative flex items-center gap-4">
           <ProgressRing value={lvl.progress} size={108}>
             <span className="font-display text-3xl leading-none text-cream">{lvl.level}</span>
             <span className="mt-0.5 text-[9px] uppercase tracking-[0.18em] text-muted2">Level</span>
@@ -184,7 +190,7 @@ export default function Dashboard() {
                   className="h-full rounded-full transition-[width] duration-500"
                   style={{
                     width: `${questFraction * 100}%`,
-                    backgroundImage: "linear-gradient(90deg, #b8923c, #d9b25a)",
+                    backgroundImage: "linear-gradient(90deg, #60a5fa, #93c5fd)",
                   }}
                 />
               </div>

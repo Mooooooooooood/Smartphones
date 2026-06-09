@@ -13,7 +13,7 @@ export default function XPBar({
         className="h-full rounded-full transition-[width] duration-700 ease-out"
         style={{
           width: `${pct}%`,
-          backgroundImage: "linear-gradient(90deg, #b8923c 0%, #d9b25a 60%, #f0cf80 100%)",
+          backgroundImage: "linear-gradient(90deg, #60a5fa 0%, #93c5fd 60%, #bfdbfe 100%)",
         }}
       />
     </div>

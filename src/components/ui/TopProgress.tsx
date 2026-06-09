@@ -35,7 +35,7 @@ export default function TopProgress({
           className="h-full rounded-full transition-[width] duration-500 ease-out"
           style={{
             width: `${pct}%`,
-            backgroundImage: "linear-gradient(90deg, #b8923c, #d9b25a 70%, #f0cf80)",
+            backgroundImage: "linear-gradient(90deg, #60a5fa, #93c5fd 70%, #bfdbfe)",
           }}
         />
       </div>

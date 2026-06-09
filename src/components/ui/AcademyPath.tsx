@@ -52,7 +52,7 @@ function NodeInner({ stop }: { stop: PathStop }) {
     return (
       <div
         className={`flex items-center justify-center rounded-2xl border text-3xl ${
-          ready ? "border-brass bg-brass/20 text-brass tab-glow" : "border-line bg-panel2 text-muted2"
+          ready ? "border-brass bg-brass/20 text-brass tab-glow" : "border-line bg-ink2 text-muted2"
         }`}
         style={{ width: size, height: size }}
         aria-hidden
@@ -82,7 +82,7 @@ function NodeInner({ stop }: { stop: PathStop }) {
     );
   }
   return (
-    <div className={`${base} border border-line bg-panel2 text-muted2`} style={{ width: size, height: size }}>
+    <div className={`${base} border border-line bg-ink2 text-muted2`} style={{ width: size, height: size }}>
       <LockGlyph />
     </div>
   );
@@ -112,8 +112,8 @@ export default function AcademyPath({ stops }: { stops: PathStop[] }) {
         preserveAspectRatio="none"
         aria-hidden
       >
-        <path d={base} fill="none" stroke="#3a2e1c" strokeWidth={4} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-        <path d={progress} fill="none" stroke="#d9b25a" strokeWidth={4} strokeLinejoin="round" strokeLinecap="round" strokeOpacity={0.7} vectorEffect="non-scaling-stroke" />
+        <path d={base} fill="none" stroke="#dbe3ee" strokeWidth={5} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+        <path d={progress} fill="none" stroke="#60a5fa" strokeWidth={5} strokeLinejoin="round" strokeLinecap="round" strokeOpacity={0.85} vectorEffect="non-scaling-stroke" />
       </svg>
 
       {stops.map((stop, i) => {

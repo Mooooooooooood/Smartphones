@@ -4,8 +4,8 @@
   "description": "A premium, structured chess training experience.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#17120c",
-  "theme_color": "#17120c",
+  "background_color": "#f8fafc",
+  "theme_color": "#60a5fa",
   "orientation": "portrait",
   "icons": [{ "src": "/favicon.ico", "sizes": "48x48", "type": "image/x-icon" }]
 }

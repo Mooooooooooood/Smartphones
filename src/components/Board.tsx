@@ -5,24 +5,25 @@ import type { CSSProperties } from "react";
 import type { Square } from "chess.js";
 import { useGameStore } from "@/state/gameStore";
 import { findKing } from "@/domain/chess/engine";
+import { BOARD_SQUARE_STYLES } from "@/components/boardTheme";
 
-const BRASS = "#d9b25a";
+const ACCENT = "#3b82f6";
 
 const moveDot: CSSProperties = {
-  backgroundImage: "radial-gradient(circle, rgba(217,178,90,0.55) 17%, transparent 19%)",
+  backgroundImage: "radial-gradient(circle, rgba(96,165,250,0.60) 17%, transparent 19%)",
 };
 const captureRing: CSSProperties = {
-  boxShadow: "inset 0 0 0 5px rgba(200,90,70,0.85)",
+  boxShadow: "inset 0 0 0 5px rgba(244,63,94,0.65)",
   borderRadius: "4px",
 };
 const selectedStyle: CSSProperties = {
-  boxShadow: `inset 0 0 0 3px ${BRASS}`,
+  boxShadow: `inset 0 0 0 3px ${ACCENT}`,
 };
 const lastMoveStyle: CSSProperties = {
-  backgroundImage: "linear-gradient(rgba(217,178,90,0.28), rgba(217,178,90,0.28))",
+  backgroundImage: "linear-gradient(rgba(253,230,138,0.55), rgba(253,230,138,0.55))",
 };
 const checkStyle: CSSProperties = {
-  background: "radial-gradient(circle, rgba(196,70,50,0.9) 0%, rgba(196,70,50,0) 72%)",
+  background: "radial-gradient(circle, rgba(244,63,94,0.75) 0%, rgba(244,63,94,0) 72%)",
 };
 
 export default function Board({ orientation = "white" }: { orientation?: "white" | "black" }) {
@@ -62,10 +63,7 @@ export default function Board({ orientation = "white" }: { orientation?: "white"
         allowDragging: true,
         showNotation: true,
         boardStyle: { borderRadius: "8px", overflow: "hidden" },
-        darkSquareStyle: { backgroundColor: "#9c6f47" },
-        lightSquareStyle: { backgroundColor: "#e9d6b0" },
-        darkSquareNotationStyle: { color: "rgba(245,232,206,0.70)" },
-        lightSquareNotationStyle: { color: "rgba(70,48,24,0.65)" },
+        ...BOARD_SQUARE_STYLES,
         squareStyles: styles,
         onSquareClick: ({ square }) => selectSquare(square as Square),
         onPieceDrag: ({ square }) => {

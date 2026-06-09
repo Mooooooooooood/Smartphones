@@ -5,23 +5,25 @@ import { Chessboard } from "react-chessboard";
 import type { Square } from "chess.js";
 import { usePuzzleStore, currentPuzzle } from "@/state/puzzleStore";
 import { legalTargets } from "@/domain/puzzles/puzzleEngine";
+import { BOARD_SQUARE_STYLES } from "@/components/boardTheme";
 
-const BRASS = "#d9b25a";
+const ACCENT = "#3b82f6";
 
 const moveDot: CSSProperties = {
-  backgroundImage: "radial-gradient(circle, rgba(20,14,8,0.32) 18%, transparent 20%)",
+  backgroundImage: "radial-gradient(circle, rgba(96,165,250,0.60) 17%, transparent 19%)",
 };
 const captureRing: CSSProperties = {
-  boxShadow: "inset 0 0 0 4px rgba(196,106,79,0.6)",
+  boxShadow: "inset 0 0 0 5px rgba(244,63,94,0.65)",
+  borderRadius: "4px",
 };
 const selectedStyle: CSSProperties = {
-  boxShadow: `inset 0 0 0 3px ${BRASS}`,
+  boxShadow: `inset 0 0 0 3px ${ACCENT}`,
 };
 const solvedStyle: CSSProperties = {
-  backgroundImage: "linear-gradient(rgba(138,174,99,0.40), rgba(138,174,99,0.40))",
+  backgroundImage: "linear-gradient(rgba(134,239,172,0.55), rgba(134,239,172,0.55))",
 };
 const hintStyle: CSSProperties = {
-  boxShadow: `inset 0 0 0 3px rgba(217,178,90,0.85)`,
+  boxShadow: `inset 0 0 0 3px rgba(96,165,250,0.85)`,
 };
 
 export default function PuzzleBoard() {
@@ -99,10 +101,7 @@ export default function PuzzleBoard() {
         allowDragging: !solved,
         showNotation: true,
         boardStyle: { borderRadius: "8px", overflow: "hidden" },
-        darkSquareStyle: { backgroundColor: "#9c6f47" },
-        lightSquareStyle: { backgroundColor: "#e9d6b0" },
-        darkSquareNotationStyle: { color: "rgba(245,232,206,0.70)" },
-        lightSquareNotationStyle: { color: "rgba(70,48,24,0.65)" },
+        ...BOARD_SQUARE_STYLES,
         squareStyles: styles,
         onSquareClick: ({ square }) => handleSquareClick(square as Square),
         onPieceDrop: ({ sourceSquare, targetSquare }) => {

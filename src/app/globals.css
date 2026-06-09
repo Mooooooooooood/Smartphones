@@ -1,20 +1,32 @@
 @import "tailwindcss";
 
+/* ---------- Sprint 4C — Bright Cartoon palette ----------
+   Token names are kept stable so the whole app re-themes from here.
+   Semantics: ink* = light surfaces, cream = primary (dark) text,
+   brass = primary sky-blue accent. */
 @theme {
-  --color-ink: #17120c;
-  --color-ink2: #1f1810;
-  --color-panel: #211a11;
-  --color-panel2: #2a2116;
-  --color-frame: #3a2a17;
-  --color-line: #3f3322;
-  --color-cream: #f1e7d4;
-  --color-muted: #b7a684;
-  --color-muted2: #8a7a5d;
-  --color-brass: #d9b25a;
-  --color-brassdeep: #b8923c;
-  --color-good: #8aae63;
-  --color-bad: #c8755a;
-  --color-warn: #d8a24a;
+  --color-ink: #f8fafc;        /* app background */
+  --color-ink2: #f1f5f9;       /* soft surface / progress tracks */
+  --color-panel: #ffffff;      /* main surface */
+  --color-panel2: #eaf3ff;     /* secondary (soft blue) surface */
+  --color-frame: #e2e8f0;      /* board / card frames */
+  --color-line: #e2e8f0;       /* borders */
+  --color-cream: #1e293b;      /* primary text */
+  --color-muted: #64748b;      /* secondary text */
+  --color-muted2: #94a3b8;     /* muted text */
+  --color-brass: #60a5fa;      /* primary accent (sky blue) */
+  --color-brassdeep: #3b82f6;  /* deeper accent */
+  --color-good: #22c55e;       /* success (readable green) */
+  --color-bad: #f43f5e;        /* error (readable coral) */
+  --color-warn: #f59e0b;       /* warning (readable amber) */
+  --color-on-accent: #ffffff;  /* text on a filled accent */
+  /* soft playful fills */
+  --color-mint: #86efac;
+  --color-sun: #fde68a;
+  --color-coral: #fda4af;
+  --color-lav: #c4b5fd;
+  --color-sky: #60a5fa;
+  --color-skysoft: #bfdbfe;
   --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
   --font-body: var(--font-hanken), system-ui, -apple-system, sans-serif;
 }
@@ -23,48 +35,47 @@ html, body { height: 100%; }
 body {
   margin: 0;
   background:
-    radial-gradient(120% 80% at 50% -8%, #271d12 0%, var(--color-ink) 58%);
+    radial-gradient(120% 70% at 50% -10%, #eaf3ff 0%, var(--color-ink) 60%);
   background-attachment: fixed;
   color: var(--color-cream);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
 }
 * { -webkit-tap-highlight-color: transparent; }
-::selection { background: rgba(217, 178, 90, 0.30); }
+::selection { background: rgba(96, 165, 250, 0.25); }
 
 .tabiya-board-wrap { width: 100%; max-width: 440px; margin: 0 auto; }
 
-/* ---------- Sprint 4 — gamefeel visual system ---------- */
+/* ---------- Bright cartoon visual system ---------- */
 
-/* Layered premium card surface */
+/* Soft rounded card surface with a gentle "toy" bottom shadow */
 .tab-card {
-  background-image: linear-gradient(to bottom, #241c12, #1c150d);
+  background: #ffffff;
   border: 1px solid var(--color-line);
   border-radius: 1.25rem;
   box-shadow:
-    0 1px 0 rgba(255, 240, 210, 0.04) inset,
-    0 10px 24px -12px rgba(0, 0, 0, 0.7);
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 8px 18px -10px rgba(30, 41, 59, 0.18);
 }
 .tab-card-accent {
-  background-image: linear-gradient(to bottom, #2c2113, #20180e);
-  border: 1px solid rgba(217, 178, 90, 0.35);
+  background-image: linear-gradient(to bottom, #eaf3ff, #f7fbff);
+  border: 1px solid rgba(96, 165, 250, 0.35);
   border-radius: 1.25rem;
   box-shadow:
-    0 1px 0 rgba(255, 240, 210, 0.05) inset,
-    0 12px 30px -14px rgba(0, 0, 0, 0.75),
-    0 0 0 0 rgba(217, 178, 90, 0);
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 10px 22px -12px rgba(59, 130, 246, 0.30);
 }
 .tab-glow {
   box-shadow:
-    0 12px 30px -14px rgba(0, 0, 0, 0.75),
-    0 0 36px -10px rgba(217, 178, 90, 0.35);
+    0 10px 24px -12px rgba(59, 130, 246, 0.30),
+    0 0 30px -10px rgba(96, 165, 250, 0.45);
 }
 
-/* Branded shimmer skeleton */
+/* Soft shimmer skeleton */
 .tab-skeleton {
   position: relative;
   overflow: hidden;
-  background: #221a11;
+  background: #eef2f7;
   border-radius: 1rem;
 }
 .tab-skeleton::after {
@@ -75,13 +86,13 @@ body {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(217, 178, 90, 0.10) 50%,
+    rgba(255, 255, 255, 0.85) 50%,
     transparent 100%
   );
   animation: tab-shimmer 1.4s ease-in-out infinite;
 }
 
-/* Thin progress path spine used by the Academy map */
+/* Thin dashed path spine */
 .tab-path-line {
   background: repeating-linear-gradient(
     to bottom,
@@ -112,9 +123,9 @@ body {
   100% { transform: translateY(-26px); opacity: 0; }
 }
 @keyframes tab-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(217, 178, 90, 0.45); }
-  70% { box-shadow: 0 0 0 12px rgba(217, 178, 90, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(217, 178, 90, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.50); }
+  70% { box-shadow: 0 0 0 12px rgba(96, 165, 250, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(96, 165, 250, 0); }
 }
 
 .tab-animate-pop { animation: tab-pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
