@@ -45,6 +45,13 @@
   --star: rgba(255, 255, 255, 0);
   --card-shadow: rgba(30, 41, 59, 0.16);
   --skeleton-shine: rgba(255, 255, 255, 0.8);
+  --island-grass: #8ef0a6;
+  --island-grass2: #4ade80;
+  --island-dirt: #b67d4f;
+  --island-dirt2: #8a5a37;
+  --island-shadow: rgba(30, 41, 59, 0.18);
+  --horizon: rgba(255, 255, 255, 0.5);
+  --sparkle: #ffffff;
 }
 
 /* ---------- Soft cartoon NIGHT theme ---------- */
@@ -79,6 +86,13 @@ html.dark {
   --star: rgba(226, 236, 255, 0.55);
   --card-shadow: rgba(0, 0, 0, 0.45);
   --skeleton-shine: rgba(255, 255, 255, 0.06);
+  --island-grass: #4ea96f;
+  --island-grass2: #3c8a59;
+  --island-dirt: #6b4a34;
+  --island-dirt2: #4f3726;
+  --island-shadow: rgba(0, 0, 0, 0.4);
+  --horizon: rgba(124, 176, 255, 0.10);
+  --sparkle: #dfeaff;
 }
 
 html, body { height: 100%; }
@@ -173,6 +187,14 @@ body {
   20% { opacity: 1; }
   100% { transform: translateY(60px) scale(1) rotate(40deg); opacity: 0; }
 }
+@keyframes tab-twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 0.95; transform: scale(1.15); }
+}
+@keyframes tab-drift {
+  0% { transform: translateX(-6px); }
+  100% { transform: translateX(8px); }
+}
 
 .tab-animate-pop { animation: tab-pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
 .tab-animate-rise { animation: tab-rise 0.4s ease-out both; }
@@ -181,6 +203,8 @@ body {
 .tab-pulse { animation: tab-pulse 1.8s ease-out infinite; }
 .tab-bob { animation: tab-bob 3s ease-in-out infinite; }
 .tab-burst { animation: tab-burst 1.2s ease-out forwards; }
+.tab-twinkle { animation: tab-twinkle 3.2s ease-in-out infinite; }
+.tab-drift { animation: tab-drift 9s ease-in-out infinite alternate; }
 
 @media (prefers-reduced-motion: reduce) {
   .tab-skeleton::after,
@@ -190,5 +214,7 @@ body {
   .tab-floatup,
   .tab-pulse,
   .tab-bob,
-  .tab-burst { animation: none; }
+  .tab-burst,
+  .tab-twinkle,
+  .tab-drift { animation: none; }
 }
