@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { useProfileStore, selectLevel, puzzlesSolvedCount, academyStateFrom } from "@/state/profileStore";
 import { usePuzzleStore, overallAccuracy } from "@/state/puzzleStore";
@@ -30,7 +30,8 @@ import RankBadge from "@/components/ui/RankBadge";
 import StatPill from "@/components/ui/StatPill";
 import XPBar from "@/components/ui/XPBar";
 import FlameIcon from "@/components/ui/FlameIcon";
-import RewardChest from "@/components/ui/RewardChest";
+import ClaimableChest from "@/components/ui/ClaimableChest";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 import ChessBuddy from "@/components/characters/ChessBuddy";
 
 type MilestoneState = "done" | "current" | "locked";
@@ -96,8 +97,6 @@ export default function Dashboard() {
   const claimDailyBonus = useProfileStore((s) => s.claimDailyBonus);
   const attempts = usePuzzleStore((s) => s.attempts);
 
-  const [justClaimed, setJustClaimed] = useState(false);
-
   useEffect(() => {
     void usePuzzleStore.getState().hydrate();
     void useGameStore.getState().hydrate();
@@ -142,18 +141,16 @@ export default function Dashboard() {
       ?.relatedPuzzleTheme ??
     null;
 
-  async function onClaim() {
-    const got = await claimDailyBonus();
-    if (got > 0) setJustClaimed(true);
-  }
-
   return (
     <div className="space-y-6">
-      <header className="pt-1">
-        <p className="text-xs uppercase tracking-[0.18em] text-muted2">
-          {fresh ? "Welcome to" : "Welcome back to"}
-        </p>
-        <h1 className="font-display text-4xl font-semibold text-cream">Tabiya</h1>
+      <header className="flex items-start justify-between pt-1">
+        <div>
+          <p className="text-xs uppercase tracking-[0.18em] text-muted2">
+            {fresh ? "Welcome to" : "Welcome back to"}
+          </p>
+          <h1 className="font-display text-4xl font-semibold text-cream">Tabiya</h1>
+        </div>
+        <ThemeToggle compact />
       </header>
 
       {/* Hero */}
@@ -213,7 +210,14 @@ export default function Dashboard() {
                 <XPBar value={doneCount / 3} />
               </div>
             </div>
-            <RewardChest state={daily.bonusClaimed ? "claimed" : allDone ? "ready" : "locked"} size={64} />
+            <ClaimableChest
+              state={daily.bonusClaimed ? "claimed" : claimable ? "ready" : "locked"}
+              size={64}
+              onClaim={claimDailyBonus}
+              rewardTitle="Daily Bonus!"
+              rewardPiece="pawn"
+              lockedMessage="Finish all 3 missions first!"
+            />
           </div>
 
           <div className="mt-3 grid grid-cols-3 gap-2.5">
@@ -229,23 +233,14 @@ export default function Dashboard() {
             ))}
           </div>
 
-          {/* Bonus state */}
-          {daily.bonusClaimed || justClaimed ? (
-            <div className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-good/40 bg-good/15 px-3 py-2.5 text-sm font-semibold text-gooddeep">
-              ✓ Daily bonus claimed · +{DAILY_BONUS_XP} XP
-            </div>
-          ) : claimable ? (
-            <button
-              onClick={onClaim}
-              className="mt-3 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl border border-brassdeep bg-brass text-[color:var(--color-on-accent)] text-sm font-semibold shadow-[0_4px_0_0_var(--color-brassdeep)] active:translate-y-0.5 active:shadow-[0_2px_0_0_var(--color-brassdeep)]"
-            >
-              🎁 Claim daily bonus · +{DAILY_BONUS_XP} XP
-            </button>
-          ) : (
-            <p className="mt-3 text-center text-[11px] text-muted2">
-              Finish all 3 missions to open today&apos;s reward chest.
-            </p>
-          )}
+          {/* Bonus hint */}
+          <p className="mt-3 text-center text-[11px] text-muted2">
+            {daily.bonusClaimed
+              ? `🎉 Daily bonus claimed · +${DAILY_BONUS_XP} XP`
+              : claimable
+                ? "Tap the glowing chest to claim your bonus!"
+                : "Finish all 3 missions to open today's reward chest."}
+          </p>
         </GameCard>
       </section>
 

@@ -21,6 +21,7 @@ import {
 import { loadPuzzleAttempts, savePuzzleAttempt } from "@/data/puzzleRepository";
 import { loadBossResults, saveBossResult } from "@/data/academyRepository";
 import { loadDailyTraining, saveDailyTraining } from "@/data/dailyRepository";
+import { loadRewardClaims, saveRewardClaim } from "@/data/rewardRepository";
 import type { BossResultRow } from "@/data/db";
 
 export interface CompletedLesson {
@@ -70,6 +71,9 @@ interface ProfileState {
   bossResults: Record<string, BossResultRow>;
   daily: DailyTraining | null;
 
+  // Sprint 5E — claimable milestone reward chests
+  claimedRewards: IdSet;
+
   hydrated: boolean;
 
   hydrate: () => Promise<void>;
@@ -81,6 +85,8 @@ interface ProfileState {
   markDailyTask: (task: DailyTask) => Promise<void>;
   /** Claim the once-per-day completion bonus. Returns XP awarded (0 if not claimable). */
   claimDailyBonus: () => Promise<number>;
+  /** Claim a one-time milestone reward chest. Returns XP awarded (0 if already claimed). */
+  claimReward: (rewardId: string, xp: number) => Promise<number>;
 }
 
 export const useProfileStore = create<ProfileState>((set, get) => {
@@ -118,17 +124,19 @@ export const useProfileStore = create<ProfileState>((set, get) => {
     bossCleared: {},
     bossResults: {},
     daily: null,
+    claimedRewards: {},
     hydrated: false,
 
     hydrate: async () => {
       if (get().hydrated) return;
       const today = todayKey();
-      const [profile, progress, attempts, bosses, daily] = await Promise.all([
+      const [profile, progress, attempts, bosses, daily, rewards] = await Promise.all([
         loadProfile(),
         loadLessonProgress(),
         loadPuzzleAttempts(),
         loadBossResults(),
         loadDailyTraining(today),
+        loadRewardClaims(),
       ]);
 
       const completed: CompletedMap = {};
@@ -148,6 +156,9 @@ export const useProfileStore = create<ProfileState>((set, get) => {
         if (b.passed) bossCleared[b.bossId] = true;
       }
 
+      const claimedRewards: IdSet = {};
+      for (const r of rewards) claimedRewards[r.id] = true;
+
       set({
         xp: profile?.xp ?? 0,
         streak: profile?.streak ?? 0,
@@ -158,6 +169,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
         attemptedPuzzleIds,
         bossCleared,
         bossResults,
+        claimedRewards,
         // Only keep the row if it belongs to today, otherwise start fresh on demand.
         daily: daily && daily.date === today ? daily : null,
         hydrated: true,
@@ -287,6 +299,23 @@ export const useProfileStore = create<ProfileState>((set, get) => {
       });
       await Promise.all([persistProfile(), saveDailyTraining(updated)]);
       return DAILY_BONUS_XP;
+    },
+
+    claimReward: async (rewardId, xp) => {
+      const s = get();
+      if (s.claimedRewards[rewardId]) return 0; // already claimed — never again
+      const today = todayKey();
+      set({
+        claimedRewards: { ...s.claimedRewards, [rewardId]: true },
+        xp: s.xp + xp,
+        streak: nextStreak(s.lastActiveDate, s.streak, today),
+        lastActiveDate: today,
+      });
+      await Promise.all([
+        persistProfile(),
+        saveRewardClaim({ id: rewardId, xpAwarded: xp, claimedAt: Date.now() }),
+      ]);
+      return xp;
     },
   };
 });

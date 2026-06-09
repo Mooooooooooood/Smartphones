@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useProfileStore, academyStateFrom } from "@/state/profileStore";
 import { lessonsForTier, tierTotalXp, TIER0_BOSS } from "@/content/academy";
@@ -18,6 +18,10 @@ import GameCard from "@/components/ui/GameCard";
 import XPBar from "@/components/ui/XPBar";
 import AcademyPath, { type PathStop, type StopStatus } from "@/components/ui/AcademyPath";
 import ChessBuddy from "@/components/characters/ChessBuddy";
+import RewardModal from "@/components/ui/RewardModal";
+
+const MID_REWARD_ID = "tier0-mid";
+const MID_REWARD_XP = 40;
 
 const MID = 4; // reward chest after the first four Tier 0 lessons
 
@@ -89,6 +93,10 @@ function TierBand({
 export default function AcademyScreen() {
   const completed = useProfileStore((s) => s.completed);
   const bossClearedMap = useProfileStore((s) => s.bossCleared);
+  const claimedRewards = useProfileStore((s) => s.claimedRewards);
+  const claimReward = useProfileStore((s) => s.claimReward);
+
+  const [modal, setModal] = useState<{ open: boolean; xp: number }>({ open: false, xp: 0 });
 
   useEffect(() => {
     void useProfileStore.getState().hydrate();
@@ -101,6 +109,15 @@ export default function AcademyScreen() {
   const t1 = tierProgress(1, state);
   const tier1Unlocked = isTierUnlocked(1, state);
   const bStatus = bossStatus(TIER0_BOSS.id, state);
+
+  // Mid-path milestone reward chest state.
+  const midClaimed = Boolean(claimedRewards[MID_REWARD_ID]);
+  const midStatus: StopStatus = midClaimed ? "completed" : t0.done >= MID ? "ready" : "locked";
+
+  async function claimMidChest() {
+    const got = await claimReward(MID_REWARD_ID, MID_REWARD_XP);
+    if (got > 0) setModal({ open: true, xp: got });
+  }
 
   // Tier 0 stops: lessons, mid chest, boss gate.
   const tier0Stops: PathStop[] = [];
@@ -119,8 +136,9 @@ export default function AcademyScreen() {
         kind: "chest",
         key: "t0-reward",
         title: "Path Reward",
-        caption: "Reward",
-        status: t0.done >= MID ? "ready" : "locked",
+        caption: midClaimed ? "Opened" : "Reward",
+        status: midStatus,
+        onClick: midStatus === "completed" ? undefined : midStatus === "ready" ? claimMidChest : () => {},
       });
     }
   });
@@ -176,7 +194,10 @@ export default function AcademyScreen() {
         pct={t0.pct}
         rewardXp={tierTotalXp(0)}
       />
-      <AcademyPath stops={tier0Stops} />
+      <AcademyPath
+        stops={tier0Stops}
+        guide={{ piece: "pawn", name: "Pip", side: "left", line: "Pip cheers you on!" }}
+      />
 
       {/* Tier 1 */}
       <TierBand
@@ -188,7 +209,25 @@ export default function AcademyScreen() {
         rewardXp={tierTotalXp(1)}
         locked={!tier1Unlocked}
       />
-      <AcademyPath stops={tier1Stops} />
+      <AcademyPath
+        stops={tier1Stops}
+        guide={{
+          piece: "knight",
+          name: "Gallop",
+          side: "right",
+          line: tier1Unlocked ? "Gallop: tactics time!" : "Gallop is waiting…",
+          faded: !tier1Unlocked,
+        }}
+      />
+
+      <RewardModal
+        open={modal.open}
+        onClose={() => setModal({ open: false, xp: 0 })}
+        title="Path Reward!"
+        xp={modal.xp}
+        piece="king"
+        subtitle="A treasure for reaching the halfway mark."
+      />
     </div>
   );
 }

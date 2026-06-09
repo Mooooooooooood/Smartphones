@@ -8,6 +8,7 @@ import Dexie, { type Table } from "dexie";
  * v2: + profile (singleton) + lessonProgress (Sprint 2)
  * v3: + puzzleAttempts (history) + profile.puzzleRating (Sprint 3)
  * v4: + bossResults + dailyTraining (Sprint 5)
+ * v5: + rewardClaims (Sprint 5E — claimable chests)
  */
 
 export interface KVRow {
@@ -66,6 +67,12 @@ export interface DailyTrainingRow {
   updatedAt: number;
 }
 
+export interface RewardClaimRow {
+  id: string; // primary key, e.g. "tier0-mid"
+  xpAwarded: number;
+  claimedAt: number;
+}
+
 class TabiyaDB extends Dexie {
   kv!: Table<KVRow, string>;
   profile!: Table<ProfileRow, string>;
@@ -73,6 +80,7 @@ class TabiyaDB extends Dexie {
   puzzleAttempts!: Table<PuzzleAttemptRow, number>;
   bossResults!: Table<BossResultRow, string>;
   dailyTraining!: Table<DailyTrainingRow, string>;
+  rewardClaims!: Table<RewardClaimRow, string>;
 
   constructor() {
     super("tabiya");
@@ -91,6 +99,15 @@ class TabiyaDB extends Dexie {
       puzzleAttempts: "++id, puzzleId, attemptedAt",
       bossResults: "bossId, tier",
       dailyTraining: "date",
+    });
+    this.version(5).stores({
+      kv: "key",
+      profile: "id",
+      lessonProgress: "lessonId",
+      puzzleAttempts: "++id, puzzleId, attemptedAt",
+      bossResults: "bossId, tier",
+      dailyTraining: "date",
+      rewardClaims: "id",
     });
   }
 }

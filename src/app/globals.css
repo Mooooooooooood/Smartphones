@@ -1,27 +1,24 @@
 @import "tailwindcss";
 
-/* ---------- Sprint 4C — Bright Cartoon palette ----------
-   Token names are kept stable so the whole app re-themes from here.
-   Semantics: ink* = light surfaces, cream = primary (dark) text,
-   brass = primary sky-blue accent. */
+/* ---------- Tabiya palette — token names stay stable so the whole app
+   re-themes from here. Light = bright cartoon; .dark = soft cartoon night. */
 @theme {
-  --color-ink: #f8fafc;        /* app background */
-  --color-ink2: #f1f5f9;       /* soft surface / progress tracks */
-  --color-panel: #ffffff;      /* main surface */
-  --color-panel2: #eaf3ff;     /* secondary (soft blue) surface */
-  --color-frame: #e2e8f0;      /* board / card frames */
-  --color-line: #e2e8f0;       /* borders */
-  --color-cream: #1e293b;      /* primary text */
-  --color-muted: #64748b;      /* secondary text */
-  --color-muted2: #94a3b8;     /* muted text */
-  --color-brass: #60a5fa;      /* primary accent (sky blue) */
-  --color-brassdeep: #3b82f6;  /* deeper accent */
-  --color-good: #22c55e;       /* success (readable green) */
-  --color-gooddeep: #16a34a;   /* success text on light surfaces */
-  --color-bad: #f43f5e;        /* error (readable coral) */
-  --color-warn: #d97706;       /* warning text (readable) */
-  --color-on-accent: #ffffff;  /* text on a filled accent */
-  /* soft playful accent fills */
+  --color-ink: #f8fafc;
+  --color-ink2: #f1f5f9;
+  --color-panel: #ffffff;
+  --color-panel2: #eaf3ff;
+  --color-frame: #e2e8f0;
+  --color-line: #e2e8f0;
+  --color-cream: #1e293b;
+  --color-muted: #64748b;
+  --color-muted2: #94a3b8;
+  --color-brass: #60a5fa;
+  --color-brassdeep: #3b82f6;
+  --color-good: #22c55e;
+  --color-gooddeep: #16a34a;
+  --color-bad: #f43f5e;
+  --color-warn: #d97706;
+  --color-on-accent: #ffffff;
   --color-mint: #86efac;
   --color-sun: #fde68a;
   --color-coral: #fda4af;
@@ -30,7 +27,6 @@
   --color-lavdeep: #7c3aed;
   --color-sky: #60a5fa;
   --color-skysoft: #bfdbfe;
-  /* soft playful card surfaces */
   --color-surf-blue: #eaf3ff;
   --color-surf-mint: #ecfdf5;
   --color-surf-lav: #f3e8ff;
@@ -40,11 +36,55 @@
   --font-body: var(--font-hanken), system-ui, -apple-system, sans-serif;
 }
 
+/* Non-colour scene variables (gradients/scenery), themed below. */
+:root {
+  --sky-1: #c3e1ff;
+  --sky-2: #eaf3ff;
+  --cloud-fill: #ffffff;
+  --cloud-line: #cdddf2;
+  --star: rgba(255, 255, 255, 0);
+  --card-shadow: rgba(30, 41, 59, 0.16);
+  --skeleton-shine: rgba(255, 255, 255, 0.8);
+}
+
+/* ---------- Soft cartoon NIGHT theme ---------- */
+html.dark {
+  --color-ink: #0f1729;
+  --color-ink2: #1a2540;
+  --color-panel: #1e2a47;
+  --color-panel2: #243358;
+  --color-frame: #2c3b5e;
+  --color-line: #2c3b5e;
+  --color-cream: #e8eefc;
+  --color-muted: #aebbd6;
+  --color-muted2: #7e8db0;
+  --color-brass: #7cb0ff;
+  --color-brassdeep: #5b9bff;
+  --color-good: #4ade80;
+  --color-gooddeep: #86efac;
+  --color-bad: #fb7185;
+  --color-warn: #fbbf24;
+  --color-on-accent: #0b1220;
+  --color-lavdeep: #c4b5fd;
+  --color-surf-blue: #1f2d4d;
+  --color-surf-mint: #16302a;
+  --color-surf-lav: #271f44;
+  --color-surf-sun: #322a14;
+  --color-surf-peach: #33241a;
+
+  --sky-1: #16233f;
+  --sky-2: #0f1729;
+  --cloud-fill: #243358;
+  --cloud-line: #324a73;
+  --star: rgba(226, 236, 255, 0.55);
+  --card-shadow: rgba(0, 0, 0, 0.45);
+  --skeleton-shine: rgba(255, 255, 255, 0.06);
+}
+
 html, body { height: 100%; }
 body {
   margin: 0;
-  background:
-    radial-gradient(120% 70% at 50% -10%, #eaf3ff 0%, var(--color-ink) 60%);
+  background: radial-gradient(120% 70% at 50% -10%, var(--color-panel2) 0%, var(--color-ink) 60%);
   background-attachment: fixed;
   color: var(--color-cream);
   font-family: var(--font-body);
@@ -55,36 +95,36 @@ body {
 
 .tabiya-board-wrap { width: 100%; max-width: 440px; margin: 0 auto; }
 
-/* ---------- Bright cartoon visual system ---------- */
-
-/* Soft rounded card surface with a gentle "toy" bottom shadow */
+/* ---------- Cards / surfaces ---------- */
 .tab-card {
-  background: #ffffff;
+  background: var(--color-panel);
   border: 1px solid var(--color-line);
   border-radius: 1.25rem;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.9) inset,
-    0 8px 18px -10px rgba(30, 41, 59, 0.18);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 8px 18px -10px var(--card-shadow);
 }
 .tab-card-accent {
-  background-image: linear-gradient(to bottom, #eaf3ff, #f7fbff);
+  background-image: linear-gradient(to bottom, var(--color-panel2), var(--color-panel));
   border: 1px solid rgba(96, 165, 250, 0.35);
   border-radius: 1.25rem;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.9) inset,
-    0 10px 22px -12px rgba(59, 130, 246, 0.30);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 10px 22px -12px var(--card-shadow);
 }
 .tab-glow {
-  box-shadow:
-    0 10px 24px -12px rgba(59, 130, 246, 0.30),
-    0 0 30px -10px rgba(96, 165, 250, 0.45);
+  box-shadow: 0 10px 24px -12px var(--card-shadow), 0 0 30px -10px rgba(96, 165, 250, 0.45);
 }
 
-/* Soft shimmer skeleton */
+/* ---------- Sky-world roadmap ---------- */
+.tab-sky {
+  background: linear-gradient(180deg, var(--sky-1), var(--sky-2));
+  border: 1px solid var(--color-line);
+  border-radius: 1.5rem;
+  overflow: hidden;
+}
+
+/* ---------- Skeleton ---------- */
 .tab-skeleton {
   position: relative;
   overflow: hidden;
-  background: #eef2f7;
+  background: var(--color-ink2);
   border-radius: 1rem;
 }
 .tab-skeleton::after {
@@ -92,27 +132,15 @@ body {
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.85) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg, transparent 0%, var(--skeleton-shine) 50%, transparent 100%);
   animation: tab-shimmer 1.4s ease-in-out infinite;
 }
 
-/* Thin dashed path spine */
 .tab-path-line {
-  background: repeating-linear-gradient(
-    to bottom,
-    var(--color-frame) 0 6px,
-    transparent 6px 12px
-  );
+  background: repeating-linear-gradient(to bottom, var(--color-frame) 0 6px, transparent 6px 12px);
 }
 
-@keyframes tab-shimmer {
-  100% { transform: translateX(100%); }
-}
+@keyframes tab-shimmer { 100% { transform: translateX(100%); } }
 @keyframes tab-pop {
   0% { transform: scale(0.82); opacity: 0; }
   60% { transform: scale(1.04); opacity: 1; }
@@ -136,12 +164,23 @@ body {
   70% { box-shadow: 0 0 0 12px rgba(96, 165, 250, 0); }
   100% { box-shadow: 0 0 0 0 rgba(96, 165, 250, 0); }
 }
+@keyframes tab-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes tab-burst {
+  0% { transform: translateY(0) scale(0.6); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(60px) scale(1) rotate(40deg); opacity: 0; }
+}
 
 .tab-animate-pop { animation: tab-pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
 .tab-animate-rise { animation: tab-rise 0.4s ease-out both; }
 .tab-flame-icon { animation: tab-flame 1.8s ease-in-out infinite; transform-origin: 50% 80%; }
 .tab-floatup { animation: tab-floatup 1.1s ease-out forwards; }
 .tab-pulse { animation: tab-pulse 1.8s ease-out infinite; }
+.tab-bob { animation: tab-bob 3s ease-in-out infinite; }
+.tab-burst { animation: tab-burst 1.2s ease-out forwards; }
 
 @media (prefers-reduced-motion: reduce) {
   .tab-skeleton::after,
@@ -149,5 +188,7 @@ body {
   .tab-animate-rise,
   .tab-flame-icon,
   .tab-floatup,
-  .tab-pulse { animation: none; }
+  .tab-pulse,
+  .tab-bob,
+  .tab-burst { animation: none; }
 }

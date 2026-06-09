@@ -23,6 +23,7 @@ import StatPill from "@/components/ui/StatPill";
 import XPBar from "@/components/ui/XPBar";
 import FlameIcon from "@/components/ui/FlameIcon";
 import BadgeEmblem from "@/components/ui/BadgeEmblem";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 import ChessBuddy, { BUDDIES, type BuddyPiece } from "@/components/characters/ChessBuddy";
 
 const GUIDE_SURFACES: { piece: BuddyPiece; surface: string }[] = [
@@ -328,6 +329,15 @@ export default function ProfileScreen() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Appearance */}
+      <section>
+        <SectionHeader title="Appearance" />
+        <GameCard className="flex flex-col items-center gap-3 p-4">
+          <p className="text-xs text-muted">Choose your world: bright day or cozy night.</p>
+          <ThemeToggle />
+        </GameCard>
       </section>
     </div>
   );
