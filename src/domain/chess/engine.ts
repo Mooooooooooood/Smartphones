@@ -54,7 +54,14 @@ export function snapshot(game: Chess): GameSnapshot {
     if (m.captured) {
       (m.color === "w" ? capturedByWhite : capturedByBlack).push(m.captured);
     }
-    return { san: m.san, from: m.from, to: m.to, color: m.color, captured: m.captured };
+    return {
+      san: m.san,
+      from: m.from,
+      to: m.to,
+      color: m.color,
+      captured: m.captured,
+      promotion: m.promotion,
+    };
   });
 
   const last = verbose.at(-1);

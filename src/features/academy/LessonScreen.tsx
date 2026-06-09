@@ -6,13 +6,30 @@ import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { TIER0_LESSONS } from "@/content/academy/tier0";
 import { useProfileStore, lessonStatus } from "@/state/profileStore";
+import GameCard from "@/components/ui/GameCard";
+import XPBar from "@/components/ui/XPBar";
+import ActionButton from "@/components/ui/ActionButton";
+import RewardPanel from "@/components/ui/RewardPanel";
+import Skeleton from "@/components/ui/Skeleton";
 
 const LessonBoard = dynamic(() => import("@/components/LessonBoard"), {
   ssr: false,
-  loading: () => (
-    <div className="mx-auto aspect-square w-full max-w-[320px] animate-pulse rounded-lg bg-panel2" />
-  ),
+  loading: () => <div className="mx-auto aspect-square w-full max-w-[320px] tab-skeleton" />,
 });
+
+const LETTERS = ["A", "B", "C", "D", "E"];
+
+function LessonLoading() {
+  return (
+    <div className="space-y-4">
+      <Skeleton className="h-4 w-24" />
+      <Skeleton className="h-9 w-3/4" />
+      <Skeleton className="mx-auto aspect-square w-full max-w-[320px]" />
+      <Skeleton className="h-20 w-full" />
+      <Skeleton className="h-40 w-full" />
+    </div>
+  );
+}
 
 export default function LessonScreen({ lessonId }: { lessonId: string }) {
   const router = useRouter();
@@ -41,14 +58,19 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
     );
   }
 
-  // Wait for hydration so we know the real completion/lock state before rendering.
   if (!hydrated) {
-    return <div className="py-20 text-center text-sm text-muted2">Loading lesson…</div>;
+    return <LessonLoading />;
   }
 
   if (lessonStatus(lesson.order, completed) === "locked") {
     return (
       <div className="py-12 text-center">
+        <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-line bg-panel2 text-muted2">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect x="5" y="11" width="14" height="9" rx="2" />
+            <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+          </svg>
+        </div>
         <h1 className="font-display text-2xl text-cream">Locked</h1>
         <p className="mt-2 text-sm text-muted">Finish the previous lesson first.</p>
         <Link href="/academy" className="mt-3 inline-block text-brass">
@@ -61,6 +83,7 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
   const alreadyDone = Boolean(completed[lesson.id]);
   const correct = picked !== null && picked === lesson.quiz.correctIndex;
   const nextSeq = TIER0_LESSONS.find((l) => l.order === lesson.order + 1) ?? null;
+  const mastered = alreadyDone || justEarned !== null;
 
   function choose(i: number) {
     if (!lesson || correct) return; // lock choices once answered correctly
@@ -70,36 +93,47 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
 
   async function finish() {
     if (!lesson || !correct || alreadyDone) return;
-    const stars = firstTry ? 3 : 2;
-    const ok = await completeLesson(lesson.id, lesson.xpReward, stars);
+    const earnedStars = firstTry ? 3 : 2;
+    const ok = await completeLesson(lesson.id, lesson.xpReward, earnedStars);
     if (ok) setJustEarned(lesson.xpReward);
   }
 
-  const showNext = (alreadyDone || justEarned !== null) && nextSeq;
+  const stars = completed[lesson.id]?.stars ?? (firstTry ? 3 : 2);
 
   return (
     <div className="space-y-4 pb-4">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <Link href="/academy" className="text-sm text-muted">
           ‹ Academy
         </Link>
-        <span className="text-xs text-muted2">
-          Lesson {lesson.order} of {TIER0_LESSONS.length}
+        <span className="rounded-full border border-line bg-panel/60 px-2.5 py-1 text-[11px] font-semibold text-muted2">
+          Lesson {lesson.order} / {TIER0_LESSONS.length}
         </span>
       </div>
 
-      <header>
-        <h1 className="font-display text-3xl text-cream">{lesson.title}</h1>
-        <p className="mt-1 text-sm text-muted">{lesson.subtitle}</p>
+      <header className="space-y-2">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="font-display text-3xl text-cream">{lesson.title}</h1>
+            <p className="mt-0.5 text-sm text-muted">{lesson.subtitle}</p>
+          </div>
+          <span className="shrink-0 rounded-full border border-brass/40 bg-brass/10 px-2.5 py-1 text-[11px] font-semibold text-brass">
+            +{lesson.xpReward} XP
+          </span>
+        </div>
+        <XPBar value={lesson.order / TIER0_LESSONS.length} />
       </header>
 
       {lesson.fen ? (
-        <div className="mx-auto w-full max-w-[320px]">
-          <LessonBoard fen={lesson.fen} />
+        <GameCard className="p-3">
+          <div className="mx-auto w-full max-w-[320px]">
+            <LessonBoard fen={lesson.fen} />
+          </div>
           {lesson.boardCaption ? (
             <p className="mt-2 text-center text-xs text-muted2">{lesson.boardCaption}</p>
           ) : null}
-        </div>
+        </GameCard>
       ) : null}
 
       <p className="text-sm leading-relaxed text-cream/90">{lesson.explanation}</p>
@@ -113,8 +147,10 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
         ))}
       </ul>
 
-      <section className="rounded-2xl border border-line bg-panel/60 p-4">
-        <h2 className="font-display text-lg text-cream">{lesson.quiz.question}</h2>
+      {/* Quiz */}
+      <GameCard className="p-4">
+        <p className="text-[11px] uppercase tracking-wider text-muted2">Checkpoint</p>
+        <h2 className="mt-0.5 font-display text-lg text-cream">{lesson.quiz.question}</h2>
         <div className="mt-3 space-y-2">
           {lesson.quiz.choices.map((c, i) => {
             const isPicked = picked === i;
@@ -125,7 +161,7 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
                 key={i}
                 onClick={() => choose(i)}
                 disabled={correct}
-                className={`w-full rounded-xl border px-3.5 py-3 text-left text-sm transition-colors disabled:cursor-default ${
+                className={`flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left text-sm transition-colors disabled:cursor-default ${
                   showCorrect
                     ? "border-good/60 bg-good/15 text-cream"
                     : showWrong
@@ -133,57 +169,61 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
                       : "border-line bg-panel text-cream hover:border-muted2"
                 }`}
               >
-                {c}
-                {showCorrect ? <span className="float-right text-good">✓</span> : null}
-                {showWrong ? <span className="float-right text-bad">✗</span> : null}
+                <span
+                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border text-xs font-bold ${
+                    showCorrect
+                      ? "border-good/60 text-good"
+                      : showWrong
+                        ? "border-bad/60 text-bad"
+                        : "border-line text-muted2"
+                  }`}
+                >
+                  {LETTERS[i]}
+                </span>
+                <span className="flex-1">{c}</span>
+                {showCorrect ? <span className="text-good">✓</span> : null}
+                {showWrong ? <span className="text-bad">✗</span> : null}
               </button>
             );
           })}
         </div>
         {picked !== null && !correct ? (
-          <p className="mt-3 text-xs text-bad">Not quite — try again.</p>
+          <p className="mt-3 text-xs text-warn">Not quite — read the lesson and try again.</p>
         ) : null}
-        {correct && !alreadyDone ? (
-          <p className="mt-3 text-xs text-good">Correct! Claim your XP below.</p>
+        {correct && !mastered ? (
+          <p className="mt-3 text-xs text-good">Correct! Claim your reward below.</p>
         ) : null}
-      </section>
+      </GameCard>
 
-      <div className="space-y-3">
-        {alreadyDone ? (
-          <div className="rounded-xl border border-brass/30 bg-brass/10 px-4 py-3 text-center text-sm text-brass">
-            Lesson completed{completed[lesson.id]?.stars ? ` · ${completed[lesson.id].stars}★` : ""}
+      {/* Completion / actions */}
+      {mastered ? (
+        <RewardPanel
+          title="Lesson mastered"
+          xp={justEarned}
+          tone="brass"
+          subtitle={`${stars}★ earned${alreadyDone && justEarned === null ? " · already completed" : ""}`}
+        >
+          <div className="flex gap-2">
+            <ActionButton href="/academy" variant="secondary">
+              Academy
+            </ActionButton>
+            {nextSeq ? (
+              <ActionButton onClick={() => router.push(`/academy/${nextSeq.id}`)}>
+                Next lesson ›
+              </ActionButton>
+            ) : null}
           </div>
-        ) : justEarned !== null ? (
-          <div className="rounded-xl border border-good/40 bg-good/15 px-4 py-3 text-center text-sm text-cream">
-            +{justEarned} XP earned
-          </div>
-        ) : (
-          <button
-            onClick={finish}
-            disabled={!correct}
-            className="w-full rounded-xl border border-brass/50 bg-brass/15 px-4 py-3 text-sm font-semibold text-brass transition-colors disabled:opacity-40"
-          >
+        </RewardPanel>
+      ) : (
+        <div className="space-y-2.5">
+          <ActionButton onClick={finish} disabled={!correct}>
             Complete lesson (+{lesson.xpReward} XP)
-          </button>
-        )}
-
-        <div className="flex gap-2">
-          <Link
-            href="/academy"
-            className="flex-1 rounded-xl border border-line bg-panel px-4 py-3 text-center text-sm font-semibold text-cream"
-          >
+          </ActionButton>
+          <ActionButton href="/academy" variant="secondary">
             Back to Academy
-          </Link>
-          {showNext ? (
-            <button
-              onClick={() => router.push(`/academy/${nextSeq.id}`)}
-              className="flex-1 rounded-xl border border-brass/50 bg-brass/15 px-4 py-3 text-center text-sm font-semibold text-brass"
-            >
-              Next lesson ›
-            </button>
-          ) : null}
+          </ActionButton>
         </div>
-      </div>
+      )}
     </div>
   );
 }

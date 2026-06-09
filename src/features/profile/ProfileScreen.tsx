@@ -3,9 +3,15 @@
 import { useEffect } from "react";
 import { useProfileStore, selectLevel, academyProgress, puzzlesSolvedCount } from "@/state/profileStore";
 import { usePuzzleStore, overallAccuracy } from "@/state/puzzleStore";
+import { rankForLevel } from "@/domain/progression/rank";
 import { BEGINNER_PUZZLES, THEME_LABELS, type PuzzleCategory } from "@/content/puzzles/beginner";
-import ProgressBar from "@/components/ProgressBar";
-import StatTile from "@/components/StatTile";
+import GameCard from "@/components/ui/GameCard";
+import SectionHeader from "@/components/ui/SectionHeader";
+import ProgressRing from "@/components/ui/ProgressRing";
+import RankBadge from "@/components/ui/RankBadge";
+import StatPill from "@/components/ui/StatPill";
+import XPBar from "@/components/ui/XPBar";
+import FlameIcon from "@/components/ui/FlameIcon";
 
 const PUZZLE_CATEGORIES: { key: PuzzleCategory; label: string }[] = [
   { key: "tactics", label: "Tactics" },
@@ -13,7 +19,21 @@ const PUZZLE_CATEGORIES: { key: PuzzleCategory; label: string }[] = [
   { key: "mate", label: "Mates" },
 ];
 
+const FUTURE = [
+  { title: "Openings Path", note: "Tier 1" },
+  { title: "Endgame Trials", note: "Tier 2" },
+];
+
 const PUZZLE_BY_ID = new Map(BEGINNER_PUZZLES.map((p) => [p.id, p]));
+
+function LockGlyph() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="5" y="11" width="14" height="9" rx="2" />
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+    </svg>
+  );
+}
 
 export default function ProfileScreen() {
   const xp = useProfileStore((s) => s.xp);
@@ -28,6 +48,7 @@ export default function ProfileScreen() {
   }, []);
 
   const lvl = selectLevel(xp);
+  const rank = rankForLevel(lvl.level);
   const prog = academyProgress(completed);
   const solved = puzzlesSolvedCount(solvedIds);
   const acc = overallAccuracy(attempts);
@@ -37,101 +58,123 @@ export default function ProfileScreen() {
     <div className="space-y-5">
       <header>
         <p className="text-xs uppercase tracking-[0.16em] text-muted2">Profile</p>
-        <h1 className="font-display text-3xl text-cream">Your progress</h1>
+        <h1 className="font-display text-3xl text-cream">Player Card</h1>
       </header>
 
-      <section
-        className="rounded-2xl border border-line p-4"
-        style={{ backgroundImage: "linear-gradient(to bottom, #2a2116, #1f1810)" }}
-      >
-        <div className="flex items-baseline justify-between">
-          <span className="font-display text-2xl text-cream">Level {lvl.level}</span>
-          <span className="text-xs text-muted">
-            {lvl.intoLevel} / {lvl.span} XP
-          </span>
+      {/* Player card */}
+      <GameCard variant="accent" glow className="p-5">
+        <div className="flex items-center gap-4">
+          <ProgressRing value={lvl.progress} size={104}>
+            <span className="font-display text-3xl leading-none text-cream">{lvl.level}</span>
+            <span className="mt-0.5 text-[9px] uppercase tracking-[0.18em] text-muted2">Level</span>
+          </ProgressRing>
+          <div className="min-w-0 flex-1">
+            <RankBadge title={rank.title} />
+            <div className="mt-2 flex items-center gap-1.5 text-xs text-muted">
+              <FlameIcon active={streak > 0} />
+              <span className="font-semibold text-cream">{streak}</span>
+              <span className="text-muted2">day{streak === 1 ? "" : "s"} streak</span>
+            </div>
+            <p className="mt-1 text-[11px] text-muted2">
+              {xp} XP
+              {rank.next ? ` · ${rank.next.title} at Lv ${rank.next.atLevel}` : " · top rank reached"}
+            </p>
+          </div>
         </div>
-        <div className="mt-2">
-          <ProgressBar value={lvl.progress} />
+        <div className="mt-4">
+          <XPBar value={lvl.progress} />
+          <p className="mt-1 text-[11px] text-muted2">
+            {lvl.intoLevel} / {lvl.span} XP to Level {lvl.level + 1}
+          </p>
         </div>
-        <div className="mt-1 text-[11px] text-muted2">{xp} total XP</div>
-      </section>
+      </GameCard>
 
-      <div className="grid grid-cols-3 gap-3">
-        <StatTile label="Streak" value={`${streak}`} hint={streak === 1 ? "day" : "days"} />
-        <StatTile label="Lessons" value={`${prog.done}/${prog.total}`} />
-        <StatTile label="Academy" value={`${Math.round(prog.pct * 100)}%`} />
+      {/* Core stats */}
+      <div className="grid grid-cols-3 gap-2.5">
+        <StatPill label="Puzzle Rating" value={`${puzzleRating}`} tone="brass" />
+        <StatPill label="Solved" value={`${solved}/${BEGINNER_PUZZLES.length}`} />
+        <StatPill
+          label="Accuracy"
+          value={acc.total ? `${Math.round(acc.pct * 100)}%` : "—"}
+          sub={acc.total ? `${acc.correct}/${acc.total}` : "no tries"}
+          tone={acc.total ? "good" : "muted"}
+        />
+        <StatPill label="Streak" value={`${streak}`} sub={streak === 1 ? "day" : "days"} />
+        <StatPill label="Lessons" value={`${prog.done}/${prog.total}`} />
+        <StatPill label="Academy" value={`${Math.round(prog.pct * 100)}%`} />
       </div>
-
-      {/* Puzzle stats */}
-      <section className="space-y-3">
-        <h2 className="font-display text-lg text-cream">Puzzle training</h2>
-        <div className="grid grid-cols-3 gap-3">
-          <StatTile label="Rating" value={`${puzzleRating}`} />
-          <StatTile label="Solved" value={`${solved}/${BEGINNER_PUZZLES.length}`} />
-          <StatTile
-            label="Accuracy"
-            value={acc.total ? `${Math.round(acc.pct * 100)}%` : "—"}
-            hint={acc.total ? `${acc.correct}/${acc.total}` : "no attempts"}
-          />
-        </div>
-      </section>
 
       {/* Skill categories */}
       <section>
-        <h2 className="mb-2 font-display text-lg text-cream">Skill categories</h2>
-        <div className="space-y-2">
+        <SectionHeader title="Skill Categories" />
+        <div className="space-y-2.5">
           {PUZZLE_CATEGORIES.map(({ key, label }) => {
             const inCat = attempts.filter((a) => PUZZLE_BY_ID.get(a.puzzleId)?.categories.includes(key));
             const correct = inCat.filter((a) => a.correct).length;
             const pct = inCat.length ? correct / inCat.length : 0;
             return (
-              <div key={key} className="rounded-xl border border-line bg-panel/50 px-3.5 py-3">
+              <GameCard key={key} className="px-3.5 py-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted">{label}</span>
+                  <span className="text-sm text-cream">{label}</span>
                   <span className="text-xs text-muted2">
                     {inCat.length ? `${Math.round(pct * 100)}% · ${correct}/${inCat.length}` : "no data yet"}
                   </span>
                 </div>
-                {inCat.length ? (
-                  <div className="mt-2">
-                    <ProgressBar value={pct} />
-                  </div>
-                ) : null}
-              </div>
+                <div className="mt-2">
+                  <XPBar value={pct} />
+                </div>
+              </GameCard>
             );
           })}
         </div>
       </section>
 
-      {/* Recent performance */}
+      {/* Recent results */}
       <section>
-        <h2 className="mb-2 font-display text-lg text-cream">Recent puzzles</h2>
+        <SectionHeader title="Recent Puzzles" />
         {recent.length === 0 ? (
-          <p className="rounded-xl border border-line bg-panel/50 px-3.5 py-3 text-center text-sm text-muted2">
-            Solve a few puzzles to see your recent performance here.
-          </p>
+          <GameCard className="px-4 py-6 text-center">
+            <p className="text-sm text-muted2">Solve a few puzzles to build your history.</p>
+          </GameCard>
         ) : (
           <ul className="space-y-2">
             {recent.map((a, i) => (
-              <li
-                key={a.id ?? i}
-                className="flex items-center justify-between rounded-xl border border-line bg-panel/50 px-3.5 py-2.5"
-              >
-                <span className="flex items-center gap-2 text-sm text-muted">
-                  <span
-                    className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${
-                      a.correct ? "bg-good/20 text-good" : "bg-bad/20 text-bad"
-                    }`}
-                  >
-                    {a.correct ? "✓" : "✗"}
+              <li key={a.id ?? i}>
+                <GameCard className="flex items-center justify-between px-3.5 py-2.5">
+                  <span className="flex items-center gap-2.5 text-sm text-cream">
+                    <span
+                      className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold ${
+                        a.correct ? "bg-good/20 text-good" : "bg-bad/20 text-bad"
+                      }`}
+                    >
+                      {a.correct ? "✓" : "✗"}
+                    </span>
+                    {THEME_LABELS[a.theme as keyof typeof THEME_LABELS] ?? a.theme}
                   </span>
-                  {THEME_LABELS[a.theme as keyof typeof THEME_LABELS] ?? a.theme}
-                </span>
-                <span className="text-xs text-muted2">{a.ratingAfter}</span>
+                  <span className="text-xs text-muted2">{a.ratingAfter} rating</span>
+                </GameCard>
               </li>
             ))}
           </ul>
         )}
+      </section>
+
+      {/* Future / locked */}
+      <section>
+        <SectionHeader title="On the Horizon" />
+        <div className="grid grid-cols-2 gap-2.5">
+          {FUTURE.map((f) => (
+            <GameCard key={f.title} className="flex items-center gap-2.5 px-3.5 py-3 opacity-70">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-panel2 text-muted2">
+                <LockGlyph />
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-sm text-cream">{f.title}</p>
+                <p className="text-[11px] text-muted2">{f.note}</p>
+              </div>
+            </GameCard>
+          ))}
+        </div>
       </section>
     </div>
   );

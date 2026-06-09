@@ -1,30 +1,18 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
 import { useProfileStore, academyProgress, lessonStatus } from "@/state/profileStore";
 import { TIER0_LESSONS, TIER0_TITLE } from "@/content/academy/tier0";
-import ProgressBar from "@/components/ProgressBar";
+import GameCard from "@/components/ui/GameCard";
+import XPBar from "@/components/ui/XPBar";
+import PathNode, { type NodeStatus } from "@/components/ui/PathNode";
 
-function Stars({ n }: { n: number }) {
-  return (
-    <span className="text-sm leading-none">
-      {[0, 1, 2].map((i) => (
-        <span key={i} className={i < n ? "text-brass" : "text-line"}>
-          ★
-        </span>
-      ))}
-    </span>
-  );
-}
+const TOTAL_XP = TIER0_LESSONS.reduce((sum, l) => sum + l.xpReward, 0);
 
-function LockIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <rect x="5" y="11" width="14" height="9" rx="2" />
-      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-    </svg>
-  );
+function toNodeStatus(status: "completed" | "available" | "locked"): NodeStatus {
+  if (status === "completed") return "completed";
+  if (status === "available") return "active";
+  return "locked";
 }
 
 export default function AcademyScreen() {
@@ -36,73 +24,63 @@ export default function AcademyScreen() {
 
   const prog = academyProgress(completed);
   const lessons = [...TIER0_LESSONS].sort((a, b) => a.order - b.order);
+  const allDone = prog.done === prog.total;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <header>
         <p className="text-xs uppercase tracking-[0.16em] text-muted2">Academy</p>
         <h1 className="font-display text-3xl text-cream">{TIER0_TITLE}</h1>
-        <p className="mt-1 text-sm text-muted">Master the rules, one step at a time.</p>
+        <p className="mt-1 text-sm text-muted">Climb the Foundations Path, one node at a time.</p>
+      </header>
+
+      {/* Tier header with progress + reward preview */}
+      <GameCard variant="accent" glow className="p-4">
+        <div className="flex items-center justify-between">
+          <span className="font-display text-lg text-cream">Foundations Path</span>
+          <span className="rounded-full border border-brass/40 bg-brass/10 px-2.5 py-1 text-[11px] font-semibold text-brass">
+            Tier 0
+          </span>
+        </div>
         <div className="mt-3 flex items-center gap-3">
-          <ProgressBar value={prog.pct} />
+          <XPBar value={prog.pct} />
           <span className="shrink-0 text-xs text-muted">
             {prog.done}/{prog.total}
           </span>
         </div>
-      </header>
+        <div className="mt-3 flex items-center gap-2 text-[11px] text-muted2">
+          <span className="rounded-md border border-line bg-ink2 px-2 py-1">Reward</span>
+          <span>{TOTAL_XP} XP · Foundations Badge</span>
+        </div>
+      </GameCard>
 
-      <ul className="space-y-2.5">
+      {/* Progression path */}
+      <ul className="relative space-y-3">
+        {/* spine connecting the nodes */}
+        <div className="pointer-events-none absolute left-[21px] top-6 bottom-6 w-0.5 tab-path-line" />
+
         {lessons.map((l) => {
-          const status = lessonStatus(l.order, completed);
-          const done = status === "completed";
-          const locked = status === "locked";
-          const stars = completed[l.id]?.stars ?? 0;
-
-          const card = (
-            <div
-              className={`flex items-center gap-3 rounded-2xl border p-3.5 ${
-                locked ? "border-line bg-panel/40 opacity-60" : done ? "border-brass/30 bg-panel" : "border-line bg-panel"
-              }`}
-            >
-              <div
-                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-                  done
-                    ? "bg-brass text-ink"
-                    : locked
-                      ? "bg-panel2 text-muted2"
-                      : "border border-brass/50 text-brass"
-                }`}
-              >
-                {done ? "✓" : locked ? <LockIcon /> : l.order}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="truncate font-display text-base text-cream">{l.title}</h3>
-                  {done ? (
-                    <Stars n={stars} />
-                  ) : (
-                    <span className="shrink-0 text-[11px] font-semibold text-muted2">+{l.xpReward} XP</span>
-                  )}
-                </div>
-                <p className="truncate text-xs text-muted2">
-                  {locked ? "Complete the previous lesson to unlock" : l.subtitle}
-                </p>
-              </div>
-            </div>
-          );
-
+          const status = toNodeStatus(lessonStatus(l.order, completed));
           return (
-            <li key={l.id}>
-              {locked ? (
-                card
-              ) : (
-                <Link href={`/academy/${l.id}`} className="block transition-transform active:scale-[0.99]">
-                  {card}
-                </Link>
-              )}
-            </li>
+            <PathNode
+              key={l.id}
+              order={l.order}
+              title={l.title}
+              subtitle={l.subtitle}
+              xpReward={l.xpReward}
+              status={status}
+              href={`/academy/${l.id}`}
+            />
           );
         })}
+
+        {/* Boss Gate */}
+        <PathNode
+          order="★"
+          title="Tier 0 Trial"
+          subtitle={allDone ? "Unlocked — coming soon" : "The Foundations boss gate"}
+          status={allDone ? "boss-ready" : "boss-locked"}
+        />
       </ul>
     </div>
   );

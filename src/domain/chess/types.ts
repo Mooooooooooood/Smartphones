@@ -10,6 +10,8 @@ export interface MoveRecord {
   to: Square;
   color: Color;
   captured?: PieceSymbol;
+  /** Set when the move was a promotion (we auto-queen, so this is usually "q"). */
+  promotion?: PieceSymbol;
 }
 
 export interface BoardCell {

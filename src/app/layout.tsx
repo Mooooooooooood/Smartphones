@@ -26,7 +26,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" className={`${display.variable} ${body.variable} h-full`}>
       <body className="min-h-full">
         <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col">
-          <main className="flex-1 px-4 pb-24 pt-5">{children}</main>
+          <main className="flex-1 px-4 pb-28 pt-[max(1.25rem,env(safe-area-inset-top))]">{children}</main>
           <BottomNav />
         </div>
       </body>

@@ -7,8 +7,12 @@ export default function MoveList() {
 
   if (history.length === 0) {
     return (
-      <div className="rounded-xl border border-line bg-panel/50 p-3 text-center text-xs text-muted2">
-        No moves yet — make the first move.
+      <div className="tab-card flex flex-col items-center gap-1 px-4 py-6 text-center">
+        <span className="text-2xl text-muted2" aria-hidden>
+          ♟
+        </span>
+        <p className="text-sm font-semibold text-cream">No moves yet</p>
+        <p className="text-xs text-muted2">Make the first move to begin the game.</p>
       </div>
     );
   }
@@ -22,15 +26,18 @@ export default function MoveList() {
   const last = history.length - 1;
 
   return (
-    <div className="rounded-xl border border-line bg-panel/50 p-2">
-      <div className="max-h-40 overflow-y-auto">
+    <div className="tab-card p-3">
+      <p className="mb-1.5 text-[11px] uppercase tracking-wider text-muted2">Moves</p>
+      <div className="max-h-44 overflow-y-auto">
         <table className="w-full text-sm tabular-nums">
           <tbody>
             {rows.map((r, ri) => (
               <tr key={r.n} className="text-cream">
-                <td className="w-8 py-0.5 pr-2 text-right text-muted2">{r.n}.</td>
-                <td className={`py-0.5 pr-3 font-medium ${ri * 2 === last ? "text-brass" : ""}`}>{r.w}</td>
-                <td className={`py-0.5 font-medium ${ri * 2 + 1 === last ? "text-brass" : ""}`}>{r.b ?? ""}</td>
+                <td className="w-8 py-1 pr-2 text-right text-muted2">{r.n}.</td>
+                <td className={`py-1 pr-3 font-medium ${ri * 2 === last ? "text-brass" : ""}`}>{r.w}</td>
+                <td className={`py-1 font-medium ${ri * 2 + 1 === last ? "text-brass" : ""}`}>
+                  {r.b ?? ""}
+                </td>
               </tr>
             ))}
           </tbody>
