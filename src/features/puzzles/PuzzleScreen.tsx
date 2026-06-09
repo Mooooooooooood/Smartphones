@@ -123,15 +123,15 @@ export default function PuzzleScreen() {
 
       {/* Coach instruction (hidden once solved — reward takes over) */}
       {status !== "correct" ? (
-        <CoachBubble tone={status === "wrong" ? "warn" : "default"}>
+        <CoachBubble piece="knight" tone={status === "wrong" ? "warn" : "default"}>
           {status === "wrong" ? (
-            <span>{feedback ?? "Legal, but not the winning move. Try again."}</span>
+            <span>{feedback ?? "So close! That's legal, but not the winning move. Try again."}</span>
           ) : (
             <span>
               <span className="font-semibold text-cream">{toMove} to move.</span> Find the best move —
               difficulty {puzzle.rating}.
               {hintShown && puzzle.hint ? (
-                <span className="mt-1 block text-brass">Hint: {puzzle.hint}</span>
+                <span className="mt-1 block font-semibold text-brass">Gallop&apos;s hint: {puzzle.hint}</span>
               ) : null}
             </span>
           )}
@@ -149,6 +149,7 @@ export default function PuzzleScreen() {
           title={`Solved — ${puzzle.answerSan ?? "correct"}`}
           xp={result?.xpAwarded ?? 0}
           tone="good"
+          piece="knight"
           subtitle={ratingText}
         >
           <p className="text-left text-sm text-muted">{puzzle.explanation}</p>

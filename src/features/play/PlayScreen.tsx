@@ -8,6 +8,7 @@ import MoveList from "@/components/MoveList";
 import CapturedPieces from "@/components/CapturedPieces";
 import Controls from "@/components/Controls";
 import GameCard from "@/components/ui/GameCard";
+import ChessBuddy from "@/components/characters/ChessBuddy";
 import { BoardSkeleton } from "@/components/ui/Skeleton";
 import type { Color, GameStatus } from "@/domain/chess/types";
 
@@ -65,9 +66,14 @@ export default function PlayScreen() {
   return (
     <div className="space-y-3">
       <header className="flex items-end justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-[0.16em] text-muted2">Tabiya</p>
-          <h1 className="font-display text-2xl text-cream">Practice Board</h1>
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-line bg-surf-peach">
+            <ChessBuddy piece="rook" size={40} />
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-[0.16em] text-muted2">Sparring with Bramble</p>
+            <h1 className="font-display text-2xl text-cream">Practice Board</h1>
+          </div>
         </div>
         <span
           className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${

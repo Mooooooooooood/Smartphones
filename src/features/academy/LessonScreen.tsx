@@ -142,7 +142,7 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
         </GameCard>
       ) : null}
 
-      <CoachBubble>{lesson.explanation}</CoachBubble>
+      <CoachBubble piece="bishop">{lesson.explanation}</CoachBubble>
 
       <ul className="space-y-1.5">
         {lesson.keyPoints.map((k, i) => (
@@ -204,9 +204,10 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
       {/* Completion / actions */}
       {mastered ? (
         <RewardPanel
-          title="Lesson mastered"
+          title="Lesson mastered!"
           xp={justEarned}
           tone="brass"
+          piece="bishop"
           subtitle={`${stars}★ earned${alreadyDone && justEarned === null ? " · already completed" : ""}`}
         >
           {nextSeq ? (

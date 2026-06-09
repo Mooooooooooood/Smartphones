@@ -11,6 +11,7 @@ import RewardPanel from "@/components/ui/RewardPanel";
 import TopProgress from "@/components/ui/TopProgress";
 import CoachBubble from "@/components/ui/CoachBubble";
 import Skeleton from "@/components/ui/Skeleton";
+import ChessBuddy, { BUDDIES } from "@/components/characters/ChessBuddy";
 
 const LETTERS = ["A", "B", "C", "D", "E"];
 
@@ -124,7 +125,7 @@ export default function BossScreen({ bossId }: { bossId: string }) {
     return (
       <div className="space-y-4">
         <TopProgress value={1} exitHref="/academy" trailing="Cleared" />
-        <RewardPanel title={`${boss.title} cleared`} tone="brass" subtitle="Tier 1 is unlocked.">
+        <RewardPanel title={`${boss.title} cleared!`} tone="brass" piece="queen" subtitle="Tier 1 is unlocked.">
           <div className="flex gap-2">
             <ActionButton onClick={retry} variant="secondary">
               Retake
@@ -148,6 +149,7 @@ export default function BossScreen({ bossId }: { bossId: string }) {
             title="Trial passed!"
             xp={outcome.xpAwarded || null}
             tone="brass"
+            piece="queen"
             subtitle={`Score ${score}/${total} · Tier 1 unlocked`}
           >
             <div className="flex gap-2">
@@ -166,12 +168,12 @@ export default function BossScreen({ bossId }: { bossId: string }) {
       <div className="space-y-4">
         <TopProgress value={1} exitHref="/academy" trailing={`${score}/${total}`} />
         <GameCard className="p-5 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-warn/50 bg-warn/15 text-2xl text-warn">
-            !
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-line bg-surf-sun">
+            <ChessBuddy piece="queen" size={62} />
           </div>
-          <h2 className="mt-3 font-display text-xl text-cream">Not yet — {score}/{total}</h2>
+          <h2 className="mt-3 font-display text-xl text-cream">So close — {score}/{total}</h2>
           <p className="mt-1 text-sm text-muted">
-            You need {boss.passScore}/{total} to pass. Review and try again.
+            You need {boss.passScore}/{total} to pass. Brush up on these and challenge me again!
           </p>
           {reviewConcepts.length > 0 ? (
             <div className="mt-3 flex flex-wrap justify-center gap-1.5">
@@ -210,7 +212,7 @@ export default function BossScreen({ bossId }: { bossId: string }) {
         <h1 className="font-display text-2xl text-cream">{boss.title}</h1>
       </header>
 
-      <CoachBubble glyph="♛">{boss.subtitle} — answer {boss.passScore} of {total} correctly to pass.</CoachBubble>
+      <CoachBubble piece="queen">I am {BUDDIES.queen.name}, your challenge host. {boss.subtitle} — answer {boss.passScore} of {total} correctly to pass.</CoachBubble>
 
       <GameCard className="p-4">
         <p className="text-[11px] uppercase tracking-wider text-muted2">Question {qIndex + 1}</p>

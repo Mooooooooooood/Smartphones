@@ -26,8 +26,8 @@ function xPercent(i: number): number {
 }
 
 function sizeFor(stop: PathStop): number {
-  if (stop.kind === "boss") return 76;
-  if (stop.kind === "chest") return 54;
+  if (stop.kind === "boss") return 80;
+  if (stop.kind === "chest") return 66;
   return stop.status === "active" ? 80 : 64;
 }
 

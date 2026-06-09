@@ -31,6 +31,7 @@ import StatPill from "@/components/ui/StatPill";
 import XPBar from "@/components/ui/XPBar";
 import FlameIcon from "@/components/ui/FlameIcon";
 import RewardChest from "@/components/ui/RewardChest";
+import ChessBuddy from "@/components/characters/ChessBuddy";
 
 type MilestoneState = "done" | "current" | "locked";
 
@@ -190,6 +191,18 @@ export default function Dashboard() {
       <section>
         <SectionHeader eyebrow="Today" title="Daily Training" />
         <GameCard className="p-4">
+          {/* Guide character + encouragement */}
+          <div className="mb-3 flex items-center gap-2.5 rounded-2xl border border-line bg-surf-blue px-3 py-2">
+            <ChessBuddy piece="pawn" size={42} />
+            <p className="flex-1 text-xs text-cream">
+              {allDone
+                ? "Every mission done — open your chest! 🎉"
+                : doneCount > 0
+                  ? `Nice work — ${3 - doneCount} to go!`
+                  : "Hi, I'm Pip! Let's finish 3 quick missions today."}
+            </p>
+          </div>
+
           <div className="flex items-center gap-3">
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between">
@@ -200,7 +213,7 @@ export default function Dashboard() {
                 <XPBar value={doneCount / 3} />
               </div>
             </div>
-            <RewardChest state={daily.bonusClaimed ? "claimed" : allDone ? "ready" : "locked"} size={48} />
+            <RewardChest state={daily.bonusClaimed ? "claimed" : allDone ? "ready" : "locked"} size={64} />
           </div>
 
           <div className="mt-3 grid grid-cols-3 gap-2.5">

@@ -17,6 +17,7 @@ import {
 import GameCard from "@/components/ui/GameCard";
 import XPBar from "@/components/ui/XPBar";
 import AcademyPath, { type PathStop, type StopStatus } from "@/components/ui/AcademyPath";
+import ChessBuddy from "@/components/characters/ChessBuddy";
 
 const MID = 4; // reward chest after the first four Tier 0 lessons
 
@@ -150,11 +151,14 @@ export default function AcademyScreen() {
         <h1 className="font-display text-3xl text-cream">Your Learning Map</h1>
       </header>
 
-      {/* Next-step banner */}
+      {/* Next-step banner with academy master */}
       <Link href={step.href} className="block transition-transform active:scale-[0.99]">
-        <GameCard variant="accent" glow className="flex items-center justify-between gap-3 p-4">
-          <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-wider text-brass">Next step</p>
+        <GameCard variant="accent" glow className="flex items-center gap-3 p-4">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-line bg-surf-sun">
+            <ChessBuddy piece="king" size={48} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] uppercase tracking-wider text-brass">Cassius says · next step</p>
             <h2 className="truncate font-display text-base text-cream">{step.title}</h2>
           </div>
           <span className="shrink-0 rounded-full border border-brass/50 bg-brass/15 px-3 py-1.5 text-xs font-bold text-brass">

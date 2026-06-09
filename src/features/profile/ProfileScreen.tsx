@@ -23,6 +23,16 @@ import StatPill from "@/components/ui/StatPill";
 import XPBar from "@/components/ui/XPBar";
 import FlameIcon from "@/components/ui/FlameIcon";
 import BadgeEmblem from "@/components/ui/BadgeEmblem";
+import ChessBuddy, { BUDDIES, type BuddyPiece } from "@/components/characters/ChessBuddy";
+
+const GUIDE_SURFACES: { piece: BuddyPiece; surface: string }[] = [
+  { piece: "pawn", surface: "bg-surf-blue" },
+  { piece: "knight", surface: "bg-surf-mint" },
+  { piece: "rook", surface: "bg-surf-peach" },
+  { piece: "bishop", surface: "bg-surf-lav" },
+  { piece: "queen", surface: "bg-surf-sun" },
+  { piece: "king", surface: "bg-surf-sun" },
+];
 
 const PUZZLE_CATEGORIES: { key: PuzzleCategory; label: string }[] = [
   { key: "tactics", label: "Tactics" },
@@ -138,6 +148,24 @@ export default function ProfileScreen() {
           </p>
         </div>
       </GameCard>
+
+      {/* Your guides */}
+      <section>
+        <SectionHeader title="Your Guides" />
+        <GameCard className="p-4">
+          <div className="grid grid-cols-3 gap-3">
+            {GUIDE_SURFACES.map(({ piece, surface }) => (
+              <div key={piece} className="flex flex-col items-center gap-1.5">
+                <div className={`flex h-16 w-16 items-center justify-center rounded-2xl border border-line ${surface}`}>
+                  <ChessBuddy piece={piece} size={52} />
+                </div>
+                <span className="text-[11px] font-semibold text-cream">{BUDDIES[piece].name}</span>
+                <span className="text-[9px] leading-tight text-muted2">{BUDDIES[piece].role}</span>
+              </div>
+            ))}
+          </div>
+        </GameCard>
+      </section>
 
       {/* Learning journey */}
       <section>
