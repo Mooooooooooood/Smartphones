@@ -1,9 +1,19 @@
 "use client";
 
 import { useEffect } from "react";
-import { useProfileStore, selectLevel, academyProgress, puzzlesSolvedCount } from "@/state/profileStore";
+import { useProfileStore, selectLevel, puzzlesSolvedCount, academyStateFrom } from "@/state/profileStore";
 import { usePuzzleStore, overallAccuracy } from "@/state/puzzleStore";
 import { rankForLevel } from "@/domain/progression/rank";
+import { todayKey } from "@/domain/progression/leveling";
+import {
+  academyProgress,
+  tierProgress,
+  isTierUnlocked,
+  bossStatus,
+  currentStageLabel,
+} from "@/domain/academy/progression";
+import { dailyForToday, dailyDoneCount } from "@/domain/training/daily";
+import { TIER0_BOSS } from "@/content/academy";
 import { BEGINNER_PUZZLES, THEME_LABELS, type PuzzleCategory } from "@/content/puzzles/beginner";
 import GameCard from "@/components/ui/GameCard";
 import SectionHeader from "@/components/ui/SectionHeader";
@@ -21,18 +31,44 @@ const PUZZLE_CATEGORIES: { key: PuzzleCategory; label: string }[] = [
 ];
 
 const FUTURE = [
-  { title: "Openings World", note: "Tier 1" },
   { title: "Endgame World", note: "Tier 2" },
+  { title: "Opening World", note: "Tier 3" },
 ];
 
 const PUZZLE_BY_ID = new Map(BEGINNER_PUZZLES.map((p) => [p.id, p]));
+
+function TierRow({
+  label,
+  done,
+  total,
+  pct,
+  locked = false,
+}: {
+  label: string;
+  done: number;
+  total: number;
+  pct: number;
+  locked?: boolean;
+}) {
+  return (
+    <div className={`flex items-center gap-2.5 ${locked ? "opacity-50" : ""}`}>
+      <span className="w-16 shrink-0 text-xs text-muted">{label}</span>
+      <XPBar value={pct} />
+      <span className="w-10 shrink-0 text-right text-[11px] text-muted2">
+        {locked ? "🔒" : `${done}/${total}`}
+      </span>
+    </div>
+  );
+}
 
 export default function ProfileScreen() {
   const xp = useProfileStore((s) => s.xp);
   const streak = useProfileStore((s) => s.streak);
   const completed = useProfileStore((s) => s.completed);
+  const bossClearedMap = useProfileStore((s) => s.bossCleared);
   const puzzleRating = useProfileStore((s) => s.puzzleRating);
   const solvedIds = useProfileStore((s) => s.solvedPuzzleIds);
+  const dailyRaw = useProfileStore((s) => s.daily);
   const attempts = usePuzzleStore((s) => s.attempts);
 
   useEffect(() => {
@@ -41,19 +77,32 @@ export default function ProfileScreen() {
 
   const lvl = selectLevel(xp);
   const rank = rankForLevel(lvl.level);
-  const prog = academyProgress(completed);
+  const state = academyStateFrom(completed, bossClearedMap);
+  const acad = academyProgress(state);
+  const t0 = tierProgress(0, state);
+  const t1 = tierProgress(1, state);
+  const tier1Open = isTierUnlocked(1, state);
+  const bStatus = bossStatus(TIER0_BOSS.id, state);
+  const stage = currentStageLabel(state);
+  const daily = dailyForToday(dailyRaw, todayKey());
+  const dailyDone = dailyDoneCount(daily);
   const solved = puzzlesSolvedCount(solvedIds);
   const acc = overallAccuracy(attempts);
   const recent = attempts.slice(0, 5);
 
   const badges = [
     { glyph: "♟", label: "First Solve", unlocked: solved >= 1 },
-    { glyph: "♞", label: "Scholar", unlocked: prog.done >= 1 },
+    { glyph: "♞", label: "Scholar", unlocked: acad.done >= 1 },
     { glyph: "♜", label: "Tactician", unlocked: solved >= 10 },
     { glyph: "✦", label: "Sharpshooter", unlocked: acc.total >= 5 && acc.pct >= 0.8 },
-    { glyph: "♛", label: "Streak ×3", unlocked: streak >= 3 },
-    { glyph: "♚", label: "Foundations", unlocked: prog.done === prog.total && prog.total > 0 },
+    { glyph: "★", label: "Streak ×3", unlocked: streak >= 3 },
+    { glyph: "♚", label: "Foundations", unlocked: t0.done === t0.total && t0.total > 0 },
+    { glyph: "♛", label: "Trial", unlocked: bStatus === "completed" },
+    { glyph: "♝", label: "First Tactics", unlocked: t1.done === t1.total && t1.total > 0 },
   ];
+
+  const bossLabel =
+    bStatus === "completed" ? "Passed" : bStatus === "ready" ? "Ready" : "Locked";
 
   return (
     <div className="space-y-5">
@@ -90,6 +139,60 @@ export default function ProfileScreen() {
         </div>
       </GameCard>
 
+      {/* Learning journey */}
+      <section>
+        <SectionHeader title="Learning Journey" />
+        <GameCard className="space-y-3 p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-cream">Current stage</span>
+            <span className="rounded-full border border-brass/40 bg-brass/10 px-2.5 py-1 text-[11px] font-semibold text-brass">
+              {stage}
+            </span>
+          </div>
+          <TierRow label="Tier 0" done={t0.done} total={t0.total} pct={t0.pct} />
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted">Tier 0 Trial</span>
+            <span
+              className={`text-[11px] font-semibold ${
+                bStatus === "completed" ? "text-good" : bStatus === "ready" ? "text-brass" : "text-muted2"
+              }`}
+            >
+              {bossLabel}
+            </span>
+          </div>
+          <TierRow label="Tier 1" done={t1.done} total={t1.total} pct={t1.pct} locked={!tier1Open} />
+        </GameCard>
+      </section>
+
+      {/* Daily training */}
+      <section>
+        <SectionHeader title="Daily Training" />
+        <GameCard className="flex items-center justify-between p-4">
+          <div className="flex items-center gap-2.5">
+            {(["academy", "puzzle", "play"] as const).map((k) => {
+              const done =
+                k === "academy" ? daily.academyTaskDone : k === "puzzle" ? daily.puzzleTaskDone : daily.playTaskDone;
+              const glyph = k === "academy" ? "♟" : k === "puzzle" ? "✦" : "♞";
+              return (
+                <span
+                  key={k}
+                  className={`flex h-9 w-9 items-center justify-center rounded-xl border text-base ${
+                    done ? "border-good/50 bg-good/15 text-good" : "border-line bg-ink2 text-muted2"
+                  }`}
+                  aria-hidden
+                >
+                  {done ? "✓" : glyph}
+                </span>
+              );
+            })}
+          </div>
+          <div className="text-right">
+            <div className="font-display text-lg text-cream">{dailyDone}/3</div>
+            <div className="text-[11px] text-muted2">{daily.bonusClaimed ? "bonus claimed" : "today"}</div>
+          </div>
+        </GameCard>
+      </section>
+
       {/* Achievement shelf */}
       <section>
         <SectionHeader title="Achievements" />
@@ -113,8 +216,8 @@ export default function ProfileScreen() {
           tone={acc.total ? "good" : "muted"}
         />
         <StatPill label="Streak" value={`${streak}`} sub={streak === 1 ? "day" : "days"} />
-        <StatPill label="Lessons" value={`${prog.done}/${prog.total}`} />
-        <StatPill label="Academy" value={`${Math.round(prog.pct * 100)}%`} />
+        <StatPill label="Lessons" value={`${acad.done}/${acad.total}`} />
+        <StatPill label="Academy" value={`${Math.round(acad.pct * 100)}%`} />
       </div>
 
       {/* Skill categories */}

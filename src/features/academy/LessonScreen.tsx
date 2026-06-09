@@ -4,8 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { TIER0_LESSONS } from "@/content/academy/tier0";
-import { useProfileStore, lessonStatus } from "@/state/profileStore";
+import { lessonById, lessonsForTier, tierMeta, TIER0_BOSS } from "@/content/academy";
+import { THEME_LABELS } from "@/content/puzzles/beginner";
+import { useProfileStore, academyStateFrom } from "@/state/profileStore";
+import { lessonStatus, nextLessonInTier } from "@/domain/academy/progression";
 import GameCard from "@/components/ui/GameCard";
 import ActionButton from "@/components/ui/ActionButton";
 import RewardPanel from "@/components/ui/RewardPanel";
@@ -35,6 +37,7 @@ function LessonLoading() {
 export default function LessonScreen({ lessonId }: { lessonId: string }) {
   const router = useRouter();
   const completed = useProfileStore((s) => s.completed);
+  const bossClearedMap = useProfileStore((s) => s.bossCleared);
   const hydrated = useProfileStore((s) => s.hydrated);
   const completeLesson = useProfileStore((s) => s.completeLesson);
 
@@ -42,7 +45,7 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
     void useProfileStore.getState().hydrate();
   }, []);
 
-  const lesson = useMemo(() => TIER0_LESSONS.find((l) => l.id === lessonId), [lessonId]);
+  const lesson = useMemo(() => lessonById(lessonId), [lessonId]);
 
   const [picked, setPicked] = useState<number | null>(null);
   const [firstTry, setFirstTry] = useState(true);
@@ -63,7 +66,9 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
     return <LessonLoading />;
   }
 
-  if (lessonStatus(lesson.order, completed) === "locked") {
+  const state = academyStateFrom(completed, bossClearedMap);
+
+  if (lessonStatus(lesson, state) === "locked") {
     return (
       <div className="py-12 text-center">
         <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-line bg-panel2 text-muted2">
@@ -73,7 +78,7 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
           </svg>
         </div>
         <h1 className="font-display text-2xl text-cream">Locked</h1>
-        <p className="mt-2 text-sm text-muted">Finish the previous lesson first.</p>
+        <p className="mt-2 text-sm text-muted">Finish the earlier lessons first.</p>
         <Link href="/academy" className="mt-3 inline-block text-brass">
           Back to Academy
         </Link>
@@ -81,10 +86,14 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
     );
   }
 
+  const tierLessons = lessonsForTier(lesson.tier);
+  const tierTitle = tierMeta(lesson.tier)?.title ?? "Academy";
   const alreadyDone = Boolean(completed[lesson.id]);
   const correct = picked !== null && picked === lesson.quiz.correctIndex;
-  const nextSeq = TIER0_LESSONS.find((l) => l.order === lesson.order + 1) ?? null;
+  const nextSeq = nextLessonInTier(lesson);
+  const bossNext = !nextSeq && lesson.tier === 0; // last Tier 0 lesson → Trial
   const mastered = alreadyDone || justEarned !== null;
+  const theme = lesson.relatedPuzzleTheme;
 
   function choose(i: number) {
     if (!lesson || correct) return;
@@ -103,17 +112,14 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
 
   return (
     <div className="space-y-4 pb-4">
-      {/* Focused-stage header */}
       <TopProgress
-        value={lesson.order / TIER0_LESSONS.length}
+        value={lesson.order / tierLessons.length}
         exitHref="/academy"
-        trailing={`${lesson.order}/${TIER0_LESSONS.length}`}
+        trailing={`${lesson.order}/${tierLessons.length}`}
       />
 
       <header>
-        <p className="text-[11px] uppercase tracking-[0.16em] text-brass">
-          Tier 0 · Foundations
-        </p>
+        <p className="text-[11px] uppercase tracking-[0.16em] text-brass">{tierTitle}</p>
         <div className="mt-0.5 flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h1 className="font-display text-3xl text-cream">{lesson.title}</h1>
@@ -136,7 +142,6 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
         </GameCard>
       ) : null}
 
-      {/* Instruction as a coach bubble */}
       <CoachBubble>{lesson.explanation}</CoachBubble>
 
       <ul className="space-y-1.5">
@@ -211,7 +216,16 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
                 {nextSeq.title}
               </span>
             </div>
+          ) : bossNext ? (
+            <div className="mb-3 text-center text-xs text-muted2">Tier 0 complete — the Trial awaits!</div>
           ) : null}
+
+          {theme ? (
+            <ActionButton href={`/puzzles?theme=${theme}`} variant="secondary" className="mb-2">
+              Practice {THEME_LABELS[theme]} ›
+            </ActionButton>
+          ) : null}
+
           <div className="flex gap-2">
             <ActionButton href="/academy" variant="secondary">
               Path
@@ -219,6 +233,10 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
             {nextSeq ? (
               <ActionButton onClick={() => router.push(`/academy/${nextSeq.id}`)}>
                 Continue ›
+              </ActionButton>
+            ) : bossNext ? (
+              <ActionButton onClick={() => router.push(`/academy/boss/${TIER0_BOSS.id}`)}>
+                Take Trial ›
               </ActionButton>
             ) : null}
           </div>

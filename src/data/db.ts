@@ -7,6 +7,7 @@ import Dexie, { type Table } from "dexie";
  * v1: kv (active game PGN — Sprint 1)
  * v2: + profile (singleton) + lessonProgress (Sprint 2)
  * v3: + puzzleAttempts (history) + profile.puzzleRating (Sprint 3)
+ * v4: + bossResults + dailyTraining (Sprint 5)
  */
 
 export interface KVRow {
@@ -45,11 +46,33 @@ export interface PuzzleAttemptRow {
   attemptedAt: number;
 }
 
+export interface BossResultRow {
+  bossId: string; // primary key, e.g. "tier-0"
+  tier: number;
+  passed: boolean;
+  score: number;
+  total: number;
+  xpAwarded: number;
+  completedAt: number;
+}
+
+export interface DailyTrainingRow {
+  date: string; // primary key, local day key "2026-06-09"
+  academyTaskDone: boolean;
+  puzzleTaskDone: boolean;
+  playTaskDone: boolean;
+  bonusClaimed: boolean;
+  completedAt: number | null;
+  updatedAt: number;
+}
+
 class TabiyaDB extends Dexie {
   kv!: Table<KVRow, string>;
   profile!: Table<ProfileRow, string>;
   lessonProgress!: Table<LessonProgressRow, string>;
   puzzleAttempts!: Table<PuzzleAttemptRow, number>;
+  bossResults!: Table<BossResultRow, string>;
+  dailyTraining!: Table<DailyTrainingRow, string>;
 
   constructor() {
     super("tabiya");
@@ -60,6 +83,14 @@ class TabiyaDB extends Dexie {
       profile: "id",
       lessonProgress: "lessonId",
       puzzleAttempts: "++id, puzzleId, attemptedAt",
+    });
+    this.version(4).stores({
+      kv: "key",
+      profile: "id",
+      lessonProgress: "lessonId",
+      puzzleAttempts: "++id, puzzleId, attemptedAt",
+      bossResults: "bossId, tier",
+      dailyTraining: "date",
     });
   }
 }

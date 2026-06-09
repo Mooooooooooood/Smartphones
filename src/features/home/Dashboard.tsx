@@ -1,108 +1,81 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
-import {
-  useProfileStore,
-  selectLevel,
-  academyProgress,
-  nextLesson,
-  puzzlesSolvedCount,
-} from "@/state/profileStore";
+import { useProfileStore, selectLevel, puzzlesSolvedCount, academyStateFrom } from "@/state/profileStore";
 import { usePuzzleStore, overallAccuracy } from "@/state/puzzleStore";
 import { useGameStore } from "@/state/gameStore";
 import { rankForLevel } from "@/domain/progression/rank";
 import { todayKey } from "@/domain/progression/leveling";
-import { TIER0_LESSONS } from "@/content/academy/tier0";
-import { BEGINNER_PUZZLES } from "@/content/puzzles/beginner";
+import {
+  nextRecommended,
+  academyProgress,
+  tierProgress,
+  isTierUnlocked,
+} from "@/domain/academy/progression";
+import {
+  dailyForToday,
+  dailyDoneCount,
+  dailyAllComplete,
+  dailyBonusClaimable,
+  DAILY_BONUS_XP,
+} from "@/domain/training/daily";
+import { lessonsForTier } from "@/content/academy";
+import { BEGINNER_PUZZLES, THEME_LABELS, type PuzzleTheme } from "@/content/puzzles/beginner";
 import GameCard from "@/components/ui/GameCard";
 import SectionHeader from "@/components/ui/SectionHeader";
 import ActionButton from "@/components/ui/ActionButton";
 import ProgressRing from "@/components/ui/ProgressRing";
 import RankBadge from "@/components/ui/RankBadge";
 import StatPill from "@/components/ui/StatPill";
+import XPBar from "@/components/ui/XPBar";
 import FlameIcon from "@/components/ui/FlameIcon";
 import RewardChest from "@/components/ui/RewardChest";
 
-function QuestRow({
+function TaskRow({
   href,
   glyph,
   label,
-  current,
-  target,
+  done,
 }: {
   href: string;
   glyph: ReactNode;
   label: string;
-  current: number;
-  target: number;
+  done: boolean;
 }) {
-  const done = current >= target;
-  const pct = Math.max(0, Math.min(1, current / target)) * 100;
   return (
-    <Link href={href} className="flex items-center gap-3 py-2">
+    <Link href={href} className="flex items-center gap-3 py-2.5">
       <div
-        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border text-base ${
-          done ? "border-brass/50 bg-brass/15 text-brass" : "border-line bg-ink2 text-muted2"
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-lg ${
+          done ? "border-good/50 bg-good/15 text-good" : "border-line bg-ink2 text-muted2"
         }`}
         aria-hidden
       >
         {done ? "✓" : glyph}
       </div>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between">
-          <span className={`text-sm ${done ? "text-cream" : "text-muted"}`}>{label}</span>
-          <span className="text-[11px] font-semibold text-muted2">
-            {Math.min(current, target)}/{target}
-          </span>
-        </div>
-        <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-ink2">
-          <div
-            className="h-full rounded-full bg-brass transition-[width] duration-500"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-      </div>
+      <span className={`flex-1 text-sm ${done ? "text-cream line-through decoration-good/40" : "text-cream"}`}>
+        {label}
+      </span>
+      <span className={`text-xs font-semibold ${done ? "text-good" : "text-muted2"}`}>
+        {done ? "Done" : "Go ›"}
+      </span>
     </Link>
-  );
-}
-
-function JourneyNode({
-  label,
-  glyph,
-  state,
-}: {
-  label: string;
-  glyph: string;
-  state: "done" | "current" | "locked";
-}) {
-  const cls =
-    state === "current"
-      ? "border-[3px] border-brass bg-ink2 text-brass tab-glow"
-      : state === "done"
-        ? "border-2 border-brass bg-brass text-ink"
-        : "border border-line bg-panel2 text-muted2";
-  return (
-    <div className="flex flex-col items-center gap-1">
-      <div className={`flex h-12 w-12 items-center justify-center rounded-full text-base font-bold ${cls}`}>
-        {glyph}
-      </div>
-      <span className="max-w-[72px] truncate text-[10px] text-muted2">{label}</span>
-    </div>
   );
 }
 
 export default function Dashboard() {
   const xp = useProfileStore((s) => s.xp);
   const streak = useProfileStore((s) => s.streak);
-  const lastActiveDate = useProfileStore((s) => s.lastActiveDate);
   const completed = useProfileStore((s) => s.completed);
+  const bossClearedMap = useProfileStore((s) => s.bossCleared);
   const puzzleRating = useProfileStore((s) => s.puzzleRating);
   const solvedIds = useProfileStore((s) => s.solvedPuzzleIds);
+  const dailyRaw = useProfileStore((s) => s.daily);
+  const claimDailyBonus = useProfileStore((s) => s.claimDailyBonus);
   const attempts = usePuzzleStore((s) => s.attempts);
-  const session = usePuzzleStore((s) => s.session);
-  const moves = useGameStore((s) => s.snap.history.length);
+
+  const [justClaimed, setJustClaimed] = useState(false);
 
   useEffect(() => {
     void usePuzzleStore.getState().hydrate();
@@ -111,26 +84,39 @@ export default function Dashboard() {
 
   const lvl = selectLevel(xp);
   const rank = rankForLevel(lvl.level);
-  const prog = academyProgress(completed);
-  const next = nextLesson(completed);
+  const state = academyStateFrom(completed, bossClearedMap);
+  const step = nextRecommended(state);
+  const acad = academyProgress(state);
+  const t0 = tierProgress(0, state);
+  const t1 = tierProgress(1, state);
+  const tier1Open = isTierUnlocked(1, state);
   const solved = puzzlesSolvedCount(solvedIds);
   const acc = overallAccuracy(attempts);
   const fresh = xp === 0;
 
-  const activeToday = lastActiveDate === todayKey();
-  const continueHref = next ? `/academy/${next.id}` : "/puzzles";
+  // Persistent daily training (today's row, fresh if absent/stale).
+  const daily = dailyForToday(dailyRaw, todayKey());
+  const doneCount = dailyDoneCount(daily);
+  const allDone = dailyAllComplete(daily);
+  const claimable = dailyBonusClaimable(daily);
 
-  // Daily quests (derived from existing state — no extra persistence).
-  const quests = [
-    { href: continueHref, glyph: "♟", label: "Earn lesson XP", current: activeToday ? 1 : 0, target: 1 },
-    { href: "/puzzles", glyph: "✦", label: "Solve 3 puzzles", current: Math.min(session.solved, 3), target: 3 },
-    { href: "/play", glyph: "♞", label: "Play 5 moves", current: Math.min(moves, 5), target: 5 },
+  const tasks = [
+    { key: "academy", href: step.href, glyph: "♟", label: "Continue Academy", done: daily.academyTaskDone },
+    { key: "puzzle", href: "/puzzles", glyph: "✦", label: "Solve a puzzle", done: daily.puzzleTaskDone },
+    { key: "play", href: "/play", glyph: "♞", label: "Practice on the board", done: daily.playTaskDone },
   ];
-  const questFraction = quests.reduce((s, q) => s + Math.min(q.current / q.target, 1), 0) / quests.length;
-  const questsDone = quests.filter((q) => q.current >= q.target).length;
 
-  // Current Journey preview.
-  const nextSeq = next ? TIER0_LESSONS.find((l) => l.order === next.order + 1) ?? null : null;
+  // Puzzle recommendation from the current/most-recent tactic lesson.
+  const recoTheme: PuzzleTheme | null =
+    step.lesson?.relatedPuzzleTheme ??
+    [...lessonsForTier(1)].reverse().find((l) => completed[l.id] && l.relatedPuzzleTheme)
+      ?.relatedPuzzleTheme ??
+    null;
+
+  async function onClaim() {
+    const got = await claimDailyBonus();
+    if (got > 0) setJustClaimed(true);
+  }
 
   return (
     <div className="space-y-6">
@@ -143,7 +129,6 @@ export default function Dashboard() {
 
       {/* Hero */}
       <GameCard variant="accent" glow className="relative overflow-hidden p-5">
-        {/* playful floating chess motifs */}
         <div aria-hidden className="pointer-events-none absolute inset-0 select-none">
           <span className="absolute -right-2 -top-3 text-7xl text-sky/10">♞</span>
           <span className="absolute right-10 bottom-1 text-4xl text-lav/20">♟</span>
@@ -167,86 +152,121 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="mt-4">
-          <ActionButton href={continueHref}>
+          <ActionButton href={step.href}>
             {fresh ? "Begin your path →" : "Continue your journey →"}
           </ActionButton>
         </div>
       </GameCard>
 
-      {/* Daily Quest */}
+      {/* Daily Training */}
       <section>
-        <SectionHeader eyebrow="Today" title="Daily Quest" />
+        <SectionHeader eyebrow="Today" title="Daily Training" />
         <GameCard className="p-4">
           <div className="flex items-center gap-3">
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-cream">
-                  {questsDone}/{quests.length} complete
-                </span>
-                <span className="text-[11px] text-muted2">resets daily</span>
+                <span className="text-sm font-semibold text-cream">{doneCount}/3 tasks</span>
+                <span className="text-[11px] text-muted2">resets at midnight</span>
               </div>
-              <div className="mt-1.5 h-2.5 w-full overflow-hidden rounded-full bg-ink2">
-                <div
-                  className="h-full rounded-full transition-[width] duration-500"
-                  style={{
-                    width: `${questFraction * 100}%`,
-                    backgroundImage: "linear-gradient(90deg, #60a5fa, #93c5fd)",
-                  }}
-                />
+              <div className="mt-1.5">
+                <XPBar value={doneCount / 3} />
               </div>
             </div>
-            <RewardChest state={questsDone === quests.length ? "ready" : "locked"} size={48} />
+            <RewardChest state={daily.bonusClaimed ? "claimed" : allDone ? "ready" : "locked"} size={48} />
           </div>
 
-          <div className="mt-2 divide-y divide-line/60">
-            {quests.map((q) => (
-              <QuestRow key={q.label} {...q} />
+          <div className="mt-1 divide-y divide-line/60">
+            {tasks.map((t) => (
+              <TaskRow key={t.key} href={t.href} glyph={t.glyph} label={t.label} done={t.done} />
             ))}
           </div>
 
-          {/* Locked upcoming teaser */}
-          <div className="mt-3 flex items-center gap-2 rounded-xl border border-line bg-ink2/60 px-3 py-2 opacity-70">
-            <RewardChest state="locked" size={28} />
-            <span className="text-[11px] text-muted2">New quests unlock tomorrow</span>
-          </div>
+          {/* Bonus state */}
+          {daily.bonusClaimed || justClaimed ? (
+            <div className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-good/40 bg-good/10 px-3 py-2.5 text-sm font-semibold text-good">
+              ✓ Daily bonus claimed · +{DAILY_BONUS_XP} XP
+            </div>
+          ) : claimable ? (
+            <button
+              onClick={onClaim}
+              className="mt-3 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl border border-brassdeep bg-brass text-[color:var(--color-on-accent)] text-sm font-semibold shadow-[0_4px_0_0_#3b82f6] active:translate-y-0.5 active:shadow-[0_2px_0_0_#3b82f6]"
+            >
+              Claim daily bonus · +{DAILY_BONUS_XP} XP
+            </button>
+          ) : (
+            <p className="mt-3 text-center text-[11px] text-muted2">
+              Finish all 3 tasks to unlock today&apos;s bonus chest.
+            </p>
+          )}
         </GameCard>
       </section>
 
-      {/* Current Journey */}
+      {/* Current Journey / next step */}
       <section>
         <SectionHeader
           eyebrow="Academy"
           title="Your Journey"
           action={
             <Link href="/academy" className="text-xs font-semibold text-brass">
-              View path ›
+              View map ›
             </Link>
           }
         />
-        <GameCard className="p-4">
-          {next ? (
-            <div className="flex items-center justify-between gap-2">
-              <JourneyNode label={next.title} glyph={`${next.order}`} state="current" />
-              <div className="h-0.5 flex-1 bg-line" />
-              <JourneyNode
-                label={nextSeq ? nextSeq.title : "Tier Trial"}
-                glyph={nextSeq ? `${nextSeq.order}` : "♛"}
-                state="locked"
-              />
-              <div className="h-0.5 flex-1 bg-line" />
-              <JourneyNode label="Boss Gate" glyph="♛" state="locked" />
+        <Link href={step.href} className="block transition-transform active:scale-[0.99]">
+          <GameCard className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-[3px] border-brass bg-ink2 text-lg font-bold text-brass tab-glow">
+                {step.kind === "boss" ? "♛" : step.kind === "done" ? "✓" : "▶"}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] uppercase tracking-wider text-brass">
+                  {step.kind === "boss" ? "Trial ready" : step.kind === "done" ? "Complete" : "Up next"}
+                </p>
+                <h3 className="truncate font-display text-base text-cream">{step.title}</h3>
+              </div>
+              <span className="shrink-0 text-muted2">›</span>
             </div>
-          ) : (
-            <div className="flex items-center justify-between gap-2">
-              <JourneyNode label="Foundations" glyph="✓" state="done" />
-              <div className="h-0.5 flex-1 bg-brass/50" />
-              <JourneyNode label="Boss Gate" glyph="♛" state="current" />
+
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="w-14 shrink-0 text-[11px] text-muted2">Tier 0</span>
+                <XPBar value={t0.pct} />
+                <span className="w-9 shrink-0 text-right text-[11px] text-muted2">{t0.done}/{t0.total}</span>
+              </div>
+              <div className={`flex items-center gap-2 ${tier1Open ? "" : "opacity-50"}`}>
+                <span className="w-14 shrink-0 text-[11px] text-muted2">Tier 1</span>
+                <XPBar value={t1.pct} />
+                <span className="w-9 shrink-0 text-right text-[11px] text-muted2">
+                  {tier1Open ? `${t1.done}/${t1.total}` : "🔒"}
+                </span>
+              </div>
             </div>
-          )}
-          <p className="mt-3 text-center text-xs text-muted2">
-            {next ? `Up next · ${next.title}` : "All lessons mastered — the Trial awaits"}
-          </p>
-        </GameCard>
+          </GameCard>
+        </Link>
+      </section>
+
+      {/* Puzzle recommendation */}
+      <section>
+        <SectionHeader eyebrow="Practice" title="Recommended Tactic" />
+        <Link
+          href={recoTheme ? `/puzzles?theme=${recoTheme}` : "/puzzles"}
+          className="block transition-transform active:scale-[0.99]"
+        >
+          <GameCard variant="accent" className="flex items-center gap-3 p-4">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-brass/40 bg-brass/10 text-xl text-brass">
+              ✦
+            </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="font-display text-base text-cream">
+                {recoTheme ? THEME_LABELS[recoTheme] : "Mixed tactics"}
+              </h3>
+              <p className="truncate text-xs text-muted2">Sharpen this pattern in the arena</p>
+            </div>
+            <span className="shrink-0 rounded-full border border-brass/50 bg-brass/15 px-3 py-1.5 text-xs font-bold text-brass">
+              Practice ›
+            </span>
+          </GameCard>
+        </Link>
       </section>
 
       {/* Secondary stats */}
@@ -254,7 +274,7 @@ export default function Dashboard() {
         <SectionHeader eyebrow="Progress" title="Skill Snapshot" />
         <div className="grid grid-cols-4 gap-2">
           <StatPill label="Rating" value={`${puzzleRating}`} tone="brass" />
-          <StatPill label="Academy" value={`${Math.round(prog.pct * 100)}%`} />
+          <StatPill label="Academy" value={`${Math.round(acad.pct * 100)}%`} />
           <StatPill label="Solved" value={`${solved}`} sub={`/${BEGINNER_PUZZLES.length}`} />
           <StatPill
             label="Accuracy"

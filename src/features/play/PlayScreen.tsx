@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useGameStore } from "@/state/gameStore";
+import { useProfileStore } from "@/state/profileStore";
 import MoveList from "@/components/MoveList";
 import CapturedPieces from "@/components/CapturedPieces";
 import Controls from "@/components/Controls";
@@ -31,9 +32,21 @@ export default function PlayScreen() {
   const clearNotice = useGameStore((s) => s.clearNotice);
   const [orientation, setOrientation] = useState<"white" | "black">("white");
 
+  const userMoveCount = useGameStore((s) => s.userMoveCount);
+
   useEffect(() => {
     void useGameStore.getState().hydrate();
+    void useProfileStore.getState().hydrate();
   }, []);
+
+  // Making at least one genuine move (not a restored game) finishes the Play task.
+  const markedPlay = useRef(false);
+  useEffect(() => {
+    if (userMoveCount > 0 && !markedPlay.current) {
+      markedPlay.current = true;
+      void useProfileStore.getState().markDailyTask("play");
+    }
+  }, [userMoveCount]);
 
   // Auto-dismiss the illegal-move notice.
   useEffect(() => {

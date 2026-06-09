@@ -1,8 +1,8 @@
 import LessonScreen from "@/features/academy/LessonScreen";
-import { TIER0_LESSONS } from "@/content/academy/tier0";
+import { ALL_LESSONS } from "@/content/academy";
 
 export function generateStaticParams() {
-  return TIER0_LESSONS.map((l) => ({ lessonId: l.id }));
+  return ALL_LESSONS.map((l) => ({ lessonId: l.id }));
 }
 
 export default async function Page({ params }: { params: Promise<{ lessonId: string }> }) {

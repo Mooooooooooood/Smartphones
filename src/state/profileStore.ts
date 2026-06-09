@@ -1,6 +1,17 @@
 import { create } from "zustand";
 import { levelInfo, nextStreak, todayKey, type LevelInfo } from "@/domain/progression/leveling";
-import { TIER0_LESSONS } from "@/content/academy/tier0";
+import { DEFAULT_PUZZLE_RATING, nextRating } from "@/domain/progression/rating";
+import { bossById } from "@/content/academy";
+import type { AcademyState } from "@/domain/academy/progression";
+import {
+  dailyForToday,
+  dailyBonusClaimable,
+  withBonusClaimed,
+  withTaskDone,
+  DAILY_BONUS_XP,
+  type DailyTask,
+  type DailyTraining,
+} from "@/domain/training/daily";
 import {
   loadLessonProgress,
   loadProfile,
@@ -8,7 +19,9 @@ import {
   saveProfile,
 } from "@/data/profileRepository";
 import { loadPuzzleAttempts, savePuzzleAttempt } from "@/data/puzzleRepository";
-import { DEFAULT_PUZZLE_RATING, nextRating } from "@/domain/progression/rating";
+import { loadBossResults, saveBossResult } from "@/data/academyRepository";
+import { loadDailyTraining, saveDailyTraining } from "@/data/dailyRepository";
+import type { BossResultRow } from "@/data/db";
 
 export interface CompletedLesson {
   stars: number;
@@ -21,21 +34,24 @@ export interface PuzzleResult {
   ratingBefore: number;
   ratingAfter: number;
   xpAwarded: number;
-  /** First time this puzzle is solved correctly (the moment XP is awarded). */
   firstSolve: boolean;
-  /** First time this puzzle is attempted at all (the only attempt that moves rating). */
   firstAttempt: boolean;
 }
 
 export interface RecordPuzzleArgs {
   puzzleId: string;
   theme: string;
-  /** The puzzle's difficulty rating. */
   puzzleRating: number;
   correct: boolean;
-  attemptedMove: string; // UCI played
-  correctMove: string; // UCI answer
+  attemptedMove: string;
+  correctMove: string;
   xpReward: number;
+}
+
+export interface BossOutcome {
+  passed: boolean;
+  xpAwarded: number;
+  firstClear: boolean;
 }
 
 interface ProfileState {
@@ -49,22 +65,25 @@ interface ProfileState {
   solvedPuzzleIds: IdSet;
   attemptedPuzzleIds: IdSet;
 
+  // Sprint 5 — boss gates + daily training
+  bossCleared: IdSet;
+  bossResults: Record<string, BossResultRow>;
+  daily: DailyTraining | null;
+
   hydrated: boolean;
 
   hydrate: () => Promise<void>;
-  /** Marks a lesson complete. Awards XP and updates the streak only the first time. */
   completeLesson: (lessonId: string, xpReward: number, stars: number) => Promise<boolean>;
-  /**
-   * Records the outcome of a puzzle attempt. Rating moves on the first attempt
-   * of each puzzle; XP and streak update only on the first correct solve.
-   */
   recordPuzzleResult: (args: RecordPuzzleArgs) => Promise<PuzzleResult>;
+  /** Record a boss attempt. Awards XP only on the first pass. */
+  completeBoss: (bossId: string, passed: boolean, score: number, total: number) => Promise<BossOutcome>;
+  /** Mark a daily-training task done (idempotent; resets on a new day). */
+  markDailyTask: (task: DailyTask) => Promise<void>;
+  /** Claim the once-per-day completion bonus. Returns XP awarded (0 if not claimable). */
+  claimDailyBonus: () => Promise<number>;
 }
 
-const TOTAL = TIER0_LESSONS.length;
-
 export const useProfileStore = create<ProfileState>((set, get) => {
-  /** Persist the singleton profile row from the current store snapshot. */
   function persistProfile() {
     const s = get();
     return saveProfile({
@@ -77,6 +96,17 @@ export const useProfileStore = create<ProfileState>((set, get) => {
     });
   }
 
+  /** Apply a daily task, bump the streak (meaningful activity), and persist. */
+  async function touchDaily(task: DailyTask) {
+    const s = get();
+    const today = todayKey();
+    const base = dailyForToday(s.daily, today);
+    const updated = withTaskDone(base, task);
+    const newStreak = nextStreak(s.lastActiveDate, s.streak, today);
+    set({ daily: updated, streak: newStreak, lastActiveDate: today });
+    await Promise.all([persistProfile(), saveDailyTraining(updated)]);
+  }
+
   return {
     xp: 0,
     streak: 0,
@@ -85,14 +115,20 @@ export const useProfileStore = create<ProfileState>((set, get) => {
     puzzleRating: DEFAULT_PUZZLE_RATING,
     solvedPuzzleIds: {},
     attemptedPuzzleIds: {},
+    bossCleared: {},
+    bossResults: {},
+    daily: null,
     hydrated: false,
 
     hydrate: async () => {
       if (get().hydrated) return;
-      const [profile, progress, attempts] = await Promise.all([
+      const today = todayKey();
+      const [profile, progress, attempts, bosses, daily] = await Promise.all([
         loadProfile(),
         loadLessonProgress(),
         loadPuzzleAttempts(),
+        loadBossResults(),
+        loadDailyTraining(today),
       ]);
 
       const completed: CompletedMap = {};
@@ -105,6 +141,13 @@ export const useProfileStore = create<ProfileState>((set, get) => {
         if (a.correct) solvedPuzzleIds[a.puzzleId] = true;
       }
 
+      const bossCleared: IdSet = {};
+      const bossResults: Record<string, BossResultRow> = {};
+      for (const b of bosses) {
+        bossResults[b.bossId] = b;
+        if (b.passed) bossCleared[b.bossId] = true;
+      }
+
       set({
         xp: profile?.xp ?? 0,
         streak: profile?.streak ?? 0,
@@ -113,6 +156,10 @@ export const useProfileStore = create<ProfileState>((set, get) => {
         puzzleRating: profile?.puzzleRating ?? DEFAULT_PUZZLE_RATING,
         solvedPuzzleIds,
         attemptedPuzzleIds,
+        bossCleared,
+        bossResults,
+        // Only keep the row if it belongs to today, otherwise start fresh on demand.
+        daily: daily && daily.date === today ? daily : null,
         hydrated: true,
       });
     },
@@ -132,6 +179,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
         persistProfile(),
         saveLessonProgress({ lessonId, status: "completed", stars, score: stars, completedAt: Date.now() }),
       ]);
+      await touchDaily("academy");
       return true;
     },
 
@@ -141,7 +189,6 @@ export const useProfileStore = create<ProfileState>((set, get) => {
       const firstAttempt = !state.attemptedPuzzleIds[args.puzzleId];
       const firstSolve = args.correct && !state.solvedPuzzleIds[args.puzzleId];
 
-      // Rating only moves on the very first attempt — no farming by retrying.
       const ratingAfter = firstAttempt
         ? nextRating(ratingBefore, args.puzzleRating, args.correct)
         : ratingBefore;
@@ -149,7 +196,6 @@ export const useProfileStore = create<ProfileState>((set, get) => {
 
       const today = todayKey();
       const newXp = state.xp + xpAwarded;
-      // A genuinely solved puzzle counts as meaningful activity for the streak.
       const newStreak = xpAwarded > 0 ? nextStreak(state.lastActiveDate, state.streak, today) : state.streak;
       const newLastActive = xpAwarded > 0 ? today : state.lastActiveDate;
 
@@ -179,7 +225,68 @@ export const useProfileStore = create<ProfileState>((set, get) => {
         }),
       ]);
 
+      // Solving a puzzle correctly satisfies the daily puzzle task.
+      if (args.correct) await touchDaily("puzzle");
+
       return { ratingBefore, ratingAfter, xpAwarded, firstSolve, firstAttempt };
+    },
+
+    completeBoss: async (bossId, passed, score, total) => {
+      const boss = bossById(bossId);
+      const state = get();
+      const already = Boolean(state.bossCleared[bossId]);
+      const firstClear = passed && !already;
+      const xpAwarded = firstClear ? boss?.xpReward ?? 0 : 0;
+
+      const prev = state.bossResults[bossId];
+      const row: BossResultRow = {
+        bossId,
+        tier: boss?.tier ?? 0,
+        passed: passed || Boolean(prev?.passed),
+        score,
+        total,
+        xpAwarded: (prev?.xpAwarded ?? 0) + xpAwarded,
+        completedAt: Date.now(),
+      };
+
+      if (firstClear) {
+        const today = todayKey();
+        set({
+          xp: state.xp + xpAwarded,
+          streak: nextStreak(state.lastActiveDate, state.streak, today),
+          lastActiveDate: today,
+          bossCleared: { ...state.bossCleared, [bossId]: true },
+          bossResults: { ...state.bossResults, [bossId]: row },
+        });
+      } else {
+        set({ bossResults: { ...state.bossResults, [bossId]: row } });
+      }
+
+      await Promise.all([persistProfile(), saveBossResult(row)]);
+      // Passing the trial satisfies the daily academy task.
+      if (passed) await touchDaily("academy");
+
+      return { passed, xpAwarded, firstClear };
+    },
+
+    markDailyTask: async (task) => {
+      await touchDaily(task);
+    },
+
+    claimDailyBonus: async () => {
+      const s = get();
+      const today = todayKey();
+      const d = dailyForToday(s.daily, today);
+      if (!dailyBonusClaimable(d)) return 0;
+      const updated = withBonusClaimed(d);
+      set({
+        daily: updated,
+        xp: s.xp + DAILY_BONUS_XP,
+        streak: nextStreak(s.lastActiveDate, s.streak, today),
+        lastActiveDate: today,
+      });
+      await Promise.all([persistProfile(), saveDailyTraining(updated)]);
+      return DAILY_BONUS_XP;
     },
   };
 });
@@ -190,32 +297,18 @@ export function selectLevel(xp: number): LevelInfo {
   return levelInfo(xp);
 }
 
-export function academyProgress(completed: Record<string, unknown>): {
-  done: number;
-  total: number;
-  pct: number;
-} {
-  const done = Object.keys(completed).length;
-  return { done, total: TOTAL, pct: TOTAL ? done / TOTAL : 0 };
-}
-
 export function puzzlesSolvedCount(solved: Record<string, unknown>): number {
   return Object.keys(solved).length;
 }
 
-export function lessonStatus(
-  order: number,
+/** Build the pure academy snapshot the progression domain expects. */
+export function academyStateFrom(
   completed: Record<string, unknown>,
-): "completed" | "available" | "locked" {
-  const lesson = TIER0_LESSONS.find((l) => l.order === order);
-  if (!lesson) return "locked";
-  if (completed[lesson.id]) return "completed";
-  if (order === 1) return "available";
-  const prev = TIER0_LESSONS.find((l) => l.order === order - 1);
-  return prev && completed[prev.id] ? "available" : "locked";
-}
-
-/** First lesson not yet completed (always available, since lessons unlock in order). */
-export function nextLesson(completed: Record<string, unknown>) {
-  return [...TIER0_LESSONS].sort((a, b) => a.order - b.order).find((l) => !completed[l.id]) ?? null;
+  bossCleared: Record<string, unknown>,
+): AcademyState {
+  const completedLessonIds: Record<string, boolean> = {};
+  for (const id of Object.keys(completed)) completedLessonIds[id] = true;
+  const cleared: Record<string, boolean> = {};
+  for (const id of Object.keys(bossCleared)) cleared[id] = true;
+  return { completedLessonIds, bossCleared: cleared };
 }

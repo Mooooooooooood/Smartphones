@@ -1,3 +1,5 @@
+import type { PuzzleTheme } from "@/content/puzzles/beginner";
+
 export interface Quiz {
   question: string;
   choices: string[];
@@ -6,7 +8,7 @@ export interface Quiz {
 
 export interface Lesson {
   id: string;
-  tier: 0;
+  tier: number;
   order: number;
   title: string;
   subtitle: string;
@@ -16,6 +18,8 @@ export interface Lesson {
   xpReward: number;
   fen?: string; // optional illustrative position (read-only board)
   boardCaption?: string;
+  /** Tier 1+ lessons point at a puzzle theme to practise the tactic. */
+  relatedPuzzleTheme?: PuzzleTheme;
 }
 
 export const TIER0_TITLE = "Tier 0 · Foundations";

@@ -48,16 +48,21 @@ function NodeInner({ stop }: { stop: PathStop }) {
   }
 
   if (stop.kind === "boss") {
-    const ready = stop.status === "ready" || stop.status === "completed";
+    const cleared = stop.status === "completed";
+    const ready = stop.status === "ready";
     return (
       <div
         className={`flex items-center justify-center rounded-2xl border text-3xl ${
-          ready ? "border-brass bg-brass/20 text-brass tab-glow" : "border-line bg-ink2 text-muted2"
+          cleared
+            ? "border-brass bg-brass text-ink tab-glow"
+            : ready
+              ? "border-brass bg-brass/20 text-brass tab-glow tab-pulse"
+              : "border-line bg-ink2 text-muted2"
         }`}
         style={{ width: size, height: size }}
         aria-hidden
       >
-        {ready ? "♛" : <LockGlyph size={22} />}
+        {cleared ? "✓" : ready ? "♛" : <LockGlyph size={22} />}
       </div>
     );
   }

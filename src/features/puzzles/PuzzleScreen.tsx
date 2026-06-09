@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
 import { usePuzzleStore, currentPuzzle, type ThemeFilter } from "@/state/puzzleStore";
 import { useProfileStore } from "@/state/profileStore";
-import { PUZZLE_THEMES, THEME_LABELS } from "@/content/puzzles/beginner";
+import { PUZZLE_THEMES, THEME_LABELS, type PuzzleTheme } from "@/content/puzzles/beginner";
 import ActionButton from "@/components/ui/ActionButton";
 import RewardPanel from "@/components/ui/RewardPanel";
 import CoachBubble from "@/components/ui/CoachBubble";
@@ -50,9 +51,18 @@ export default function PuzzleScreen() {
 
   const puzzleRating = useProfileStore((s) => s.puzzleRating);
 
+  // Preselect a theme from ?theme= (e.g. a lesson's "Practice this tactic" CTA).
+  const searchParams = useSearchParams();
+  const themeParam = searchParams.get("theme");
+  const appliedTheme = useRef(false);
+
   useEffect(() => {
     void usePuzzleStore.getState().hydrate();
-  }, []);
+    if (!appliedTheme.current && themeParam && (PUZZLE_THEMES as string[]).includes(themeParam)) {
+      usePuzzleStore.getState().setTheme(themeParam as PuzzleTheme);
+      appliedTheme.current = true;
+    }
+  }, [themeParam]);
 
   const puzzle = currentPuzzle({ queue, index });
   const toMove = puzzle.sideToMove === "w" ? "White" : "Black";

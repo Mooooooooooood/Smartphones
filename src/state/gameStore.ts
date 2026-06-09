@@ -13,6 +13,8 @@ interface GameState {
   targets: Square[];
   /** Transient message for an illegal drag-drop, shown then auto-cleared. */
   notice: string | null;
+  /** Count of genuine user moves this session (not affected by hydrate/restore). */
+  userMoveCount: number;
   hydrated: boolean;
 
   /** Tap behaviour: select / deselect / move depending on context. */
@@ -36,6 +38,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   selected: null,
   targets: [],
   notice: null,
+  userMoveCount: 0,
   hydrated: false,
 
   selectSquare: (sq) => {
@@ -49,7 +52,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (selected && targets.includes(sq)) {
       if (tryMove(game, selected, sq)) {
         const snap = snapshot(game);
-        set({ snap, selected: null, targets: [] });
+        set({ snap, selected: null, targets: [], userMoveCount: get().userMoveCount + 1 });
         void saveActiveGame(snap.pgn);
       } else {
         set({ selected: null, targets: [] });
@@ -77,7 +80,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     const { game } = get();
     if (tryMove(game, from, to)) {
       const snap = snapshot(game);
-      set({ snap, selected: null, targets: [], notice: null });
+      set({ snap, selected: null, targets: [], notice: null, userMoveCount: get().userMoveCount + 1 });
       void saveActiveGame(snap.pgn);
       return true;
     }
