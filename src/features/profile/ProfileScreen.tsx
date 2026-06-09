@@ -31,8 +31,8 @@ const PUZZLE_CATEGORIES: { key: PuzzleCategory; label: string }[] = [
 ];
 
 const FUTURE = [
-  { title: "Endgame World", note: "Tier 2" },
-  { title: "Opening World", note: "Tier 3" },
+  { title: "Endgame World", note: "Tier 2", surface: "bg-surf-mint", glyph: "♚" },
+  { title: "Opening World", note: "Tier 3", surface: "bg-surf-peach", glyph: "♟" },
 ];
 
 const PUZZLE_BY_ID = new Map(BEGINNER_PUZZLES.map((p) => [p.id, p]));
@@ -280,18 +280,24 @@ export default function ProfileScreen() {
         <SectionHeader title="Locked Worlds" />
         <div className="grid grid-cols-2 gap-2.5">
           {FUTURE.map((f) => (
-            <GameCard key={f.title} className="flex items-center gap-2.5 px-3.5 py-3 opacity-70">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-panel2 text-muted2">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="5" y="11" width="14" height="9" rx="2" />
-                  <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-                </svg>
+            <div
+              key={f.title}
+              className={`flex items-center gap-2.5 rounded-2xl border border-line px-3.5 py-3 ${f.surface}`}
+            >
+              <span className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-panel text-lg text-muted2">
+                {f.glyph}
+                <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full border border-line bg-panel text-[8px] text-muted2">
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <rect x="5" y="11" width="14" height="9" rx="2" />
+                    <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+                  </svg>
+                </span>
               </span>
               <div className="min-w-0">
-                <p className="truncate text-sm text-cream">{f.title}</p>
+                <p className="truncate text-sm font-semibold text-cream">{f.title}</p>
                 <p className="text-[11px] text-muted2">{f.note}</p>
               </div>
-            </GameCard>
+            </div>
           ))}
         </div>
       </section>

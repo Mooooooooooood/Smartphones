@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { ReactNode } from "react";
 import Link from "next/link";
 import { useProfileStore, selectLevel, puzzlesSolvedCount, academyStateFrom } from "@/state/profileStore";
 import { usePuzzleStore, overallAccuracy } from "@/state/puzzleStore";
@@ -33,34 +32,55 @@ import XPBar from "@/components/ui/XPBar";
 import FlameIcon from "@/components/ui/FlameIcon";
 import RewardChest from "@/components/ui/RewardChest";
 
-function TaskRow({
+type MilestoneState = "done" | "current" | "locked";
+
+function MissionCard({
   href,
   glyph,
   label,
   done,
+  surface,
 }: {
   href: string;
-  glyph: ReactNode;
+  glyph: string;
   label: string;
   done: boolean;
+  surface: string;
 }) {
   return (
-    <Link href={href} className="flex items-center gap-3 py-2.5">
-      <div
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-lg ${
-          done ? "border-good/50 bg-good/15 text-good" : "border-line bg-ink2 text-muted2"
-        }`}
-        aria-hidden
-      >
-        {done ? "✓" : glyph}
+    <Link href={href} className="block transition-transform active:scale-[0.97]">
+      <div className={`flex h-full flex-col items-center gap-2 rounded-2xl border border-line p-3 text-center ${surface}`}>
+        <div
+          className={`flex h-12 w-12 items-center justify-center rounded-full border text-2xl ${
+            done ? "border-good/50 bg-good/20 text-gooddeep" : "border-line bg-panel text-cream"
+          }`}
+          aria-hidden
+        >
+          {done ? "✓" : glyph}
+        </div>
+        <span className="text-[11px] font-semibold leading-tight text-cream">{label}</span>
+        <span className={`text-[10px] font-bold ${done ? "text-gooddeep" : "text-muted2"}`}>
+          {done ? "Done" : "Go ›"}
+        </span>
       </div>
-      <span className={`flex-1 text-sm ${done ? "text-cream line-through decoration-good/40" : "text-cream"}`}>
-        {label}
-      </span>
-      <span className={`text-xs font-semibold ${done ? "text-good" : "text-muted2"}`}>
-        {done ? "Done" : "Go ›"}
-      </span>
     </Link>
+  );
+}
+
+function MiniNode({ glyph, label, state }: { glyph: string; label: string; state: MilestoneState }) {
+  const cls =
+    state === "current"
+      ? "border-[3px] border-brass bg-surf-blue text-brass tab-pulse"
+      : state === "done"
+        ? "border-2 border-good/50 bg-good/20 text-gooddeep"
+        : "border border-line bg-ink2 text-muted2";
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <div className={`flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold ${cls}`}>
+        {state === "locked" ? "🔒" : state === "done" ? "✓" : glyph}
+      </div>
+      <span className="max-w-[64px] truncate text-[10px] text-muted2">{label}</span>
+    </div>
   );
 }
 
@@ -90,23 +110,31 @@ export default function Dashboard() {
   const t0 = tierProgress(0, state);
   const t1 = tierProgress(1, state);
   const tier1Open = isTierUnlocked(1, state);
+  const bossDone = Boolean(bossClearedMap["tier-0"]);
   const solved = puzzlesSolvedCount(solvedIds);
   const acc = overallAccuracy(attempts);
   const fresh = xp === 0;
 
-  // Persistent daily training (today's row, fresh if absent/stale).
   const daily = dailyForToday(dailyRaw, todayKey());
   const doneCount = dailyDoneCount(daily);
   const allDone = dailyAllComplete(daily);
   const claimable = dailyBonusClaimable(daily);
 
-  const tasks = [
-    { key: "academy", href: step.href, glyph: "♟", label: "Continue Academy", done: daily.academyTaskDone },
-    { key: "puzzle", href: "/puzzles", glyph: "✦", label: "Solve a puzzle", done: daily.puzzleTaskDone },
-    { key: "play", href: "/play", glyph: "♞", label: "Practice on the board", done: daily.playTaskDone },
+  const missions = [
+    { key: "academy", href: step.href, glyph: "♟", label: "Academy", done: daily.academyTaskDone, surface: "bg-surf-blue" },
+    { key: "puzzle", href: "/puzzles", glyph: "✦", label: "Puzzle", done: daily.puzzleTaskDone, surface: "bg-surf-mint" },
+    { key: "play", href: "/play", glyph: "♞", label: "Play", done: daily.playTaskDone, surface: "bg-surf-lav" },
   ];
 
-  // Puzzle recommendation from the current/most-recent tactic lesson.
+  // Mini-path milestone states.
+  const t0State: MilestoneState = t0.total > 0 && t0.done === t0.total ? "done" : "current";
+  const bossState: MilestoneState = bossDone ? "done" : t0State === "done" ? "current" : "locked";
+  const t1State: MilestoneState = !tier1Open
+    ? "locked"
+    : t1.total > 0 && t1.done === t1.total
+      ? "done"
+      : "current";
+
   const recoTheme: PuzzleTheme | null =
     step.lesson?.relatedPuzzleTheme ??
     [...lessonsForTier(1)].reverse().find((l) => completed[l.id] && l.relatedPuzzleTheme)
@@ -131,8 +159,8 @@ export default function Dashboard() {
       <GameCard variant="accent" glow className="relative overflow-hidden p-5">
         <div aria-hidden className="pointer-events-none absolute inset-0 select-none">
           <span className="absolute -right-2 -top-3 text-7xl text-sky/10">♞</span>
-          <span className="absolute right-10 bottom-1 text-4xl text-lav/20">♟</span>
-          <span className="absolute left-2 -bottom-3 text-5xl text-mint/20">★</span>
+          <span className="absolute right-10 bottom-1 text-4xl text-lav/30">♟</span>
+          <span className="absolute left-2 -bottom-3 text-5xl text-mint/40">★</span>
         </div>
         <div className="relative flex items-center gap-4">
           <ProgressRing value={lvl.progress} size={108}>
@@ -165,8 +193,8 @@ export default function Dashboard() {
           <div className="flex items-center gap-3">
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-cream">{doneCount}/3 tasks</span>
-                <span className="text-[11px] text-muted2">resets at midnight</span>
+                <span className="text-sm font-semibold text-cream">{doneCount}/3 missions</span>
+                <span className="text-[11px] text-muted2">resets daily</span>
               </div>
               <div className="mt-1.5">
                 <XPBar value={doneCount / 3} />
@@ -175,33 +203,40 @@ export default function Dashboard() {
             <RewardChest state={daily.bonusClaimed ? "claimed" : allDone ? "ready" : "locked"} size={48} />
           </div>
 
-          <div className="mt-1 divide-y divide-line/60">
-            {tasks.map((t) => (
-              <TaskRow key={t.key} href={t.href} glyph={t.glyph} label={t.label} done={t.done} />
+          <div className="mt-3 grid grid-cols-3 gap-2.5">
+            {missions.map((m) => (
+              <MissionCard
+                key={m.key}
+                href={m.href}
+                glyph={m.glyph}
+                label={m.label}
+                done={m.done}
+                surface={m.surface}
+              />
             ))}
           </div>
 
           {/* Bonus state */}
           {daily.bonusClaimed || justClaimed ? (
-            <div className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-good/40 bg-good/10 px-3 py-2.5 text-sm font-semibold text-good">
+            <div className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-good/40 bg-good/15 px-3 py-2.5 text-sm font-semibold text-gooddeep">
               ✓ Daily bonus claimed · +{DAILY_BONUS_XP} XP
             </div>
           ) : claimable ? (
             <button
               onClick={onClaim}
-              className="mt-3 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl border border-brassdeep bg-brass text-[color:var(--color-on-accent)] text-sm font-semibold shadow-[0_4px_0_0_#3b82f6] active:translate-y-0.5 active:shadow-[0_2px_0_0_#3b82f6]"
+              className="mt-3 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl border border-brassdeep bg-brass text-[color:var(--color-on-accent)] text-sm font-semibold shadow-[0_4px_0_0_var(--color-brassdeep)] active:translate-y-0.5 active:shadow-[0_2px_0_0_var(--color-brassdeep)]"
             >
-              Claim daily bonus · +{DAILY_BONUS_XP} XP
+              🎁 Claim daily bonus · +{DAILY_BONUS_XP} XP
             </button>
           ) : (
             <p className="mt-3 text-center text-[11px] text-muted2">
-              Finish all 3 tasks to unlock today&apos;s bonus chest.
+              Finish all 3 missions to open today&apos;s reward chest.
             </p>
           )}
         </GameCard>
       </section>
 
-      {/* Current Journey / next step */}
+      {/* Journey mini-path */}
       <section>
         <SectionHeader
           eyebrow="Academy"
@@ -212,48 +247,36 @@ export default function Dashboard() {
             </Link>
           }
         />
-        <Link href={step.href} className="block transition-transform active:scale-[0.99]">
-          <GameCard className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-[3px] border-brass bg-ink2 text-lg font-bold text-brass tab-glow">
-                {step.kind === "boss" ? "♛" : step.kind === "done" ? "✓" : "▶"}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[11px] uppercase tracking-wider text-brass">
-                  {step.kind === "boss" ? "Trial ready" : step.kind === "done" ? "Complete" : "Up next"}
-                </p>
-                <h3 className="truncate font-display text-base text-cream">{step.title}</h3>
-              </div>
-              <span className="shrink-0 text-muted2">›</span>
-            </div>
-
-            <div className="mt-3 space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="w-14 shrink-0 text-[11px] text-muted2">Tier 0</span>
-                <XPBar value={t0.pct} />
-                <span className="w-9 shrink-0 text-right text-[11px] text-muted2">{t0.done}/{t0.total}</span>
-              </div>
-              <div className={`flex items-center gap-2 ${tier1Open ? "" : "opacity-50"}`}>
-                <span className="w-14 shrink-0 text-[11px] text-muted2">Tier 1</span>
-                <XPBar value={t1.pct} />
-                <span className="w-9 shrink-0 text-right text-[11px] text-muted2">
-                  {tier1Open ? `${t1.done}/${t1.total}` : "🔒"}
-                </span>
-              </div>
-            </div>
-          </GameCard>
-        </Link>
+        <GameCard className="p-4">
+          <div className="flex items-center justify-between">
+            <MiniNode glyph="♟" label="Foundations" state={t0State} />
+            <div className={`mx-1 h-0.5 flex-1 rounded-full ${t0State === "done" ? "bg-good/40" : "bg-line"}`} />
+            <MiniNode glyph="♛" label="Trial" state={bossState} />
+            <div className={`mx-1 h-0.5 flex-1 rounded-full ${bossState === "done" ? "bg-good/40" : "bg-line"}`} />
+            <MiniNode glyph="♝" label="Tactics" state={t1State} />
+          </div>
+          <Link
+            href={step.href}
+            className="mt-3 flex items-center gap-2 rounded-xl border border-brass/30 bg-surf-blue px-3 py-2.5 transition-transform active:scale-[0.99]"
+          >
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-brass">
+              {step.kind === "boss" ? "Trial ready" : step.kind === "done" ? "All done" : "Up next"}
+            </span>
+            <span className="min-w-0 flex-1 truncate text-sm text-cream">{step.title}</span>
+            <span className="shrink-0 text-brass">›</span>
+          </Link>
+        </GameCard>
       </section>
 
-      {/* Puzzle recommendation */}
+      {/* Recommended tactic */}
       <section>
         <SectionHeader eyebrow="Practice" title="Recommended Tactic" />
         <Link
           href={recoTheme ? `/puzzles?theme=${recoTheme}` : "/puzzles"}
           className="block transition-transform active:scale-[0.99]"
         >
-          <GameCard variant="accent" className="flex items-center gap-3 p-4">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-brass/40 bg-brass/10 text-xl text-brass">
+          <div className="flex items-center gap-3 rounded-[1.25rem] border border-lav/40 bg-surf-lav p-4 shadow-[0_8px_18px_-10px_rgba(124,58,237,0.25)]">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-lav/50 bg-panel text-2xl text-lavdeep">
               ✦
             </div>
             <div className="min-w-0 flex-1">
@@ -262,10 +285,10 @@ export default function Dashboard() {
               </h3>
               <p className="truncate text-xs text-muted2">Sharpen this pattern in the arena</p>
             </div>
-            <span className="shrink-0 rounded-full border border-brass/50 bg-brass/15 px-3 py-1.5 text-xs font-bold text-brass">
-              Practice ›
+            <span className="shrink-0 rounded-full border border-lav/50 bg-panel px-3 py-1.5 text-xs font-bold text-lavdeep">
+              Play ›
             </span>
-          </GameCard>
+          </div>
         </Link>
       </section>
 

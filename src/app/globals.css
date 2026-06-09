@@ -17,16 +17,25 @@
   --color-brass: #60a5fa;      /* primary accent (sky blue) */
   --color-brassdeep: #3b82f6;  /* deeper accent */
   --color-good: #22c55e;       /* success (readable green) */
+  --color-gooddeep: #16a34a;   /* success text on light surfaces */
   --color-bad: #f43f5e;        /* error (readable coral) */
-  --color-warn: #f59e0b;       /* warning (readable amber) */
+  --color-warn: #d97706;       /* warning text (readable) */
   --color-on-accent: #ffffff;  /* text on a filled accent */
-  /* soft playful fills */
+  /* soft playful accent fills */
   --color-mint: #86efac;
   --color-sun: #fde68a;
   --color-coral: #fda4af;
+  --color-peach: #fdba74;
   --color-lav: #c4b5fd;
+  --color-lavdeep: #7c3aed;
   --color-sky: #60a5fa;
   --color-skysoft: #bfdbfe;
+  /* soft playful card surfaces */
+  --color-surf-blue: #eaf3ff;
+  --color-surf-mint: #ecfdf5;
+  --color-surf-lav: #f3e8ff;
+  --color-surf-sun: #fef3c7;
+  --color-surf-peach: #fff1e6;
   --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
   --font-body: var(--font-hanken), system-ui, -apple-system, sans-serif;
 }

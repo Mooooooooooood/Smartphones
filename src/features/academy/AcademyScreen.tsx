@@ -43,19 +43,21 @@ function TierBand({
   rewardXp: number;
   locked?: boolean;
 }) {
-  return (
-    <GameCard variant={locked ? "default" : "accent"} glow={!locked} className={`p-4 ${locked ? "opacity-80" : ""}`}>
+  const body = (
+    <>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.16em] text-brass">{eyebrow}</p>
+          <p className={`text-[11px] uppercase tracking-[0.16em] ${locked ? "text-lavdeep" : "text-brass"}`}>
+            {eyebrow}
+          </p>
           <h2 className="font-display text-lg text-cream">{title}</h2>
         </div>
         <span
           className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${
-            locked ? "border-line bg-ink2 text-muted2" : "border-brass/40 bg-brass/10 text-brass"
+            locked ? "border-lav/50 bg-panel text-lavdeep" : "border-brass/40 bg-brass/10 text-brass"
           }`}
         >
-          {locked ? "Locked" : `${done}/${total}`}
+          {locked ? "🔒 Locked" : `${done}/${total}`}
         </span>
       </div>
       {!locked ? (
@@ -64,8 +66,21 @@ function TierBand({
         </div>
       ) : null}
       <p className="mt-2 text-[11px] text-muted2">
-        {locked ? "Pass the Tier 0 Trial to unlock" : `Reward · ${rewardXp} XP`}
+        {locked ? "Pass the Tier 0 Trial to unlock this world" : `Reward · ${rewardXp} XP`}
       </p>
+    </>
+  );
+
+  if (locked) {
+    return (
+      <div className="rounded-[1.25rem] border border-lav/40 bg-surf-lav p-4 shadow-[0_8px_18px_-10px_rgba(124,58,237,0.25)]">
+        {body}
+      </div>
+    );
+  }
+  return (
+    <GameCard variant="accent" glow className="p-4">
+      {body}
     </GameCard>
   );
 }
