@@ -11,6 +11,8 @@ interface GameState {
   snap: GameSnapshot;
   selected: Square | null;
   targets: Square[];
+  /** Transient message for an illegal drag-drop, shown then auto-cleared. */
+  notice: string | null;
   hydrated: boolean;
 
   /** Tap behaviour: select / deselect / move depending on context. */
@@ -20,6 +22,7 @@ interface GameState {
   /** Direct from→to move (used on drag-drop). Returns true if the move was legal. */
   move: (from: Square, to: Square) => boolean;
   clearSelection: () => void;
+  clearNotice: () => void;
   reset: () => void;
   undo: () => void;
   hydrate: () => Promise<void>;
@@ -32,6 +35,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   snap: snapshot(initialGame),
   selected: null,
   targets: [],
+  notice: null,
   hydrated: false,
 
   selectSquare: (sq) => {
@@ -73,15 +77,16 @@ export const useGameStore = create<GameState>((set, get) => ({
     const { game } = get();
     if (tryMove(game, from, to)) {
       const snap = snapshot(game);
-      set({ snap, selected: null, targets: [] });
+      set({ snap, selected: null, targets: [], notice: null });
       void saveActiveGame(snap.pgn);
       return true;
     }
-    set({ selected: null, targets: [] });
+    set({ selected: null, targets: [], notice: "That move isn't legal." });
     return false;
   },
 
   clearSelection: () => set({ selected: null, targets: [] }),
+  clearNotice: () => set({ notice: null }),
 
   reset: () => {
     const game = createGame();

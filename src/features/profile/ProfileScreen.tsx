@@ -12,6 +12,7 @@ import RankBadge from "@/components/ui/RankBadge";
 import StatPill from "@/components/ui/StatPill";
 import XPBar from "@/components/ui/XPBar";
 import FlameIcon from "@/components/ui/FlameIcon";
+import BadgeEmblem from "@/components/ui/BadgeEmblem";
 
 const PUZZLE_CATEGORIES: { key: PuzzleCategory; label: string }[] = [
   { key: "tactics", label: "Tactics" },
@@ -20,20 +21,11 @@ const PUZZLE_CATEGORIES: { key: PuzzleCategory; label: string }[] = [
 ];
 
 const FUTURE = [
-  { title: "Openings Path", note: "Tier 1" },
-  { title: "Endgame Trials", note: "Tier 2" },
+  { title: "Openings World", note: "Tier 1" },
+  { title: "Endgame World", note: "Tier 2" },
 ];
 
 const PUZZLE_BY_ID = new Map(BEGINNER_PUZZLES.map((p) => [p.id, p]));
-
-function LockGlyph() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <rect x="5" y="11" width="14" height="9" rx="2" />
-      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-    </svg>
-  );
-}
 
 export default function ProfileScreen() {
   const xp = useProfileStore((s) => s.xp);
@@ -54,6 +46,15 @@ export default function ProfileScreen() {
   const acc = overallAccuracy(attempts);
   const recent = attempts.slice(0, 5);
 
+  const badges = [
+    { glyph: "♟", label: "First Solve", unlocked: solved >= 1 },
+    { glyph: "♞", label: "Scholar", unlocked: prog.done >= 1 },
+    { glyph: "♜", label: "Tactician", unlocked: solved >= 10 },
+    { glyph: "✦", label: "Sharpshooter", unlocked: acc.total >= 5 && acc.pct >= 0.8 },
+    { glyph: "♛", label: "Streak ×3", unlocked: streak >= 3 },
+    { glyph: "♚", label: "Foundations", unlocked: prog.done === prog.total && prog.total > 0 },
+  ];
+
   return (
     <div className="space-y-5">
       <header>
@@ -61,10 +62,10 @@ export default function ProfileScreen() {
         <h1 className="font-display text-3xl text-cream">Player Card</h1>
       </header>
 
-      {/* Player card */}
+      {/* Player identity card */}
       <GameCard variant="accent" glow className="p-5">
         <div className="flex items-center gap-4">
-          <ProgressRing value={lvl.progress} size={104}>
+          <ProgressRing value={lvl.progress} size={108}>
             <span className="font-display text-3xl leading-none text-cream">{lvl.level}</span>
             <span className="mt-0.5 text-[9px] uppercase tracking-[0.18em] text-muted2">Level</span>
           </ProgressRing>
@@ -88,6 +89,18 @@ export default function ProfileScreen() {
           </p>
         </div>
       </GameCard>
+
+      {/* Achievement shelf */}
+      <section>
+        <SectionHeader title="Achievements" />
+        <GameCard className="p-4">
+          <div className="grid grid-cols-4 gap-3">
+            {badges.map((b) => (
+              <BadgeEmblem key={b.label} glyph={b.glyph} label={b.label} unlocked={b.unlocked} />
+            ))}
+          </div>
+        </GameCard>
+      </section>
 
       {/* Core stats */}
       <div className="grid grid-cols-3 gap-2.5">
@@ -129,7 +142,7 @@ export default function ProfileScreen() {
         </div>
       </section>
 
-      {/* Recent results */}
+      {/* Recent activity */}
       <section>
         <SectionHeader title="Recent Puzzles" />
         {recent.length === 0 ? (
@@ -159,14 +172,17 @@ export default function ProfileScreen() {
         )}
       </section>
 
-      {/* Future / locked */}
+      {/* Future worlds */}
       <section>
-        <SectionHeader title="On the Horizon" />
+        <SectionHeader title="Locked Worlds" />
         <div className="grid grid-cols-2 gap-2.5">
           {FUTURE.map((f) => (
             <GameCard key={f.title} className="flex items-center gap-2.5 px-3.5 py-3 opacity-70">
               <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-panel2 text-muted2">
-                <LockGlyph />
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="5" y="11" width="14" height="9" rx="2" />
+                  <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+                </svg>
               </span>
               <div className="min-w-0">
                 <p className="truncate text-sm text-cream">{f.title}</p>

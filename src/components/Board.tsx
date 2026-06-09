@@ -9,10 +9,11 @@ import { findKing } from "@/domain/chess/engine";
 const BRASS = "#d9b25a";
 
 const moveDot: CSSProperties = {
-  backgroundImage: "radial-gradient(circle, rgba(20,14,8,0.32) 18%, transparent 20%)",
+  backgroundImage: "radial-gradient(circle, rgba(217,178,90,0.55) 17%, transparent 19%)",
 };
 const captureRing: CSSProperties = {
-  boxShadow: "inset 0 0 0 4px rgba(196,106,79,0.6)",
+  boxShadow: "inset 0 0 0 5px rgba(200,90,70,0.85)",
+  borderRadius: "4px",
 };
 const selectedStyle: CSSProperties = {
   boxShadow: `inset 0 0 0 3px ${BRASS}`,

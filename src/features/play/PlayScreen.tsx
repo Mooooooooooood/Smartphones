@@ -26,12 +26,21 @@ function statusLabel(status: GameStatus, turn: Color, over: boolean): string {
 
 export default function PlayScreen() {
   const snap = useGameStore((s) => s.snap);
+  const notice = useGameStore((s) => s.notice);
   const reset = useGameStore((s) => s.reset);
+  const clearNotice = useGameStore((s) => s.clearNotice);
   const [orientation, setOrientation] = useState<"white" | "black">("white");
 
   useEffect(() => {
     void useGameStore.getState().hydrate();
   }, []);
+
+  // Auto-dismiss the illegal-move notice.
+  useEffect(() => {
+    if (!notice) return;
+    const t = setTimeout(clearNotice, 1800);
+    return () => clearTimeout(t);
+  }, [notice, clearNotice]);
 
   const topSide: Color = orientation === "white" ? "b" : "w";
   const bottomSide: Color = orientation === "white" ? "w" : "b";
@@ -80,15 +89,25 @@ export default function PlayScreen() {
       {justPromoted ? (
         <div className="tab-animate-rise flex items-center gap-2 rounded-xl border border-brass/30 bg-brass/10 px-3 py-2 text-sm text-brass">
           <span aria-hidden>♛</span>
-          <span>Auto-promoted to Queen.</span>
+          <span>Promoted to Queen.</span>
         </div>
       ) : null}
 
-      <CapturedPieces side={topSide} />
-      <div className="tabiya-board-wrap">
-        <Board orientation={orientation} />
-      </div>
-      <CapturedPieces side={bottomSide} />
+      {/* Premium board frame */}
+      <GameCard className="p-2.5">
+        <CapturedPieces side={topSide} />
+        <div className="tabiya-board-wrap my-1.5 overflow-hidden rounded-lg ring-1 ring-frame">
+          <Board orientation={orientation} />
+        </div>
+        <CapturedPieces side={bottomSide} />
+      </GameCard>
+
+      {/* Illegal-move notice */}
+      {notice ? (
+        <div className="tab-animate-rise rounded-xl border border-bad/40 bg-bad/10 px-3 py-2 text-center text-sm text-bad">
+          {notice}
+        </div>
+      ) : null}
 
       <Controls
         orientation={orientation}

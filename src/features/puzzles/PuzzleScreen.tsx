@@ -5,9 +5,10 @@ import dynamic from "next/dynamic";
 import { usePuzzleStore, currentPuzzle, type ThemeFilter } from "@/state/puzzleStore";
 import { useProfileStore } from "@/state/profileStore";
 import { PUZZLE_THEMES, THEME_LABELS } from "@/content/puzzles/beginner";
-import GameCard from "@/components/ui/GameCard";
 import ActionButton from "@/components/ui/ActionButton";
 import RewardPanel from "@/components/ui/RewardPanel";
+import CoachBubble from "@/components/ui/CoachBubble";
+import TopProgress from "@/components/ui/TopProgress";
 import Skeleton, { BoardSkeleton } from "@/components/ui/Skeleton";
 
 const PuzzleBoard = dynamic(() => import("@/components/PuzzleBoard"), {
@@ -20,28 +21,13 @@ const THEME_OPTIONS: { value: ThemeFilter; label: string }[] = [
   ...PUZZLE_THEMES.map((t) => ({ value: t as ThemeFilter, label: THEME_LABELS[t] })),
 ];
 
-function MiniStat({ label, value, tone = "cream" }: { label: string; value: string; tone?: "cream" | "brass" }) {
-  return (
-    <div className="tab-card px-2.5 py-2 text-center">
-      <div className={`font-display text-lg leading-none ${tone === "brass" ? "text-brass" : "text-cream"}`}>
-        {value}
-      </div>
-      <div className="mt-1 text-[9px] uppercase tracking-wider text-muted2">{label}</div>
-    </div>
-  );
-}
-
 function PuzzleLoading() {
   return (
     <div className="space-y-4">
+      <Skeleton className="h-3 w-full rounded-full" />
       <Skeleton className="h-9 w-2/3" />
-      <div className="grid grid-cols-4 gap-2">
-        {[0, 1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-14" />
-        ))}
-      </div>
-      <Skeleton className="h-9 w-full rounded-full" />
       <BoardSkeleton />
+      <Skeleton className="h-12 w-full" />
     </div>
   );
 }
@@ -63,14 +49,12 @@ export default function PuzzleScreen() {
   const nextPuzzle = usePuzzleStore((s) => s.nextPuzzle);
 
   const puzzleRating = useProfileStore((s) => s.puzzleRating);
-  const solvedIds = useProfileStore((s) => s.solvedPuzzleIds);
 
   useEffect(() => {
     void usePuzzleStore.getState().hydrate();
   }, []);
 
   const puzzle = currentPuzzle({ queue, index });
-  const alreadySolved = Boolean(solvedIds[puzzle.id]);
   const toMove = puzzle.sideToMove === "w" ? "White" : "Black";
   const ratingDelta = result ? result.ratingAfter - result.ratingBefore : 0;
   const ratingText =
@@ -81,21 +65,30 @@ export default function PuzzleScreen() {
   }
 
   return (
-    <div className="space-y-4">
-      <header>
-        <p className="text-xs uppercase tracking-[0.16em] text-muted2">Puzzles</p>
-        <h1 className="font-display text-3xl text-cream">Tactics Trainer</h1>
-      </header>
+    <div className="space-y-3.5">
+      {/* Arena top bar */}
+      <TopProgress
+        value={(index + 1) / queue.length}
+        exitHref="/"
+        trailing={`#${index + 1}/${queue.length}`}
+      />
 
-      {/* Rating + session progress */}
-      <div className="grid grid-cols-4 gap-2">
-        <MiniStat label="Rating" value={`${puzzleRating}`} tone="brass" />
-        <MiniStat label="Solved" value={`${session.solved}`} />
-        <MiniStat label="Streak" value={`${session.streak}`} />
-        <MiniStat label="Puzzle" value={`${index + 1}/${queue.length}`} />
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-[11px] uppercase tracking-[0.16em] text-brass">Tactics Arena</p>
+          <h1 className="font-display text-xl text-cream">{THEME_LABELS[puzzle.theme]}</h1>
+        </div>
+        <div className="flex items-center gap-3 text-xs">
+          <span className="text-muted2">
+            Rating <span className="font-semibold text-brass">{puzzleRating}</span>
+          </span>
+          <span className="text-muted2">
+            🔥 <span className="font-semibold text-cream">{session.streak}</span>
+          </span>
+        </div>
       </div>
 
-      {/* Theme filters */}
+      {/* Game-mode theme filters */}
       <div className="-mx-4 overflow-x-auto px-4">
         <div className="flex w-max gap-2">
           {THEME_OPTIONS.map((opt) => {
@@ -105,7 +98,7 @@ export default function PuzzleScreen() {
                 key={opt.value}
                 type="button"
                 onClick={() => setTheme(opt.value)}
-                className={`shrink-0 rounded-full border px-3.5 py-2 text-xs font-semibold transition-colors ${
+                className={`shrink-0 rounded-xl border px-3.5 py-2 text-xs font-semibold transition-colors ${
                   active
                     ? "border-brass bg-brass/15 text-brass tab-glow"
                     : "border-line bg-panel/50 text-muted2 hover:text-muted"
@@ -118,25 +111,29 @@ export default function PuzzleScreen() {
         </div>
       </div>
 
-      {/* Current puzzle meta */}
-      <GameCard className="flex items-center justify-between gap-3 p-3.5">
-        <div className="min-w-0">
-          <h2 className="truncate font-display text-base text-cream">{puzzle.title}</h2>
-          <p className="text-xs text-muted2">
-            {THEME_LABELS[puzzle.theme]} · difficulty {puzzle.rating}
-            {alreadySolved ? " · solved before" : ""}
-          </p>
-        </div>
-        <span className="shrink-0 rounded-full border border-brass/40 bg-brass/10 px-2.5 py-1 text-[11px] font-semibold text-brass">
-          {toMove} to move
-        </span>
-      </GameCard>
+      {/* Coach instruction (hidden once solved — reward takes over) */}
+      {status !== "correct" ? (
+        <CoachBubble tone={status === "wrong" ? "warn" : "default"}>
+          {status === "wrong" ? (
+            <span>{feedback ?? "Legal, but not the winning move. Try again."}</span>
+          ) : (
+            <span>
+              <span className="font-semibold text-cream">{toMove} to move.</span> Find the best move —
+              difficulty {puzzle.rating}.
+              {hintShown && puzzle.hint ? (
+                <span className="mt-1 block text-brass">Hint: {puzzle.hint}</span>
+              ) : null}
+            </span>
+          )}
+        </CoachBubble>
+      ) : null}
 
+      {/* Board dominates */}
       <div className="tabiya-board-wrap">
         <PuzzleBoard />
       </div>
 
-      {/* Feedback */}
+      {/* Outcome */}
       {status === "correct" ? (
         <RewardPanel
           title={`Solved — ${puzzle.answerSan ?? "correct"}`}
@@ -146,48 +143,21 @@ export default function PuzzleScreen() {
         >
           <p className="text-left text-sm text-muted">{puzzle.explanation}</p>
         </RewardPanel>
-      ) : status === "wrong" ? (
-        <div className="rounded-2xl border border-warn/45 bg-warn/10 p-4">
-          <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-warn/20 font-bold text-warn">
-              !
-            </span>
-            <span className="font-display text-base text-cream">Legal, but not the solution</span>
-          </div>
-          <p className="mt-1.5 text-sm text-muted">{feedback}</p>
-        </div>
-      ) : (
-        <GameCard className="p-4">
-          <p className="text-sm text-muted">
-            Find the best move for {toMove}. Drag a piece or tap a square to move.
-          </p>
-          {feedback ? <p className="mt-1 text-xs text-bad">{feedback}</p> : null}
-          {hintShown && puzzle.hint ? (
-            <div className="mt-3 flex items-start gap-2 rounded-xl border border-brass/30 bg-brass/10 px-3 py-2.5">
-              <span className="text-brass" aria-hidden>
-                ◆
-              </span>
-              <p className="text-sm text-brass">{puzzle.hint}</p>
-            </div>
-          ) : null}
-        </GameCard>
-      )}
+      ) : null}
 
       {/* Controls */}
       {status === "correct" ? (
         <ActionButton onClick={nextPuzzle}>Next puzzle →</ActionButton>
       ) : (
-        <div className="space-y-2.5">
-          <div className="grid grid-cols-2 gap-2.5">
-            <ActionButton onClick={showHint} disabled={hintShown} variant="secondary">
-              {hintShown ? "Hint shown" : "Show hint"}
-            </ActionButton>
-            <ActionButton onClick={resetPuzzle} variant="secondary">
-              Reset puzzle
-            </ActionButton>
-          </div>
-          <ActionButton onClick={nextPuzzle} variant="ghost">
-            Skip to next →
+        <div className="grid grid-cols-3 gap-2.5">
+          <ActionButton onClick={showHint} disabled={hintShown} variant="secondary">
+            {hintShown ? "Hint ✓" : "Hint"}
+          </ActionButton>
+          <ActionButton onClick={resetPuzzle} variant="secondary">
+            Reset
+          </ActionButton>
+          <ActionButton onClick={nextPuzzle} variant="secondary">
+            Skip →
           </ActionButton>
         </div>
       )}

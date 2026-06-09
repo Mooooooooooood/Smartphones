@@ -7,9 +7,10 @@ import dynamic from "next/dynamic";
 import { TIER0_LESSONS } from "@/content/academy/tier0";
 import { useProfileStore, lessonStatus } from "@/state/profileStore";
 import GameCard from "@/components/ui/GameCard";
-import XPBar from "@/components/ui/XPBar";
 import ActionButton from "@/components/ui/ActionButton";
 import RewardPanel from "@/components/ui/RewardPanel";
+import CoachBubble from "@/components/ui/CoachBubble";
+import TopProgress from "@/components/ui/TopProgress";
 import Skeleton from "@/components/ui/Skeleton";
 
 const LessonBoard = dynamic(() => import("@/components/LessonBoard"), {
@@ -22,7 +23,7 @@ const LETTERS = ["A", "B", "C", "D", "E"];
 function LessonLoading() {
   return (
     <div className="space-y-4">
-      <Skeleton className="h-4 w-24" />
+      <Skeleton className="h-3 w-full rounded-full" />
       <Skeleton className="h-9 w-3/4" />
       <Skeleton className="mx-auto aspect-square w-full max-w-[320px]" />
       <Skeleton className="h-20 w-full" />
@@ -86,7 +87,7 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
   const mastered = alreadyDone || justEarned !== null;
 
   function choose(i: number) {
-    if (!lesson || correct) return; // lock choices once answered correctly
+    if (!lesson || correct) return;
     setPicked(i);
     if (i !== lesson.quiz.correctIndex) setFirstTry(false);
   }
@@ -102,18 +103,18 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
 
   return (
     <div className="space-y-4 pb-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <Link href="/academy" className="text-sm text-muted">
-          ‹ Academy
-        </Link>
-        <span className="rounded-full border border-line bg-panel/60 px-2.5 py-1 text-[11px] font-semibold text-muted2">
-          Lesson {lesson.order} / {TIER0_LESSONS.length}
-        </span>
-      </div>
+      {/* Focused-stage header */}
+      <TopProgress
+        value={lesson.order / TIER0_LESSONS.length}
+        exitHref="/academy"
+        trailing={`${lesson.order}/${TIER0_LESSONS.length}`}
+      />
 
-      <header className="space-y-2">
-        <div className="flex items-start justify-between gap-3">
+      <header>
+        <p className="text-[11px] uppercase tracking-[0.16em] text-brass">
+          Tier 0 · Foundations
+        </p>
+        <div className="mt-0.5 flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h1 className="font-display text-3xl text-cream">{lesson.title}</h1>
             <p className="mt-0.5 text-sm text-muted">{lesson.subtitle}</p>
@@ -122,7 +123,6 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
             +{lesson.xpReward} XP
           </span>
         </div>
-        <XPBar value={lesson.order / TIER0_LESSONS.length} />
       </header>
 
       {lesson.fen ? (
@@ -136,7 +136,8 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
         </GameCard>
       ) : null}
 
-      <p className="text-sm leading-relaxed text-cream/90">{lesson.explanation}</p>
+      {/* Instruction as a coach bubble */}
+      <CoachBubble>{lesson.explanation}</CoachBubble>
 
       <ul className="space-y-1.5">
         {lesson.keyPoints.map((k, i) => (
@@ -151,7 +152,7 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
       <GameCard className="p-4">
         <p className="text-[11px] uppercase tracking-wider text-muted2">Checkpoint</p>
         <h2 className="mt-0.5 font-display text-lg text-cream">{lesson.quiz.question}</h2>
-        <div className="mt-3 space-y-2">
+        <div className="mt-3 space-y-2.5">
           {lesson.quiz.choices.map((c, i) => {
             const isPicked = picked === i;
             const showCorrect = picked !== null && i === lesson.quiz.correctIndex;
@@ -161,7 +162,7 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
                 key={i}
                 onClick={() => choose(i)}
                 disabled={correct}
-                className={`flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left text-sm transition-colors disabled:cursor-default ${
+                className={`flex min-h-[52px] w-full items-center gap-3 rounded-xl border px-3 py-3 text-left text-sm transition-colors disabled:cursor-default ${
                   showCorrect
                     ? "border-good/60 bg-good/15 text-cream"
                     : showWrong
@@ -170,7 +171,7 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
                 }`}
               >
                 <span
-                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border text-xs font-bold ${
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border text-xs font-bold ${
                     showCorrect
                       ? "border-good/60 text-good"
                       : showWrong
@@ -188,7 +189,7 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
           })}
         </div>
         {picked !== null && !correct ? (
-          <p className="mt-3 text-xs text-warn">Not quite — read the lesson and try again.</p>
+          <p className="mt-3 text-xs text-warn">Not quite — review the lesson and try again.</p>
         ) : null}
         {correct && !mastered ? (
           <p className="mt-3 text-xs text-good">Correct! Claim your reward below.</p>
@@ -203,13 +204,21 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
           tone="brass"
           subtitle={`${stars}★ earned${alreadyDone && justEarned === null ? " · already completed" : ""}`}
         >
+          {nextSeq ? (
+            <div className="mb-3 flex items-center justify-center gap-2 text-xs text-muted2">
+              <span>Unlocks next</span>
+              <span className="rounded-full border border-line bg-ink2 px-2 py-0.5 text-cream">
+                {nextSeq.title}
+              </span>
+            </div>
+          ) : null}
           <div className="flex gap-2">
             <ActionButton href="/academy" variant="secondary">
-              Academy
+              Path
             </ActionButton>
             {nextSeq ? (
               <ActionButton onClick={() => router.push(`/academy/${nextSeq.id}`)}>
-                Next lesson ›
+                Continue ›
               </ActionButton>
             ) : null}
           </div>
@@ -220,7 +229,7 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
             Complete lesson (+{lesson.xpReward} XP)
           </ActionButton>
           <ActionButton href="/academy" variant="secondary">
-            Back to Academy
+            Back to Path
           </ActionButton>
         </div>
       )}
