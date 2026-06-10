@@ -31,7 +31,6 @@ import StatPill from "@/components/ui/StatPill";
 import XPBar from "@/components/ui/XPBar";
 import FlameIcon from "@/components/ui/FlameIcon";
 import ClaimableChest from "@/components/ui/ClaimableChest";
-import ThemeToggle from "@/components/ui/ThemeToggle";
 import ChessBuddy from "@/components/characters/ChessBuddy";
 
 type MilestoneState = "done" | "current" | "locked";
@@ -143,14 +142,11 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-start justify-between pt-1">
-        <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-muted2">
-            {fresh ? "Welcome to" : "Welcome back to"}
-          </p>
-          <h1 className="font-display text-4xl font-semibold text-cream">Tabiya</h1>
-        </div>
-        <ThemeToggle compact />
+      <header className="pt-1">
+        <p className="text-xs uppercase tracking-[0.18em] text-muted2">
+          {fresh ? "Welcome to" : "Welcome back to"}
+        </p>
+        <h1 className="font-display text-4xl font-semibold text-cream">Tabiya</h1>
       </header>
 
       {/* Hero */}

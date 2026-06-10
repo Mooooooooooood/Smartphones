@@ -52,6 +52,11 @@
   --island-shadow: rgba(30, 41, 59, 0.18);
   --horizon: rgba(255, 255, 255, 0.5);
   --sparkle: #ffffff;
+  /* captured-piece glyph colours (board side panels) */
+  --piece-white: #ffffff;
+  --piece-white-line: #94a3b8;
+  --piece-black: #334155;
+  --piece-black-line: #1e293b;
 }
 
 /* ---------- Soft cartoon NIGHT theme ---------- */
@@ -93,6 +98,10 @@ html.dark {
   --island-shadow: rgba(0, 0, 0, 0.4);
   --horizon: rgba(124, 176, 255, 0.10);
   --sparkle: #dfeaff;
+  --piece-white: #e8eefc;
+  --piece-white-line: #7e8db0;
+  --piece-black: #94a2c2;
+  --piece-black-line: #5b6b8f;
 }
 
 html, body { height: 100%; }

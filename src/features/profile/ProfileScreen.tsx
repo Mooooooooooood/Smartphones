@@ -117,9 +117,12 @@ export default function ProfileScreen() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <p className="text-xs uppercase tracking-[0.16em] text-muted2">Profile</p>
-        <h1 className="font-display text-3xl text-cream">Player Card</h1>
+      <header className="flex items-start justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.16em] text-muted2">Profile</p>
+          <h1 className="font-display text-3xl text-cream">Player Card</h1>
+        </div>
+        <ThemeToggle compact />
       </header>
 
       {/* Player identity card */}
