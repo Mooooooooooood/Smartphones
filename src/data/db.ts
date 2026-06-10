@@ -9,6 +9,7 @@ import Dexie, { type Table } from "dexie";
  * v3: + puzzleAttempts (history) + profile.puzzleRating (Sprint 3)
  * v4: + bossResults + dailyTraining (Sprint 5)
  * v5: + rewardClaims (Sprint 5E — claimable chests)
+ * v6: + matches + profile.playRating (Sprint 7 — bot matches)
  */
 
 export interface KVRow {
@@ -23,7 +24,27 @@ export interface ProfileRow {
   lastActiveDate: string | null; // local day key, e.g. "2026-06-09"
   /** Puzzle rating (Sprint 3). Optional for rows written before v3. */
   puzzleRating?: number;
+  /** Play (bot match) rating (Sprint 7). Optional for older rows. */
+  playRating?: number;
   updatedAt: number;
+}
+
+export type MatchResult = "win" | "loss" | "draw";
+
+export interface MatchRow {
+  id?: number; // auto-incremented primary key
+  opponentId: string;
+  opponentName: string;
+  result: MatchResult;
+  reason: string; // checkmate / stalemate / draw / resignation
+  userColor: "w" | "b";
+  moves: number;
+  pgn: string;
+  xpAwarded: number;
+  ratingBefore: number;
+  ratingAfter: number;
+  startedAt: number;
+  finishedAt: number;
 }
 
 export interface LessonProgressRow {
@@ -81,6 +102,7 @@ class TabiyaDB extends Dexie {
   bossResults!: Table<BossResultRow, string>;
   dailyTraining!: Table<DailyTrainingRow, string>;
   rewardClaims!: Table<RewardClaimRow, string>;
+  matches!: Table<MatchRow, number>;
 
   constructor() {
     super("tabiya");
@@ -108,6 +130,16 @@ class TabiyaDB extends Dexie {
       bossResults: "bossId, tier",
       dailyTraining: "date",
       rewardClaims: "id",
+    });
+    this.version(6).stores({
+      kv: "key",
+      profile: "id",
+      lessonProgress: "lessonId",
+      puzzleAttempts: "++id, puzzleId, attemptedAt",
+      bossResults: "bossId, tier",
+      dailyTraining: "date",
+      rewardClaims: "id",
+      matches: "++id, finishedAt",
     });
   }
 }

@@ -49,3 +49,19 @@ export function ratingDelta(
 ): number {
   return nextRating(playerRating, puzzleRating, correct, k) - playerRating;
 }
+
+export const DEFAULT_PLAY_RATING = 400;
+
+/**
+ * Elo update for a finished match. `score` is 1 (win), 0.5 (draw), or 0 (loss).
+ * Used by the bot-match play rating.
+ */
+export function eloUpdate(
+  playerRating: number,
+  opponentRating: number,
+  score: number,
+  k = 24,
+): number {
+  const expected = expectedScore(playerRating, opponentRating);
+  return Math.max(PUZZLE_RATING_FLOOR, Math.round(playerRating + k * (score - expected)));
+}

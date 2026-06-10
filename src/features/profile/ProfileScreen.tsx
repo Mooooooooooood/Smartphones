@@ -80,11 +80,21 @@ export default function ProfileScreen() {
   const puzzleRating = useProfileStore((s) => s.puzzleRating);
   const solvedIds = useProfileStore((s) => s.solvedPuzzleIds);
   const dailyRaw = useProfileStore((s) => s.daily);
+  const playRating = useProfileStore((s) => s.playRating);
+  const matches = useProfileStore((s) => s.matches);
   const attempts = usePuzzleStore((s) => s.attempts);
 
   useEffect(() => {
     void usePuzzleStore.getState().hydrate();
   }, []);
+
+  const matchStats = {
+    played: matches.length,
+    wins: matches.filter((m) => m.result === "win").length,
+    losses: matches.filter((m) => m.result === "loss").length,
+    draws: matches.filter((m) => m.result === "draw").length,
+  };
+  const recentMatches = matches.slice(0, 4);
 
   const lvl = selectLevel(xp);
   const rank = rankForLevel(lvl.level);
@@ -222,6 +232,63 @@ export default function ProfileScreen() {
             <div className="font-display text-lg text-cream">{dailyDone}/3</div>
             <div className="text-[11px] text-muted2">{daily.bonusClaimed ? "bonus claimed" : "today"}</div>
           </div>
+        </GameCard>
+      </section>
+
+      {/* Matches */}
+      <section>
+        <SectionHeader title="Matches" />
+        <GameCard className="p-4">
+          <div className="grid grid-cols-4 gap-2 text-center">
+            <div>
+              <div className="font-display text-xl text-cream">{matchStats.played}</div>
+              <div className="text-[10px] uppercase tracking-wide text-muted2">Played</div>
+            </div>
+            <div>
+              <div className="font-display text-xl text-gooddeep">{matchStats.wins}</div>
+              <div className="text-[10px] uppercase tracking-wide text-muted2">Wins</div>
+            </div>
+            <div>
+              <div className="font-display text-xl text-muted">{matchStats.draws}</div>
+              <div className="text-[10px] uppercase tracking-wide text-muted2">Draws</div>
+            </div>
+            <div>
+              <div className="font-display text-xl text-bad">{matchStats.losses}</div>
+              <div className="text-[10px] uppercase tracking-wide text-muted2">Losses</div>
+            </div>
+          </div>
+          <div className="mt-3 flex items-center justify-between border-t border-line/70 pt-3">
+            <span className="text-sm text-muted">Play rating</span>
+            <span className="font-display text-lg text-brass">{playRating}</span>
+          </div>
+
+          {recentMatches.length > 0 ? (
+            <ul className="mt-3 space-y-1.5">
+              {recentMatches.map((m, i) => (
+                <li key={m.id ?? i} className="flex items-center justify-between text-xs">
+                  <span className="flex items-center gap-2 text-muted">
+                    <span
+                      className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
+                        m.result === "win"
+                          ? "bg-good/20 text-gooddeep"
+                          : m.result === "draw"
+                            ? "bg-ink2 text-muted"
+                            : "bg-bad/20 text-bad"
+                      }`}
+                    >
+                      {m.result === "win" ? "W" : m.result === "draw" ? "D" : "L"}
+                    </span>
+                    {m.opponentName}
+                  </span>
+                  <span className="text-muted2">{m.moves} moves</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-3 text-center text-[11px] text-muted2">
+              Play a match to start your record.
+            </p>
+          )}
         </GameCard>
       </section>
 

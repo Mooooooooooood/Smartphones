@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { levelInfo, nextStreak, todayKey, type LevelInfo } from "@/domain/progression/leveling";
-import { DEFAULT_PUZZLE_RATING, nextRating } from "@/domain/progression/rating";
+import { DEFAULT_PUZZLE_RATING, DEFAULT_PLAY_RATING, eloUpdate, nextRating } from "@/domain/progression/rating";
 import { bossById } from "@/content/academy";
 import type { AcademyState } from "@/domain/academy/progression";
 import {
@@ -22,7 +22,8 @@ import { loadPuzzleAttempts, savePuzzleAttempt } from "@/data/puzzleRepository";
 import { loadBossResults, saveBossResult } from "@/data/academyRepository";
 import { loadDailyTraining, saveDailyTraining } from "@/data/dailyRepository";
 import { loadRewardClaims, saveRewardClaim } from "@/data/rewardRepository";
-import type { BossResultRow } from "@/data/db";
+import { loadMatches, saveMatch } from "@/data/matchRepository";
+import type { BossResultRow, MatchResult, MatchRow } from "@/data/db";
 
 export interface CompletedLesson {
   stars: number;
@@ -55,6 +56,20 @@ export interface BossOutcome {
   firstClear: boolean;
 }
 
+export interface RecordMatchArgs {
+  opponentId: string;
+  opponentName: string;
+  opponentRating: number;
+  xpReward: number;
+  outcome: MatchResult;
+  reason: string;
+  userColor: "w" | "b";
+  moves: number;
+  pgn: string;
+  startedAt: number;
+  finishedAt: number;
+}
+
 interface ProfileState {
   xp: number;
   streak: number;
@@ -74,9 +89,15 @@ interface ProfileState {
   // Sprint 5E — claimable milestone reward chests
   claimedRewards: IdSet;
 
+  // Sprint 7 — bot matches
+  playRating: number;
+  matches: MatchRow[];
+
   hydrated: boolean;
 
   hydrate: () => Promise<void>;
+  /** Record a finished bot match: awards XP, updates play rating, marks daily play. Returns XP awarded. */
+  recordMatch: (args: RecordMatchArgs) => Promise<number>;
   completeLesson: (lessonId: string, xpReward: number, stars: number) => Promise<boolean>;
   recordPuzzleResult: (args: RecordPuzzleArgs) => Promise<PuzzleResult>;
   /** Record a boss attempt. Awards XP only on the first pass. */
@@ -98,6 +119,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
       streak: s.streak,
       lastActiveDate: s.lastActiveDate,
       puzzleRating: s.puzzleRating,
+      playRating: s.playRating,
       updatedAt: Date.now(),
     });
   }
@@ -125,18 +147,21 @@ export const useProfileStore = create<ProfileState>((set, get) => {
     bossResults: {},
     daily: null,
     claimedRewards: {},
+    playRating: DEFAULT_PLAY_RATING,
+    matches: [],
     hydrated: false,
 
     hydrate: async () => {
       if (get().hydrated) return;
       const today = todayKey();
-      const [profile, progress, attempts, bosses, daily, rewards] = await Promise.all([
+      const [profile, progress, attempts, bosses, daily, rewards, matches] = await Promise.all([
         loadProfile(),
         loadLessonProgress(),
         loadPuzzleAttempts(),
         loadBossResults(),
         loadDailyTraining(today),
         loadRewardClaims(),
+        loadMatches(),
       ]);
 
       const completed: CompletedMap = {};
@@ -170,10 +195,54 @@ export const useProfileStore = create<ProfileState>((set, get) => {
         bossCleared,
         bossResults,
         claimedRewards,
+        playRating: profile?.playRating ?? DEFAULT_PLAY_RATING,
+        matches,
         // Only keep the row if it belongs to today, otherwise start fresh on demand.
         daily: daily && daily.date === today ? daily : null,
         hydrated: true,
       });
+    },
+
+    recordMatch: async (m) => {
+      const s = get();
+      const score = m.outcome === "win" ? 1 : m.outcome === "draw" ? 0.5 : 0;
+      const xpAwarded =
+        m.outcome === "win"
+          ? m.xpReward
+          : m.outcome === "draw"
+            ? Math.round(m.xpReward / 2)
+            : Math.max(5, Math.round(m.xpReward * 0.2));
+      const ratingBefore = s.playRating;
+      const ratingAfter = eloUpdate(ratingBefore, m.opponentRating, score);
+      const today = todayKey();
+
+      const row: MatchRow = {
+        opponentId: m.opponentId,
+        opponentName: m.opponentName,
+        result: m.outcome,
+        reason: m.reason,
+        userColor: m.userColor,
+        moves: m.moves,
+        pgn: m.pgn,
+        xpAwarded,
+        ratingBefore,
+        ratingAfter,
+        startedAt: m.startedAt,
+        finishedAt: m.finishedAt,
+      };
+
+      set({
+        xp: s.xp + xpAwarded,
+        streak: nextStreak(s.lastActiveDate, s.streak, today),
+        lastActiveDate: today,
+        playRating: ratingAfter,
+      });
+
+      await Promise.all([persistProfile(), saveMatch(row)]);
+      const matches = await loadMatches();
+      set({ matches });
+      await touchDaily("play");
+      return xpAwarded;
     },
 
     completeLesson: async (lessonId, xpReward, stars) => {
