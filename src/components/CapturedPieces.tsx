@@ -4,7 +4,11 @@ import { useGameStore } from "@/state/gameStore";
 import { GLYPH, VALUE } from "@/features/play/pieceGlyphs";
 import type { Color } from "chess.js";
 
-export default function CapturedPieces({ side }: { side: Color }) {
+/**
+ * One side's captured material with a label and a friendly "+N" advantage pill.
+ * `side` is the colour doing the capturing (so it shows the pieces it has won).
+ */
+export default function CapturedPieces({ side, label }: { side: Color; label?: string }) {
   const snap = useGameStore((s) => s.snap);
 
   const captured = side === "w" ? snap.capturedByWhite : snap.capturedByBlack;
@@ -20,22 +24,33 @@ export default function CapturedPieces({ side }: { side: Color }) {
   const sorted = [...captured].sort((a, b) => VALUE[b] - VALUE[a]);
 
   return (
-    <div className="flex h-6 items-center gap-1 px-1">
-      <div className="flex items-center text-xl leading-none">
-        {sorted.map((p, i) => (
-          <span
-            key={i}
-            style={{
-              color: pieceColor === "w" ? "var(--piece-white)" : "var(--piece-black)",
-              WebkitTextStroke:
-                pieceColor === "w" ? "1px var(--piece-white-line)" : "0.7px var(--piece-black-line)",
-            }}
-          >
-            {GLYPH[p]}
-          </span>
-        ))}
+    <div className="flex h-6 items-center gap-2 px-1">
+      {label ? (
+        <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted2">{label}</span>
+      ) : null}
+      <div className="flex min-w-0 flex-1 items-center text-lg leading-none">
+        {sorted.length === 0 ? (
+          <span className="text-[11px] text-muted2/70">—</span>
+        ) : (
+          sorted.map((p, i) => (
+            <span
+              key={i}
+              style={{
+                color: pieceColor === "w" ? "var(--piece-white)" : "var(--piece-black)",
+                WebkitTextStroke:
+                  pieceColor === "w" ? "1px var(--piece-white-line)" : "0.7px var(--piece-black-line)",
+              }}
+            >
+              {GLYPH[p]}
+            </span>
+          ))
+        )}
       </div>
-      {lead > 0 && <span className="text-xs font-semibold text-muted">+{lead}</span>}
+      {lead > 0 ? (
+        <span className="shrink-0 rounded-full bg-good/15 px-1.5 py-0.5 text-[10px] font-bold text-gooddeep">
+          +{lead}
+        </span>
+      ) : null}
     </div>
   );
 }

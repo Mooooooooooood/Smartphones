@@ -11,6 +11,8 @@ export interface Opponent {
   personality: BotPersonality;
   line: string;
   surface: string; // soft card surface class
+  /** Short post-match reactions, keyed by the USER's result. */
+  reactions: { win: string; loss: string; draw: string };
 }
 
 /** Three friendly cartoon bot opponents. All play legal chess.js moves only. */
@@ -25,6 +27,11 @@ export const OPPONENTS: Opponent[] = [
     personality: "random",
     line: "Yay, my first match! Let's just have fun.",
     surface: "bg-surf-blue",
+    reactions: {
+      win: "Great job! You found the checkmate! 🎉",
+      loss: "Nice try — let's practice again!",
+      draw: "So close! That was a fun one!",
+    },
   },
   {
     id: "bramble",
@@ -36,6 +43,11 @@ export const OPPONENTS: Opponent[] = [
     personality: "cautious",
     line: "Slow and steady. I like a tidy board.",
     surface: "bg-surf-peach",
+    reactions: {
+      win: "Well played — solid, steady technique.",
+      loss: "Good effort. Review it and go again.",
+      draw: "A balanced game. Nicely held.",
+    },
   },
   {
     id: "gallop",
@@ -47,6 +59,11 @@ export const OPPONENTS: Opponent[] = [
     personality: "tactical",
     line: "I love a cheeky fork — watch out!",
     surface: "bg-surf-mint",
+    reactions: {
+      win: "Whoa, you out-tricked me! 😄",
+      loss: "Gotcha! Keep an eye on those forks 😉",
+      draw: "A tricky draw — I'll get you next time!",
+    },
   },
 ];
 

@@ -13,7 +13,12 @@ export type MatchOutcome = "win" | "loss" | "draw";
 export interface MatchResultState {
   outcome: MatchOutcome;
   reason: string;
+  moves: number;
   xpAwarded: number;
+  ratingBefore: number;
+  ratingAfter: number;
+  /** True until the reward has been computed/persisted. */
+  pending: boolean;
 }
 
 interface GameState {
@@ -68,7 +73,9 @@ export const useGameStore = create<GameState>((set, get) => {
 
   function isUserTurn(): boolean {
     const s = get();
-    return s.mode !== "bot" || s.game.turn() === s.userColor;
+    if (s.mode !== "bot") return true;
+    if (s.result) return false; // match is over — no more input
+    return s.game.turn() === s.userColor;
   }
 
   async function finalizeMatch(forced?: { outcome: MatchOutcome; reason: string }) {
@@ -97,9 +104,20 @@ export const useGameStore = create<GameState>((set, get) => {
       }
     }
 
-    set({ matchSaved: true, matchEndTime: Date.now(), botThinking: false });
+    const moves = s.snap.history.length;
+    const before = useProfileStore.getState().playRating;
+    // Show the recap immediately; fill in the reward once persisted.
+    set({
+      matchSaved: true,
+      matchEndTime: Date.now(),
+      botThinking: false,
+      selected: null,
+      targets: [],
+      result: { outcome, reason, moves, xpAwarded: 0, ratingBefore: before, ratingAfter: before, pending: true },
+    });
+
     const opp = opponentById(s.opponentId);
-    const xpAwarded = await useProfileStore.getState().recordMatch({
+    const reward = await useProfileStore.getState().recordMatch({
       opponentId: s.opponentId ?? "bot",
       opponentName: opp?.name ?? "Bot",
       opponentRating: opp?.rating ?? 400,
@@ -107,12 +125,22 @@ export const useGameStore = create<GameState>((set, get) => {
       outcome,
       reason,
       userColor: s.userColor,
-      moves: s.snap.history.length,
+      moves,
       pgn: s.snap.pgn,
       startedAt: s.matchStartTime ?? Date.now(),
       finishedAt: Date.now(),
     });
-    set({ result: { outcome, reason, xpAwarded } });
+    set({
+      result: {
+        outcome,
+        reason,
+        moves,
+        xpAwarded: reward.xpAwarded,
+        ratingBefore: reward.ratingBefore,
+        ratingAfter: reward.ratingAfter,
+        pending: false,
+      },
+    });
   }
 
   function playBotMove() {

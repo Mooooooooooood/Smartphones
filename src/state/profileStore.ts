@@ -56,6 +56,12 @@ export interface BossOutcome {
   firstClear: boolean;
 }
 
+export interface MatchReward {
+  xpAwarded: number;
+  ratingBefore: number;
+  ratingAfter: number;
+}
+
 export interface RecordMatchArgs {
   opponentId: string;
   opponentName: string;
@@ -96,8 +102,8 @@ interface ProfileState {
   hydrated: boolean;
 
   hydrate: () => Promise<void>;
-  /** Record a finished bot match: awards XP, updates play rating, marks daily play. Returns XP awarded. */
-  recordMatch: (args: RecordMatchArgs) => Promise<number>;
+  /** Record a finished bot match: awards XP, updates play rating, marks daily play. */
+  recordMatch: (args: RecordMatchArgs) => Promise<MatchReward>;
   completeLesson: (lessonId: string, xpReward: number, stars: number) => Promise<boolean>;
   recordPuzzleResult: (args: RecordPuzzleArgs) => Promise<PuzzleResult>;
   /** Record a boss attempt. Awards XP only on the first pass. */
@@ -242,7 +248,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
       const matches = await loadMatches();
       set({ matches });
       await touchDaily("play");
-      return xpAwarded;
+      return { xpAwarded, ratingBefore, ratingAfter };
     },
 
     completeLesson: async (lessonId, xpReward, stars) => {
