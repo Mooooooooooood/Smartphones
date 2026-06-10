@@ -94,6 +94,8 @@ export default function Dashboard() {
   const solvedIds = useProfileStore((s) => s.solvedPuzzleIds);
   const dailyRaw = useProfileStore((s) => s.daily);
   const claimDailyBonus = useProfileStore((s) => s.claimDailyBonus);
+  const playRating = useProfileStore((s) => s.playRating);
+  const matches = useProfileStore((s) => s.matches);
   const attempts = usePuzzleStore((s) => s.attempts);
 
   useEffect(() => {
@@ -118,6 +120,8 @@ export default function Dashboard() {
   const doneCount = dailyDoneCount(daily);
   const allDone = dailyAllComplete(daily);
   const claimable = dailyBonusClaimable(daily);
+  const lastMatch = matches[0];
+  const playTaskDone = daily.playTaskDone;
 
   const missions = [
     { key: "academy", href: step.href, glyph: "♟", label: "Academy", done: daily.academyTaskDone, surface: "bg-surf-blue" },
@@ -291,6 +295,39 @@ export default function Dashboard() {
             </div>
             <span className="shrink-0 rounded-full border border-lav/50 bg-panel px-3 py-1.5 text-xs font-bold text-lavdeep">
               Play ›
+            </span>
+          </div>
+        </Link>
+      </section>
+
+      {/* Friendly match */}
+      <section>
+        <SectionHeader eyebrow="Play" title={playTaskDone ? "Friendly Match" : "Daily Match"} />
+        <Link href="/play" className="block transition-transform active:scale-[0.99]">
+          <div
+            className={`relative flex items-center gap-3 overflow-hidden rounded-[1.25rem] border p-4 ${
+              playTaskDone ? "border-line bg-panel" : "border-brass/40 bg-surf-blue tab-glow"
+            }`}
+          >
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-line bg-panel">
+              <ChessBuddy piece="rook" size={46} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h3 className="font-display text-base text-cream">
+                  {playTaskDone ? "Play a friendly match" : "Play your Daily Match"}
+                </h3>
+              </div>
+              <p className="truncate text-xs text-muted2">
+                {lastMatch
+                  ? `Last: ${lastMatch.result === "win" ? "Won vs" : lastMatch.result === "draw" ? "Drew vs" : "Lost to"} ${lastMatch.opponentName.split(" ")[0]}`
+                  : "Beat Pip, Bramble or Gallop"}
+                {" · Rating "}
+                <span className="font-semibold text-brass">{playRating}</span>
+              </p>
+            </div>
+            <span className="shrink-0 rounded-full border border-brassdeep bg-brass px-3.5 py-2 text-xs font-bold text-[color:var(--color-on-accent)] shadow-[0_3px_0_0_var(--color-brassdeep)]">
+              {playTaskDone ? "Play ›" : "Start ›"}
             </span>
           </div>
         </Link>

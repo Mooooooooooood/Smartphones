@@ -6,6 +6,7 @@ import { chooseBotMove } from "@/domain/chess/bot";
 import type { GameSnapshot } from "@/domain/chess/types";
 import { loadActiveGame, saveActiveGame } from "@/data/gameRepository";
 import { opponentById } from "@/content/opponents";
+import { resolveSide, type SideChoice } from "@/domain/chess/side";
 import { useProfileStore } from "@/state/profileStore";
 
 export type PlayMode = "idle" | "practice" | "bot";
@@ -49,7 +50,7 @@ interface GameState {
   undo: () => void;
   hydrate: () => Promise<void>;
 
-  startMatch: (opponentId: string) => void;
+  startMatch: (opponentId: string, side?: SideChoice) => void;
   startPractice: () => void;
   exitMatch: () => void;
   resignMatch: () => void;
@@ -299,13 +300,14 @@ export const useGameStore = create<GameState>((set, get) => {
       }
     },
 
-    startMatch: (opponentId) => {
+    startMatch: (opponentId, side = "w") => {
       clearBotTimer();
+      const userColor = resolveSide(side);
       set({
         ...freshMatchState(),
         mode: "bot",
         opponentId,
-        userColor: "w",
+        userColor,
         botThinking: false,
         result: null,
         matchStartTime: Date.now(),
@@ -313,6 +315,8 @@ export const useGameStore = create<GameState>((set, get) => {
         matchSaved: false,
       });
       void saveActiveGame(get().snap.pgn);
+      // If the user is Black, the bot (White) opens with the first move.
+      if (userColor === "b") scheduleBot();
     },
 
     startPractice: () => {

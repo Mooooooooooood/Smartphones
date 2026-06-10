@@ -6,6 +6,7 @@
  */
 import { Chess } from "chess.js";
 import { chooseBotMove, type BotPersonality } from "../src/domain/chess/bot.ts";
+import { resolveSide } from "../src/domain/chess/side.ts";
 
 let pass = 0;
 let fail = 0;
@@ -79,6 +80,23 @@ for (const p of personalities) {
   const fen = "4k3/8/8/3q4/4P3/8/8/4K3 w - - 0 1"; // exd5 wins the queen
   const mv = chooseBotMove(fen, "tactical", () => 0.5);
   ok("tactical grabs the hanging queen (exd5)", Boolean(mv && mv.from === "e4" && mv.to === "d5"));
+}
+
+// Side selection (color choice).
+ok("resolveSide white", resolveSide("w") === "w");
+ok("resolveSide black", resolveSide("b") === "b");
+ok("resolveSide random → white (rng<0.5)", resolveSide("random", () => 0.2) === "w");
+ok("resolveSide random → black (rng>=0.5)", resolveSide("random", () => 0.8) === "b");
+
+// When the user is Black, the bot opens as White: a legal first move exists.
+{
+  const start = new Chess().fen();
+  const opening = chooseBotMove(start, "random");
+  const legalOpenings = new Chess().moves({ verbose: true });
+  ok(
+    "bot makes a legal first move as White",
+    Boolean(opening && legalOpenings.some((m) => m.from === opening.from && m.to === opening.to)),
+  );
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

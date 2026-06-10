@@ -263,26 +263,40 @@ export default function ProfileScreen() {
           </div>
 
           {recentMatches.length > 0 ? (
-            <ul className="mt-3 space-y-1.5">
-              {recentMatches.map((m, i) => (
-                <li key={m.id ?? i} className="flex items-center justify-between text-xs">
-                  <span className="flex items-center gap-2 text-muted">
-                    <span
-                      className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
-                        m.result === "win"
-                          ? "bg-good/20 text-gooddeep"
-                          : m.result === "draw"
-                            ? "bg-ink2 text-muted"
-                            : "bg-bad/20 text-bad"
-                      }`}
-                    >
-                      {m.result === "win" ? "W" : m.result === "draw" ? "D" : "L"}
+            <ul className="mt-3 space-y-2">
+              {recentMatches.map((m, i) => {
+                const delta = m.ratingAfter - m.ratingBefore;
+                return (
+                  <li key={m.id ?? i} className="flex items-center justify-between gap-2 rounded-xl border border-line bg-ink2/50 px-2.5 py-2 text-xs">
+                    <span className="flex min-w-0 items-center gap-2 text-muted">
+                      <span
+                        className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
+                          m.result === "win"
+                            ? "bg-good/20 text-gooddeep"
+                            : m.result === "draw"
+                              ? "bg-ink2 text-muted"
+                              : "bg-bad/20 text-bad"
+                        }`}
+                      >
+                        {m.result === "win" ? "W" : m.result === "draw" ? "D" : "L"}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate text-cream">{m.opponentName}</span>
+                        <span className="text-[10px] text-muted2">
+                          as {m.userColor === "w" ? "White" : "Black"} · {m.moves} moves
+                        </span>
+                      </span>
                     </span>
-                    {m.opponentName}
-                  </span>
-                  <span className="text-muted2">{m.moves} moves</span>
-                </li>
-              ))}
+                    <span className="shrink-0 text-right">
+                      <span className={`block font-semibold ${delta >= 0 ? "text-gooddeep" : "text-bad"}`}>
+                        {delta >= 0 ? "+" : ""}
+                        {delta}
+                      </span>
+                      <span className="text-[10px] text-brass">+{m.xpAwarded} XP</span>
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
           ) : (
             <p className="mt-3 text-center text-[11px] text-muted2">

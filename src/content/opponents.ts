@@ -13,6 +13,8 @@ export interface Opponent {
   surface: string; // soft card surface class
   /** Short post-match reactions, keyed by the USER's result. */
   reactions: { win: string; loss: string; draw: string };
+  /** Suggested starting opponent for beginners. */
+  recommended?: boolean;
 }
 
 /** Three friendly cartoon bot opponents. All play legal chess.js moves only. */
@@ -32,6 +34,7 @@ export const OPPONENTS: Opponent[] = [
       loss: "Nice try — let's practice again!",
       draw: "So close! That was a fun one!",
     },
+    recommended: true,
   },
   {
     id: "bramble",

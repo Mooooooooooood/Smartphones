@@ -16,6 +16,7 @@ import { BoardSkeleton } from "@/components/ui/Skeleton";
 import type { Color, GameStatus } from "@/domain/chess/types";
 import type { MatchResultState } from "@/state/gameStore";
 import type { Opponent } from "@/content/opponents";
+import type { SideChoice } from "@/domain/chess/side";
 
 const Board = dynamic(() => import("@/components/Board"), {
   ssr: false,
@@ -40,7 +41,7 @@ function reasonText(reason: string): string {
 
 /* ---------- opponent selection ---------- */
 
-function OpponentSelect({ onStart, onPractice }: { onStart: (id: string) => void; onPractice: () => void }) {
+function OpponentSelect({ onChoose, onPractice }: { onChoose: (id: string) => void; onPractice: () => void }) {
   return (
     <div className="space-y-4">
       <header>
@@ -51,8 +52,13 @@ function OpponentSelect({ onStart, onPractice }: { onStart: (id: string) => void
 
       <div className="space-y-3">
         {OPPONENTS.map((o) => (
-          <div key={o.id} className={`flex items-center gap-3 rounded-2xl border border-line p-3.5 ${o.surface}`}>
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-line bg-panel">
+          <button
+            key={o.id}
+            type="button"
+            onClick={() => onChoose(o.id)}
+            className={`flex w-full items-center gap-3 rounded-2xl border border-line p-3.5 text-left transition-transform active:scale-[0.99] ${o.surface}`}
+          >
+            <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-line bg-panel">
               <ChessBuddy piece={o.piece} size={52} />
             </div>
             <div className="min-w-0 flex-1">
@@ -61,18 +67,19 @@ function OpponentSelect({ onStart, onPractice }: { onStart: (id: string) => void
                 <span className="shrink-0 rounded-full border border-line bg-panel px-2 py-0.5 text-[10px] font-semibold text-muted2">
                   ~{o.rating}
                 </span>
+                {o.recommended ? (
+                  <span className="shrink-0 rounded-full border border-good/40 bg-good/15 px-2 py-0.5 text-[9px] font-bold uppercase text-gooddeep">
+                    Start here
+                  </span>
+                ) : null}
               </div>
               <p className="text-[11px] font-semibold text-muted">{o.level} · +{o.xpReward} XP</p>
               <p className="mt-0.5 truncate text-xs text-muted2">{o.line}</p>
             </div>
-            <button
-              type="button"
-              onClick={() => onStart(o.id)}
-              className="shrink-0 rounded-full border border-brassdeep bg-brass px-3.5 py-2 text-xs font-bold text-[color:var(--color-on-accent)] shadow-[0_3px_0_0_var(--color-brassdeep)] active:translate-y-0.5"
-            >
-              Play ›
-            </button>
-          </div>
+            <span className="shrink-0 rounded-full border border-brassdeep bg-brass px-3 py-2 text-xs font-bold text-[color:var(--color-on-accent)] shadow-[0_3px_0_0_var(--color-brassdeep)]">
+              ›
+            </span>
+          </button>
         ))}
       </div>
 
@@ -90,6 +97,75 @@ function OpponentSelect({ onStart, onPractice }: { onStart: (id: string) => void
         </div>
         <span className="shrink-0 text-muted2">›</span>
       </button>
+    </div>
+  );
+}
+
+/* ---------- match setup / intro ---------- */
+
+const SIDES: { value: SideChoice; label: string; sub: string; glyph: string }[] = [
+  { value: "w", label: "White", sub: "Move first", glyph: "♙" },
+  { value: "b", label: "Black", sub: "Opponent moves first", glyph: "♟" },
+  { value: "random", label: "Random", sub: "Surprise me", glyph: "⁇" },
+];
+
+function MatchSetup({
+  opponent,
+  onStart,
+  onBack,
+}: {
+  opponent: Opponent;
+  onStart: (side: SideChoice) => void;
+  onBack: () => void;
+}) {
+  const [side, setSide] = useState<SideChoice>("w");
+  return (
+    <div className="space-y-4">
+      <button onClick={onBack} className="text-sm text-muted">
+        ‹ Opponents
+      </button>
+
+      <GameCard variant="accent" glow className="p-5 text-center">
+        <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full border border-line bg-surf-blue">
+          <ChessBuddy piece={opponent.piece} size={76} />
+        </div>
+        <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-brass">You vs</p>
+        <h1 className="font-display text-2xl text-cream">{opponent.name}</h1>
+        <p className="mt-1 text-sm text-muted">&ldquo;{opponent.line}&rdquo;</p>
+        <div className="mt-2 flex items-center justify-center gap-2 text-xs text-muted2">
+          <span className="rounded-full border border-line bg-panel px-2 py-0.5">~{opponent.rating}</span>
+          <span className="rounded-full border border-brass/40 bg-brass/10 px-2 py-0.5 font-semibold text-brass">
+            Win = +{opponent.xpReward} XP
+          </span>
+        </div>
+      </GameCard>
+
+      <div>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted2">Choose your side</p>
+        <div className="grid grid-cols-3 gap-2.5">
+          {SIDES.map((s) => {
+            const active = side === s.value;
+            return (
+              <button
+                key={s.value}
+                type="button"
+                onClick={() => setSide(s.value)}
+                className={`flex flex-col items-center gap-1 rounded-2xl border p-3 text-center transition-colors ${
+                  active ? "border-brass bg-brass/15 tab-glow" : "border-line bg-panel"
+                }`}
+              >
+                <span className={`text-2xl ${active ? "text-brass" : "text-muted"}`} aria-hidden>
+                  {s.glyph}
+                </span>
+                <span className="text-xs font-bold text-cream">{s.label}</span>
+                <span className="text-[10px] leading-tight text-muted2">{s.sub}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <ActionButton onClick={() => onStart(side)}>Start match →</ActionButton>
     </div>
   );
 }
@@ -187,6 +263,7 @@ export default function PlayScreen() {
   const resignMatch = useGameStore((s) => s.resignMatch);
 
   const [flip, setFlip] = useState(false);
+  const [setupId, setSetupId] = useState<string | null>(null);
 
   useEffect(() => {
     void useGameStore.getState().hydrate();
@@ -208,7 +285,20 @@ export default function PlayScreen() {
   }, [notice, clearNotice]);
 
   if (mode === "idle") {
-    return <OpponentSelect onStart={startMatch} onPractice={startPractice} />;
+    const setupOpponent = setupId ? opponentById(setupId) : undefined;
+    if (setupOpponent) {
+      return (
+        <MatchSetup
+          opponent={setupOpponent}
+          onBack={() => setSetupId(null)}
+          onStart={(side) => {
+            setSetupId(null);
+            startMatch(setupOpponent.id, side);
+          }}
+        />
+      );
+    }
+    return <OpponentSelect onChoose={setSetupId} onPractice={startPractice} />;
   }
 
   const opponent = opponentById(opponentId);
