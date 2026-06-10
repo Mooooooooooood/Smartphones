@@ -128,6 +128,7 @@ export const useGameStore = create<GameState>((set, get) => {
       userColor: s.userColor,
       moves,
       pgn: s.snap.pgn,
+      sans: s.snap.history.map((h) => h.san),
       startedAt: s.matchStartTime ?? Date.now(),
       finishedAt: Date.now(),
     });

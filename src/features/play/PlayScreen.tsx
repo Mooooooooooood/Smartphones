@@ -185,11 +185,13 @@ function StatPill({ label, value, tone = "cream" }: { label: string; value: stri
 function MatchRecap({
   result,
   opponent,
+  reviewHref,
   onRematch,
   onChange,
 }: {
   result: MatchResultState;
   opponent: Opponent | undefined;
+  reviewHref?: string;
   onRematch: () => void;
   onChange: () => void;
 }) {
@@ -211,11 +213,14 @@ function MatchRecap({
       </div>
       <p className="mt-2 text-[11px] text-muted2">Match ended {reasonText(result.reason)}</p>
       <div className="mt-4 space-y-2">
+        {reviewHref ? <ActionButton href={reviewHref}>🔍 Review game</ActionButton> : null}
         <div className="grid grid-cols-2 gap-2">
           <ActionButton onClick={onChange} variant="secondary">
             New opponent
           </ActionButton>
-          <ActionButton onClick={onRematch}>Rematch ›</ActionButton>
+          <ActionButton onClick={onRematch} variant="secondary">
+            Rematch ›
+          </ActionButton>
         </div>
         <ActionButton href="/" variant="ghost">
           Continue training →
@@ -255,6 +260,7 @@ export default function PlayScreen() {
   const opponentId = useGameStore((s) => s.opponentId);
   const userColor = useGameStore((s) => s.userColor);
   const userMoveCount = useGameStore((s) => s.userMoveCount);
+  const latestMatchId = useProfileStore((s) => s.matches[0]?.id);
   const clearNotice = useGameStore((s) => s.clearNotice);
 
   const startMatch = useGameStore((s) => s.startMatch);
@@ -384,6 +390,7 @@ export default function PlayScreen() {
         <MatchRecap
           result={result}
           opponent={opponent}
+          reviewHref={!result.pending && latestMatchId ? `/play/review?id=${latestMatchId}` : undefined}
           onRematch={() => startMatch(opponentId!)}
           onChange={exitMatch}
         />

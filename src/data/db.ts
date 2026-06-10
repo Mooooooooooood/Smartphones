@@ -40,6 +40,8 @@ export interface MatchRow {
   userColor: "w" | "b";
   moves: number;
   pgn: string;
+  /** SAN move list for reliable replay (Sprint 9). Optional for older rows. */
+  sans?: string[];
   xpAwarded: number;
   ratingBefore: number;
   ratingAfter: number;

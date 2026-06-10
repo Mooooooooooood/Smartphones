@@ -17,3 +17,12 @@ export async function loadMatches(): Promise<MatchRow[]> {
     return [];
   }
 }
+
+/** A single match by its id, or null if not found / unavailable. */
+export async function loadMatch(id: number): Promise<MatchRow | null> {
+  try {
+    return (await getDb().matches.get(id)) ?? null;
+  } catch {
+    return null;
+  }
+}

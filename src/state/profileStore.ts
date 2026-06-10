@@ -72,6 +72,7 @@ export interface RecordMatchArgs {
   userColor: "w" | "b";
   moves: number;
   pgn: string;
+  sans: string[];
   startedAt: number;
   finishedAt: number;
 }
@@ -230,6 +231,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
         userColor: m.userColor,
         moves: m.moves,
         pgn: m.pgn,
+        sans: m.sans,
         xpAwarded,
         ratingBefore,
         ratingAfter,

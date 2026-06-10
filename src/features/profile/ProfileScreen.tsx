@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { useProfileStore, selectLevel, puzzlesSolvedCount, academyStateFrom } from "@/state/profileStore";
 import { usePuzzleStore, overallAccuracy } from "@/state/puzzleStore";
 import { rankForLevel } from "@/domain/progression/rank";
@@ -266,8 +267,9 @@ export default function ProfileScreen() {
             <ul className="mt-3 space-y-2">
               {recentMatches.map((m, i) => {
                 const delta = m.ratingAfter - m.ratingBefore;
-                return (
-                  <li key={m.id ?? i} className="flex items-center justify-between gap-2 rounded-xl border border-line bg-ink2/50 px-2.5 py-2 text-xs">
+                const replayable = Boolean(m.id && ((m.sans && m.sans.length) || m.pgn));
+                const inner = (
+                  <>
                     <span className="flex min-w-0 items-center gap-2 text-muted">
                       <span
                         className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
@@ -287,13 +289,29 @@ export default function ProfileScreen() {
                         </span>
                       </span>
                     </span>
-                    <span className="shrink-0 text-right">
-                      <span className={`block font-semibold ${delta >= 0 ? "text-gooddeep" : "text-bad"}`}>
-                        {delta >= 0 ? "+" : ""}
-                        {delta}
+                    <span className="flex shrink-0 items-center gap-2 text-right">
+                      <span>
+                        <span className={`block font-semibold ${delta >= 0 ? "text-gooddeep" : "text-bad"}`}>
+                          {delta >= 0 ? "+" : ""}
+                          {delta}
+                        </span>
+                        <span className="text-[10px] text-brass">+{m.xpAwarded} XP</span>
                       </span>
-                      <span className="text-[10px] text-brass">+{m.xpAwarded} XP</span>
+                      {replayable ? <span className="text-brass">›</span> : null}
                     </span>
+                  </>
+                );
+                const cls =
+                  "flex items-center justify-between gap-2 rounded-xl border border-line bg-ink2/50 px-2.5 py-2 text-xs";
+                return (
+                  <li key={m.id ?? i}>
+                    {replayable ? (
+                      <Link href={`/play/review?id=${m.id}`} className={`${cls} transition-transform active:scale-[0.99]`}>
+                        {inner}
+                      </Link>
+                    ) : (
+                      <div className={cls}>{inner}</div>
+                    )}
                   </li>
                 );
               })}

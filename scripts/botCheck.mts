@@ -7,6 +7,7 @@
 import { Chess } from "chess.js";
 import { chooseBotMove, type BotPersonality } from "../src/domain/chess/bot.ts";
 import { resolveSide } from "../src/domain/chess/side.ts";
+import { buildReplay, coachComment } from "../src/domain/chess/replay.ts";
 
 let pass = 0;
 let fail = 0;
@@ -98,6 +99,44 @@ ok("resolveSide random → black (rng>=0.5)", resolveSide("random", () => 0.8) =
     Boolean(opening && legalOpenings.some((m) => m.from === opening.from && m.to === opening.to)),
   );
 }
+
+// ---- Match replay reconstruction ----
+{
+  // Build a short game and replay it from its SAN list.
+  const g = new Chess();
+  const sans = ["e4", "e5", "Nf3", "Nc6", "Bb5"];
+  for (const s of sans) g.move(s);
+  const finalFen = g.fen();
+
+  const frames = buildReplay({ sans });
+  ok("replay frames = moves + 1", frames !== null && frames.length === sans.length + 1);
+  ok("replay frame 0 is the start position", frames !== null && frames[0].fen === new Chess().fen());
+  ok("replay last frame matches final position", frames !== null && frames[frames.length - 1].fen === finalFen);
+
+  // Every frame is a legal/loadable position.
+  let allLoad = true;
+  for (const f of frames ?? []) {
+    try {
+      new Chess(f.fen);
+    } catch {
+      allLoad = false;
+    }
+  }
+  ok("every replay frame is a valid position", allLoad);
+
+  // PGN fallback yields the same number of frames.
+  const fromPgn = buildReplay({ pgn: g.pgn() });
+  ok("replay from PGN works", fromPgn !== null && fromPgn.length === sans.length + 1);
+
+  // Coach comment for a capture/check exists and is non-empty (no engine claims).
+  const checkmate = buildReplay({ sans: ["f3", "e5", "g4", "Qh4#"] });
+  ok("mate frame gets a finishing comment", Boolean(checkmate && coachComment(checkmate[checkmate.length - 1]).text.length > 0));
+}
+
+// Old/empty matches are handled safely (no crash, returns null).
+ok("empty input → null", buildReplay({}) === null);
+ok("empty sans → null", buildReplay({ sans: [] }) === null);
+ok("bad pgn → null", buildReplay({ pgn: "not a real pgn @@@" }) === null);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail > 0) process.exit(1);
