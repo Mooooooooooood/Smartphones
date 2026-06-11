@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test:rules": "npx --yes tsx scripts/chessRulesCheck.mts",
-    "test:bot": "npx --yes tsx scripts/botCheck.mts"
+    "test:bot": "npx --yes tsx scripts/botCheck.mts",
+    "test:pwa": "npx --yes tsx scripts/pwaCheck.mts"
   },
   "dependencies": {
     "chess.js": "^1.4.0",

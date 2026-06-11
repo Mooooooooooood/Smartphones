@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7cc0ff"/>
+      <stop offset="1" stop-color="#4f9bf5"/>
+    </linearGradient>
+  </defs>
+  <!-- full-bleed sky background -->
+  <rect x="0" y="0" width="512" height="512" fill="url(#sky)"/>
+  <!-- soft clouds -->
+  <g fill="#ffffff" opacity="0.85">
+    <ellipse cx="120" cy="430" rx="70" ry="26"/>
+    <ellipse cx="180" cy="438" rx="60" ry="22"/>
+    <ellipse cx="400" cy="392" rx="62" ry="22"/>
+    <ellipse cx="350" cy="398" rx="46" ry="18"/>
+  </g>
+  <!-- sparkles -->
+  <g fill="#fde68a">
+    <path d="M398 120 l8 22 22 8 -22 8 -8 22 -8 -22 -22 -8 22 -8 z"/>
+    <circle cx="120" cy="150" r="7"/>
+  </g>
+  <!-- Pip the pawn -->
+  <g stroke="#2a4a7a" stroke-width="9" stroke-linejoin="round">
+    <path d="M150 388 C150 320 196 296 256 296 C316 296 362 320 362 388 Z" fill="#ffffff"/>
+    <ellipse cx="256" cy="388" rx="118" ry="22" fill="#ffffff"/>
+    <circle cx="256" cy="196" r="74" fill="#ffffff"/>
+  </g>
+  <!-- friendly face -->
+  <g fill="#2a4a7a">
+    <circle cx="232" cy="192" r="9"/>
+    <circle cx="280" cy="192" r="9"/>
+  </g>
+  <path d="M236 214 Q256 230 276 214" fill="none" stroke="#2a4a7a" stroke-width="8" stroke-linecap="round"/>
+  <g fill="#fda4af" opacity="0.6">
+    <circle cx="214" cy="210" r="9"/>
+    <circle cx="298" cy="210" r="9"/>
+  </g>
+</svg>
