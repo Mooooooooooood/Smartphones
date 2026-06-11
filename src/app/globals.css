@@ -78,6 +78,12 @@
   --glow-accent: rgba(77, 141, 255, 0.55);
   --glow-reward: rgba(247, 189, 63, 0.6);
   --skeleton-shine: rgba(150, 170, 255, 0.14);
+  /* Bronze outer shell */
+  --bronze-1: #c07e34;
+  --bronze-2: #8a531f;
+  --bronze-hi: #e6a85a;
+  /* Section-tab default hue */
+  --tab-bg: #2f64c4;
 
   /* Chessboard squares (theme-aware via inline var()) */
   --board-light: #dfe7fb;
@@ -141,6 +147,10 @@ html.dark {
   --sparkle: #fff3c4;
   --glow-accent: rgba(77, 141, 255, 0.6);
   --glow-reward: rgba(255, 201, 74, 0.6);
+  --bronze-1: #a8692a;
+  --bronze-2: #6e3f16;
+  --bronze-hi: #cc8f46;
+  --tab-bg: #244e9e;
 
   --board-light: #c6d2f2;
   --board-dark: #5f7fce;
@@ -252,6 +262,47 @@ body::before {
   border-radius: 1px;
   z-index: 2;
 }
+
+/* ---------- Bronze outer shell (frames the whole screen) ---------- */
+.px-shell {
+  position: relative;
+  border: 4px solid var(--bronze-1);
+  border-radius: 9px;
+  background:
+    linear-gradient(180deg, var(--bronze-1), var(--bronze-2)) border-box;
+  box-shadow:
+    0 0 0 3px var(--px-edge),
+    inset 0 0 0 2px var(--bronze-hi),
+    inset 0 0 0 6px var(--px-edge);
+}
+/* Decorative corner bolt for the shell. */
+.px-bolt {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: radial-gradient(circle at 35% 30%, var(--bronze-hi), var(--bronze-1) 60%, var(--bronze-2));
+  border: 2px solid var(--px-edge);
+  z-index: 5;
+}
+
+/* ---------- Section-label tab (overlaps a panel's top edge) ---------- */
+.px-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-display);
+  font-size: 0.56rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-cream);
+  background-image: linear-gradient(180deg, var(--tab-bg, var(--color-sky)), color-mix(in oklab, var(--tab-bg, var(--color-sky)) 70%, #000 18%));
+  border: 2px solid var(--px-edge);
+  border-radius: 5px;
+  padding: 0.2rem 0.5rem;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 0 0 var(--px-edge);
+}
+.px-tab-diamond { color: var(--color-brass); }
 
 /* ---------- Pixel buttons ---------- */
 .px-btn {

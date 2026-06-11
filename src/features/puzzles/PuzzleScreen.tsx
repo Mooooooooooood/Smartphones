@@ -9,7 +9,7 @@ import { PUZZLE_THEMES, THEME_LABELS, type PuzzleTheme } from "@/content/puzzles
 import RewardPanel from "@/components/ui/RewardPanel";
 import TopProgress from "@/components/ui/TopProgress";
 import Skeleton, { BoardSkeleton } from "@/components/ui/Skeleton";
-import TopBar from "@/components/pixel/TopBar";
+import PixelTopBar from "@/components/pixel/PixelTopBar";
 import PixelPanel from "@/components/pixel/PixelPanel";
 import PixelButton from "@/components/pixel/PixelButton";
 import PixelStat from "@/components/pixel/PixelStat";
@@ -72,7 +72,7 @@ export default function PuzzleScreen() {
 
   return (
     <div className="space-y-2.5">
-      <TopBar />
+      <PixelTopBar star />
       <TopProgress value={(index + 1) / queue.length} exitHref="/" trailing={`#${index + 1}/${queue.length}`} />
 
       {/* Header + stats */}

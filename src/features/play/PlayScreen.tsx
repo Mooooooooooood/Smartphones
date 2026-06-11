@@ -10,10 +10,12 @@ import CapturedPieces from "@/components/CapturedPieces";
 import Controls from "@/components/Controls";
 import RewardPanel from "@/components/ui/RewardPanel";
 import ChessBuddy from "@/components/characters/ChessBuddy";
-import TopBar from "@/components/pixel/TopBar";
+import PixelTopBar from "@/components/pixel/PixelTopBar";
 import PixelPanel, { type PixelHue } from "@/components/pixel/PixelPanel";
 import PixelButton from "@/components/pixel/PixelButton";
 import PixelStat from "@/components/pixel/PixelStat";
+import PixelCharacterFrame from "@/components/pixel/PixelCharacterFrame";
+import PixelBoardFrame from "@/components/pixel/PixelBoardFrame";
 import { BoardSkeleton } from "@/components/ui/Skeleton";
 import type { Color, GameStatus } from "@/domain/chess/types";
 import type { MatchResultState } from "@/state/gameStore";
@@ -45,10 +47,28 @@ function reasonText(reason: string): string {
 
 /* ---------- opponent selection ---------- */
 
+const ARROW_BG: Record<PixelHue, string> = {
+  blue: "var(--color-sky)", orange: "var(--color-peach)", green: "var(--color-mint)",
+  red: "var(--color-bad)", purple: "#8a6fe0", gold: "var(--color-brass)",
+  gray: "var(--color-frame)", none: "var(--color-frame)",
+};
+
+function RoundArrow({ hue }: { hue: PixelHue }) {
+  return (
+    <span
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-[3px] border-[var(--px-edge)] font-display text-[0.8rem] text-[color:#06122e] shadow-[0_3px_0_0_var(--px-edge)]"
+      style={{ background: `radial-gradient(circle at 38% 32%, #ffffff55, ${ARROW_BG[hue]})` }}
+      aria-hidden
+    >
+      →
+    </span>
+  );
+}
+
 function OpponentSelect({ onChoose, onPractice }: { onChoose: (id: string) => void; onPractice: () => void }) {
   return (
     <div className="space-y-2.5">
-      <TopBar />
+      <PixelTopBar />
       <h1 className="px-title px-1 text-[1.5rem] leading-tight">Choose Your Match</h1>
       <p className="px-1 text-[0.62rem] text-muted">Pick a friendly opponent — they only play legal moves.</p>
 
@@ -56,9 +76,9 @@ function OpponentSelect({ onChoose, onPractice }: { onChoose: (id: string) => vo
         {OPPONENTS.map((o) => (
           <button key={o.id} type="button" onClick={() => onChoose(o.id)} className="block w-full text-left active:translate-y-0.5">
             <PixelPanel hue={PIECE_HUE[o.piece]} className="flex items-center gap-2.5 px-2.5 py-2.5">
-              <div className="px-inset flex h-14 w-14 shrink-0 items-center justify-center">
-                <ChessBuddy piece={o.piece} size={44} />
-              </div>
+              <PixelCharacterFrame hue={PIECE_HUE[o.piece] as "blue"} size={52} className="shrink-0">
+                <ChessBuddy piece={o.piece} size={42} />
+              </PixelCharacterFrame>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
                   <h2 className="truncate px-label text-[0.7rem] text-cream">{o.name}</h2>
@@ -73,21 +93,21 @@ function OpponentSelect({ onChoose, onPractice }: { onChoose: (id: string) => vo
                 </div>
                 <p className="mt-0.5 truncate text-[0.6rem] text-muted2">{o.line}</p>
               </div>
-              <span className="px-btn !min-h-0 !px-2.5 !py-2 shrink-0 text-cream" aria-hidden>→</span>
+              <RoundArrow hue={PIECE_HUE[o.piece]} />
             </PixelPanel>
           </button>
         ))}
 
         <button type="button" onClick={onPractice} className="block w-full text-left active:translate-y-0.5">
           <PixelPanel hue="gray" className="flex items-center gap-2.5 px-2.5 py-2.5">
-            <div className="px-inset flex h-12 w-12 shrink-0 items-center justify-center">
+            <PixelCharacterFrame hue="gray" size={48} className="shrink-0">
               <ChessBuddy piece="bishop" size={38} />
-            </div>
+            </PixelCharacterFrame>
             <div className="min-w-0 flex-1">
               <h2 className="px-label text-[0.7rem] text-cream">Practice Board</h2>
               <p className="text-[0.6rem] text-muted2">Free play — move both sides yourself</p>
             </div>
-            <span className="shrink-0 text-muted2">›</span>
+            <RoundArrow hue="gray" />
           </PixelPanel>
         </button>
       </div>
@@ -107,7 +127,7 @@ function MatchSetup({ opponent, onStart, onBack }: { opponent: Opponent; onStart
   const [side, setSide] = useState<SideChoice>("w");
   return (
     <div className="space-y-3">
-      <TopBar />
+      <PixelTopBar />
       <button onClick={onBack} className="px-label px-1 text-[0.56rem] text-muted">‹ Opponents</button>
 
       <PixelPanel hue={PIECE_HUE[opponent.piece]} rivets className="px-4 py-4 text-center">
@@ -264,12 +284,12 @@ export default function PlayScreen() {
 
   return (
     <div className="space-y-2.5">
-      <TopBar />
+      <PixelTopBar />
       {/* Battle header */}
       <PixelPanel hue={opponent ? PIECE_HUE[opponent.piece] : "gray"} className="flex items-center gap-2.5 px-2.5 py-2">
-        <div className="px-inset flex h-12 w-12 shrink-0 items-center justify-center">
-          <ChessBuddy piece={opponent?.piece ?? "rook"} size={38} />
-        </div>
+        <PixelCharacterFrame hue={opponent ? (PIECE_HUE[opponent.piece] as "blue") : "gray"} size={44} className="shrink-0">
+          <ChessBuddy piece={opponent?.piece ?? "rook"} size={36} />
+        </PixelCharacterFrame>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             <h1 className="truncate px-label text-[0.66rem] text-cream">{isBot ? opponent?.name ?? "Bot" : "Practice Board"}</h1>
@@ -291,13 +311,14 @@ export default function PlayScreen() {
       ) : null}
 
       {/* Board */}
-      <div className="px-board-frame">
-        <CapturedPieces side={topSide} label={topLabel} />
-        <div className="tabiya-board-wrap my-1 overflow-hidden rounded-[4px]">
+      <PixelBoardFrame
+        top={<div className="flex items-center justify-between px-0.5"><span className="px-label rounded-[3px] border border-[var(--px-edge)] bg-[var(--color-ink)] px-1.5 py-0.5 text-[0.46rem] text-muted">{topLabel}</span></div>}
+        bottom={<div className="flex items-center justify-between px-0.5"><span className="px-label rounded-[3px] border border-[var(--px-edge)] bg-brass px-1.5 py-0.5 text-[0.46rem] text-[color:var(--color-on-accent)]">{bottomLabel}</span></div>}
+      >
+        <div className="tabiya-board-wrap">
           <Board orientation={orientation} />
         </div>
-        <CapturedPieces side={bottomSide} label={bottomLabel} />
-      </div>
+      </PixelBoardFrame>
 
       {notice ? (
         <div className="px-inset tab-animate-rise px-3 py-2 text-center text-[0.66rem] text-bad" style={{ borderColor: "var(--color-bad)" }}>{notice}</div>
@@ -312,18 +333,27 @@ export default function PlayScreen() {
         </PixelPanel>
       ) : null}
 
+      {/* Controls */}
       {isBot ? (
         !matchOver ? (
           <div className="grid grid-cols-2 gap-2">
-            <PixelButton onClick={resignMatch} variant="secondary" size="sm">⚑ Resign</PixelButton>
-            <PixelButton onClick={() => setFlip((f) => !f)} variant="secondary" size="sm">⇅ Flip</PixelButton>
+            <PixelButton onClick={resignMatch} tone="red" size="sm">⚑ Resign</PixelButton>
+            <PixelButton onClick={() => setFlip((f) => !f)} tone="blue" size="sm">⇅ Flip</PixelButton>
           </div>
         ) : null
       ) : (
         <Controls orientation={orientation} onFlip={() => setFlip((f) => !f)} />
       )}
 
-      <MoveList />
+      {/* Captured pieces */}
+      {!matchOver ? (
+        <PixelPanel label="Captured Pieces" labelHue="gold" className="grid grid-cols-2 gap-2 px-2.5 pb-2 pt-3">
+          <CapturedPieces side="w" label="White" />
+          <CapturedPieces side="b" label="Black" />
+        </PixelPanel>
+      ) : null}
+
+      {!isBot ? <MoveList /> : null}
     </div>
   );
 }

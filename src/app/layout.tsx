@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Press_Start_2P, Pixelify_Sans } from "next/font/google";
 import "./globals.css";
-import BottomNav from "@/components/BottomNav";
+import PixelBottomNav from "@/components/pixel/PixelBottomNav";
+import PixelShell from "@/components/pixel/PixelShell";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import PwaRegister from "@/components/PwaRegister";
 
@@ -57,9 +58,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body className="min-h-full">
         <div id="tabiya-root" className="mx-auto flex min-h-dvh w-full max-w-md flex-col">
-          <main className="flex-1 px-3 pb-[88px] pt-[max(0.75rem,env(safe-area-inset-top))]">{children}</main>
-          <BottomNav />
+          <main className="flex-1 px-3.5 pb-[84px] pt-[max(0.85rem,env(safe-area-inset-top))]">{children}</main>
+          <PixelBottomNav />
         </div>
+        <PixelShell />
         <PwaRegister />
       </body>
     </html>
