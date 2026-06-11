@@ -1,6 +1,7 @@
 /**
- * Achievement emblem for the profile shelf. Unlocked badges glow in brass;
- * locked ones are dimmed silhouettes. Glyphs are plain chess symbols.
+ * Achievement emblem for the profile shelf. Unlocked badges glow in brass with
+ * a sparkle; locked ones are friendly "future collectibles" — a soft dashed
+ * tile with a faint silhouette and a "?" — not a dead disabled box.
  */
 export default function BadgeEmblem({
   glyph,
@@ -14,22 +15,31 @@ export default function BadgeEmblem({
   return (
     <div className="flex flex-col items-center gap-1.5 text-center">
       <div
-        className={`flex h-14 w-14 items-center justify-center rounded-2xl border text-2xl ${
+        className={`relative flex h-16 w-16 items-center justify-center rounded-2xl border text-3xl ${
           unlocked
-            ? "border-brass/50 bg-brass/15 text-brass tab-glow"
-            : "border-line bg-panel2 text-muted2 opacity-70"
+            ? "border-brass/50 text-brass tab-glow"
+            : "border-dashed border-muted2/45 bg-ink2"
         }`}
+        style={
+          unlocked
+            ? { backgroundImage: "linear-gradient(160deg, var(--color-surf-sun), var(--color-panel))" }
+            : undefined
+        }
         aria-hidden
       >
-        {unlocked ? glyph : "🔒".replace("🔒", "")}
-        {!unlocked ? (
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="5" y="11" width="14" height="9" rx="2" />
-            <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-          </svg>
-        ) : null}
+        {unlocked ? (
+          <>
+            <span>{glyph}</span>
+            <span className="tab-twinkle absolute -right-1 -top-1 text-xs text-sun">✦</span>
+          </>
+        ) : (
+          <>
+            <span className="text-muted2/30">{glyph}</span>
+            <span className="absolute bottom-1 right-1.5 text-[11px] font-bold text-muted2/70">?</span>
+          </>
+        )}
       </div>
-      <span className={`text-[10px] leading-tight ${unlocked ? "text-muted" : "text-muted2"}`}>
+      <span className={`text-[10px] font-semibold leading-tight ${unlocked ? "text-cream" : "text-muted2"}`}>
         {label}
       </span>
     </div>

@@ -172,11 +172,23 @@ function MatchSetup({
 
 /* ---------- match recap ---------- */
 
-function StatPill({ label, value, tone = "cream" }: { label: string; value: string; tone?: "cream" | "good" | "brass" }) {
-  const color = tone === "good" ? "text-gooddeep" : tone === "brass" ? "text-brass" : "text-cream";
+function StatCard({
+  icon,
+  label,
+  value,
+  tone = "cream",
+}: {
+  icon: string;
+  label: string;
+  value: string;
+  tone?: "cream" | "good" | "bad" | "brass";
+}) {
+  const color =
+    tone === "good" ? "text-gooddeep" : tone === "bad" ? "text-bad" : tone === "brass" ? "text-brass" : "text-cream";
   return (
-    <div className="rounded-xl border border-line bg-panel px-2 py-1.5 text-center">
-      <div className={`font-display text-base leading-none ${color}`}>{value}</div>
+    <div className="rounded-2xl border border-line bg-panel px-2 py-2.5 text-center shadow-[0_3px_0_0_var(--color-line)]">
+      <div className="text-base leading-none" aria-hidden>{icon}</div>
+      <div className={`mt-1 font-display text-lg leading-none ${color}`}>{value}</div>
       <div className="mt-0.5 text-[9px] uppercase tracking-wide text-muted2">{label}</div>
     </div>
   );
@@ -207,9 +219,9 @@ function MatchRecap({
   const stats = (
     <>
       <div className="mt-3 grid grid-cols-3 gap-2">
-        <StatPill label="XP" value={xpStr} tone="brass" />
-        <StatPill label="Rating" value={ratingStr} tone={delta >= 0 ? "good" : "cream"} />
-        <StatPill label="Moves" value={`${result.moves}`} />
+        <StatCard icon="✦" label="XP" value={xpStr} tone="brass" />
+        <StatCard icon="⚡" label="Rating" value={ratingStr} tone={delta >= 0 ? "good" : "bad"} />
+        <StatCard icon="♟" label="Moves" value={`${result.moves}`} />
       </div>
       <p className="mt-2 text-[11px] text-muted2">Match ended {reasonText(result.reason)}</p>
       <div className="mt-4 space-y-2">
@@ -218,9 +230,7 @@ function MatchRecap({
           <ActionButton onClick={onChange} variant="secondary">
             New opponent
           </ActionButton>
-          <ActionButton onClick={onRematch} variant="secondary">
-            Rematch ›
-          </ActionButton>
+          <ActionButton onClick={onRematch}>Rematch ›</ActionButton>
         </div>
         <ActionButton href="/" variant="ghost">
           Continue training →
@@ -237,12 +247,20 @@ function MatchRecap({
     );
   }
 
+  const ribbon =
+    result.outcome === "draw"
+      ? { text: "DRAW", cls: "border-brass/40 bg-brass/10 text-brass" }
+      : { text: "DEFEAT", cls: "border-coral/50 bg-coral/15 text-bad" };
+
   return (
     <GameCard variant="accent" glow className="tab-animate-pop relative overflow-hidden p-5 text-center">
       <span className="tab-twinkle absolute left-6 top-5 text-lg text-sun" aria-hidden>✦</span>
       <span className="tab-twinkle absolute right-7 top-9 text-sm text-mint" aria-hidden>✦</span>
+      <span className={`inline-block rounded-full border px-3 py-0.5 text-[11px] font-bold uppercase tracking-[0.2em] ${ribbon.cls}`}>
+        {ribbon.text}
+      </span>
       <div
-        className={`mx-auto flex h-24 w-24 items-center justify-center rounded-full border ${
+        className={`relative mx-auto mt-3 flex h-24 w-24 items-center justify-center rounded-full border ${
           result.outcome === "draw" ? "border-brass/40 bg-surf-blue" : "border-coral/50 bg-surf-peach"
         }`}
       >
@@ -251,7 +269,7 @@ function MatchRecap({
         </div>
       </div>
       <h3 className="mt-3 font-display text-2xl text-cream">{title}</h3>
-      <p className="mt-1 text-sm text-muted">{reaction}</p>
+      <p className="mt-1 text-[15px] text-muted">{reaction}</p>
       {stats}
     </GameCard>
   );

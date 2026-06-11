@@ -20,10 +20,10 @@ import GameCard from "@/components/ui/GameCard";
 import SectionHeader from "@/components/ui/SectionHeader";
 import ProgressRing from "@/components/ui/ProgressRing";
 import RankBadge from "@/components/ui/RankBadge";
-import StatPill from "@/components/ui/StatPill";
 import XPBar from "@/components/ui/XPBar";
 import FlameIcon from "@/components/ui/FlameIcon";
 import BadgeEmblem from "@/components/ui/BadgeEmblem";
+import CoachBubble from "@/components/ui/CoachBubble";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import ChessBuddy, { BUDDIES, type BuddyPiece } from "@/components/characters/ChessBuddy";
 
@@ -126,6 +126,16 @@ export default function ProfileScreen() {
   const bossLabel =
     bStatus === "completed" ? "Passed" : bStatus === "ready" ? "Ready" : "Locked";
 
+  const unlockedBadges = badges.filter((b) => b.unlocked).length;
+  const coachLine =
+    xp === 0
+      ? "Welcome, challenger! Begin your journey on the path."
+      : t0.done < t0.total
+        ? "Keep climbing the Foundations path — you're doing great!"
+        : bStatus !== "completed"
+          ? "The Tier 0 Trial awaits. I believe in you!"
+          : `Strong work, ${rank.title}! Keep that streak alive.`;
+
   return (
     <div className="space-y-5">
       <header className="flex items-start justify-between">
@@ -171,6 +181,9 @@ export default function ProfileScreen() {
         </div>
       </GameCard>
 
+      {/* Cassius coach note */}
+      <CoachBubble piece="king">{coachLine}</CoachBubble>
+
       {/* Your guides */}
       <section>
         <SectionHeader title="Your Guides" />
@@ -189,9 +202,9 @@ export default function ProfileScreen() {
         </GameCard>
       </section>
 
-      {/* Learning journey */}
+      {/* World progress */}
       <section>
-        <SectionHeader title="Learning Journey" />
+        <SectionHeader title="World Progress" />
         <GameCard className="space-y-3 p-4">
           <div className="flex items-center justify-between">
             <span className="text-sm text-cream">Current stage</span>
@@ -333,7 +346,14 @@ export default function ProfileScreen() {
 
       {/* Achievement shelf */}
       <section>
-        <SectionHeader title="Achievements" />
+        <SectionHeader
+          title="Achievements"
+          action={
+            <span className="rounded-full border border-brass/40 bg-brass/10 px-2.5 py-1 text-[11px] font-bold text-brass">
+              {unlockedBadges}/{badges.length}
+            </span>
+          }
+        />
         <GameCard className="p-4">
           <div className="grid grid-cols-4 gap-3">
             {badges.map((b) => (
@@ -343,24 +363,25 @@ export default function ProfileScreen() {
         </GameCard>
       </section>
 
-      {/* Core stats */}
-      <div className="grid grid-cols-3 gap-2.5">
-        <StatPill label="Puzzle Rating" value={`${puzzleRating}`} tone="brass" />
-        <StatPill label="Solved" value={`${solved}/${BEGINNER_PUZZLES.length}`} />
-        <StatPill
-          label="Accuracy"
-          value={acc.total ? `${Math.round(acc.pct * 100)}%` : "—"}
-          sub={acc.total ? `${acc.correct}/${acc.total}` : "no tries"}
-          tone={acc.total ? "good" : "muted"}
-        />
-        <StatPill label="Streak" value={`${streak}`} sub={streak === 1 ? "day" : "days"} />
-        <StatPill label="Lessons" value={`${acad.done}/${acad.total}`} />
-        <StatPill label="Academy" value={`${Math.round(acad.pct * 100)}%`} />
-      </div>
-
-      {/* Skill categories */}
+      {/* Tactics — puzzle stats + categories */}
       <section>
-        <SectionHeader title="Skill Categories" />
+        <SectionHeader title="Tactics" />
+        <GameCard className="mb-2.5 grid grid-cols-3 gap-2 p-3 text-center">
+          <div>
+            <div className="font-display text-xl text-brass">{puzzleRating}</div>
+            <div className="text-[10px] uppercase tracking-wide text-muted2">Rating</div>
+          </div>
+          <div>
+            <div className="font-display text-xl text-cream">{solved}<span className="text-sm text-muted2">/{BEGINNER_PUZZLES.length}</span></div>
+            <div className="text-[10px] uppercase tracking-wide text-muted2">Solved</div>
+          </div>
+          <div>
+            <div className={`font-display text-xl ${acc.total ? "text-gooddeep" : "text-muted2"}`}>
+              {acc.total ? `${Math.round(acc.pct * 100)}%` : "—"}
+            </div>
+            <div className="text-[10px] uppercase tracking-wide text-muted2">Accuracy</div>
+          </div>
+        </GameCard>
         <div className="space-y-2.5">
           {PUZZLE_CATEGORIES.map(({ key, label }) => {
             const inCat = attempts.filter((a) => PUZZLE_BY_ID.get(a.puzzleId)?.categories.includes(key));

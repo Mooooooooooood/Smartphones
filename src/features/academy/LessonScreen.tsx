@@ -119,21 +119,29 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
       />
 
       <header>
-        <p className="text-[11px] uppercase tracking-[0.16em] text-brass">{tierTitle}</p>
-        <div className="mt-0.5 flex items-start justify-between gap-3">
+        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-brass">
+          {tierTitle} · Stage {lesson.order}
+        </p>
+        <div className="mt-1 flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="font-display text-3xl text-cream">{lesson.title}</h1>
+            <h1 className="font-display text-3xl leading-tight text-cream">{lesson.title}</h1>
             <p className="mt-0.5 text-sm text-muted">{lesson.subtitle}</p>
           </div>
-          <span className="shrink-0 rounded-full border border-brass/40 bg-brass/10 px-2.5 py-1 text-[11px] font-semibold text-brass">
-            +{lesson.xpReward} XP
+          <span className="shrink-0 rounded-full border border-brass/40 bg-surf-sun px-2.5 py-1 text-[11px] font-bold text-warn">
+            ⭐ +{lesson.xpReward} XP
           </span>
         </div>
       </header>
 
       {lesson.fen ? (
         <GameCard className="p-3">
-          <div className="mx-auto w-full max-w-[320px]">
+          <div className="mb-2 flex items-center gap-2">
+            <span className="rounded-full border border-brass/30 bg-brass/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brass">
+              Example
+            </span>
+            <span className="h-px flex-1 bg-line" />
+          </div>
+          <div className="mx-auto w-full max-w-[320px] overflow-hidden rounded-xl ring-1 ring-frame">
             <LessonBoard fen={lesson.fen} />
           </div>
           {lesson.boardCaption ? (
@@ -167,21 +175,21 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
                 key={i}
                 onClick={() => choose(i)}
                 disabled={correct}
-                className={`flex min-h-[52px] w-full items-center gap-3 rounded-xl border px-3 py-3 text-left text-sm transition-colors disabled:cursor-default ${
+                className={`flex min-h-[54px] w-full items-center gap-3 rounded-2xl border px-3 py-3 text-left text-sm transition-transform active:translate-y-0.5 disabled:cursor-default ${
                   showCorrect
-                    ? "border-good/60 bg-good/15 text-cream"
+                    ? "border-good/60 bg-good/15 text-cream shadow-[0_3px_0_0_color-mix(in_oklab,var(--color-good)_45%,var(--color-line))]"
                     : showWrong
-                      ? "border-bad/60 bg-bad/15 text-cream"
-                      : "border-line bg-panel text-cream hover:border-muted2"
+                      ? "border-bad/60 bg-bad/15 text-cream shadow-[0_3px_0_0_color-mix(in_oklab,var(--color-bad)_45%,var(--color-line))]"
+                      : "border-line bg-panel text-cream shadow-[0_3px_0_0_var(--color-line)] hover:border-brass/50"
                 }`}
               >
                 <span
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border text-xs font-bold ${
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
                     showCorrect
-                      ? "border-good/60 text-good"
+                      ? "bg-good/20 text-gooddeep"
                       : showWrong
-                        ? "border-bad/60 text-bad"
-                        : "border-line text-muted2"
+                        ? "bg-bad/20 text-bad"
+                        : "bg-ink2 text-muted"
                   }`}
                 >
                   {LETTERS[i]}
@@ -222,9 +230,19 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
           ) : null}
 
           {theme ? (
-            <ActionButton href={`/puzzles?theme=${theme}`} variant="secondary" className="mb-2">
-              Practice {THEME_LABELS[theme]} ›
-            </ActionButton>
+            <Link
+              href={`/puzzles?theme=${theme}`}
+              className="mb-2 flex items-center gap-2.5 rounded-2xl border border-lav/40 bg-surf-lav p-3 transition-transform active:scale-[0.99]"
+            >
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-lav/40 bg-panel text-xl text-lavdeep">
+                ✦
+              </span>
+              <span className="min-w-0 flex-1 text-left">
+                <span className="block text-sm font-semibold text-cream">Practice {THEME_LABELS[theme]}</span>
+                <span className="block text-[11px] text-muted2">Try it in the Tactics Arena</span>
+              </span>
+              <span className="shrink-0 text-lavdeep">›</span>
+            </Link>
           ) : null}
 
           <div className="flex gap-2">
@@ -244,9 +262,13 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
         </RewardPanel>
       ) : (
         <div className="space-y-2.5">
-          <ActionButton onClick={finish} disabled={!correct}>
-            Complete lesson (+{lesson.xpReward} XP)
-          </ActionButton>
+          {correct ? (
+            <ActionButton onClick={finish}>Complete lesson (+{lesson.xpReward} XP) ✓</ActionButton>
+          ) : (
+            <div className="flex min-h-[48px] items-center justify-center gap-2 rounded-2xl border border-dashed border-line bg-ink2 px-4 text-sm font-semibold text-muted2">
+              <span aria-hidden>👇</span> Answer the checkpoint to finish
+            </div>
+          )}
           <ActionButton href="/academy" variant="secondary">
             Back to Path
           </ActionButton>
