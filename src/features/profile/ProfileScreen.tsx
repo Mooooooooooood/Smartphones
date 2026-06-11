@@ -137,23 +137,30 @@ export default function ProfileScreen() {
       </header>
 
       {/* Player identity card */}
-      <GameCard variant="accent" glow className="p-5">
-        <div className="flex items-center gap-4">
-          <ProgressRing value={lvl.progress} size={108}>
-            <span className="font-display text-3xl leading-none text-cream">{lvl.level}</span>
-            <span className="mt-0.5 text-[9px] uppercase tracking-[0.18em] text-muted2">Level</span>
+      <GameCard variant="accent" glow className="relative overflow-hidden p-5">
+        <div aria-hidden className="pointer-events-none absolute inset-0 select-none">
+          <span className="absolute -right-3 -top-4 text-8xl text-lav/15">♚</span>
+          <span className="tab-twinkle absolute left-4 top-4 text-lg text-sun">✦</span>
+          <span className="tab-twinkle absolute right-10 top-12 text-sm text-mint">✦</span>
+        </div>
+        <div className="relative flex items-center gap-3.5">
+          <ProgressRing value={lvl.progress} size={104} stroke={11}>
+            <span className="font-display text-4xl leading-none text-cream">{lvl.level}</span>
+            <span className="mt-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-muted2">Level</span>
           </ProgressRing>
           <div className="min-w-0 flex-1">
             <RankBadge title={rank.title} />
             <div className="mt-2 flex items-center gap-1.5 text-xs text-muted">
               <FlameIcon active={streak > 0} />
               <span className="font-semibold text-cream">{streak}</span>
-              <span className="text-muted2">day{streak === 1 ? "" : "s"} streak</span>
+              <span className="text-muted2">day{streak === 1 ? "" : "s"}</span>
             </div>
             <p className="mt-1 text-[11px] text-muted2">
-              {xp} XP
-              {rank.next ? ` · ${rank.next.title} at Lv ${rank.next.atLevel}` : " · top rank reached"}
+              {xp} XP{rank.next ? ` · ${rank.next.title} next` : " · top rank"}
             </p>
+          </div>
+          <div className="tab-bob shrink-0 self-end">
+            <ChessBuddy piece="king" size={54} />
           </div>
         </div>
         <div className="mt-4">

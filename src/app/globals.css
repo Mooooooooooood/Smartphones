@@ -44,6 +44,7 @@
   --cloud-line: #cdddf2;
   --star: rgba(255, 255, 255, 0);
   --card-shadow: rgba(30, 41, 59, 0.16);
+  --card-top: rgba(255, 255, 255, 0.85);
   --skeleton-shine: rgba(255, 255, 255, 0.8);
   --island-grass: #8ef0a6;
   --island-grass2: #4ade80;
@@ -90,6 +91,7 @@ html.dark {
   --cloud-line: #324a73;
   --star: rgba(226, 236, 255, 0.55);
   --card-shadow: rgba(0, 0, 0, 0.45);
+  --card-top: rgba(255, 255, 255, 0.06);
   --skeleton-shine: rgba(255, 255, 255, 0.06);
   --island-grass: #4ea96f;
   --island-grass2: #3c8a59;
@@ -107,7 +109,10 @@ html.dark {
 html, body { height: 100%; }
 body {
   margin: 0;
-  background: radial-gradient(120% 70% at 50% -10%, var(--color-panel2) 0%, var(--color-ink) 60%);
+  background:
+    radial-gradient(90% 50% at 12% 4%, color-mix(in oklab, var(--color-lav) 22%, transparent) 0%, transparent 60%),
+    radial-gradient(95% 55% at 92% 2%, color-mix(in oklab, var(--color-mint) 20%, transparent) 0%, transparent 55%),
+    radial-gradient(130% 80% at 50% -12%, var(--color-panel2) 0%, var(--color-ink) 62%);
   background-attachment: fixed;
   color: var(--color-cream);
   font-family: var(--font-body);
@@ -122,17 +127,24 @@ body {
 .tab-card {
   background: var(--color-panel);
   border: 1px solid var(--color-line);
-  border-radius: 1.25rem;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 8px 18px -10px var(--card-shadow);
+  border-radius: 1.375rem;
+  box-shadow:
+    0 1px 0 var(--card-top) inset,
+    0 1px 2px rgba(30, 41, 59, 0.04),
+    0 14px 26px -16px var(--card-shadow);
 }
 .tab-card-accent {
-  background-image: linear-gradient(to bottom, var(--color-panel2), var(--color-panel));
-  border: 1px solid rgba(96, 165, 250, 0.35);
-  border-radius: 1.25rem;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 10px 22px -12px var(--card-shadow);
+  background-image: linear-gradient(160deg, var(--color-panel2), var(--color-panel) 78%);
+  border: 1px solid color-mix(in oklab, var(--color-brass) 38%, var(--color-line));
+  border-radius: 1.375rem;
+  box-shadow:
+    0 1px 0 var(--card-top) inset,
+    0 16px 30px -16px color-mix(in oklab, var(--color-brass) 40%, var(--card-shadow));
 }
 .tab-glow {
-  box-shadow: 0 10px 24px -12px var(--card-shadow), 0 0 30px -10px rgba(96, 165, 250, 0.45);
+  box-shadow:
+    0 16px 30px -16px color-mix(in oklab, var(--color-brass) 36%, var(--card-shadow)),
+    0 0 34px -8px color-mix(in oklab, var(--color-brass) 55%, transparent);
 }
 
 /* ---------- Sky-world roadmap ---------- */

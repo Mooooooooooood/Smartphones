@@ -238,11 +238,19 @@ function MatchRecap({
   }
 
   return (
-    <GameCard variant="accent" className="tab-animate-pop p-5 text-center">
-      <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-line bg-surf-blue">
-        <ChessBuddy piece={piece} size={64} />
+    <GameCard variant="accent" glow className="tab-animate-pop relative overflow-hidden p-5 text-center">
+      <span className="tab-twinkle absolute left-6 top-5 text-lg text-sun" aria-hidden>✦</span>
+      <span className="tab-twinkle absolute right-7 top-9 text-sm text-mint" aria-hidden>✦</span>
+      <div
+        className={`mx-auto flex h-24 w-24 items-center justify-center rounded-full border ${
+          result.outcome === "draw" ? "border-brass/40 bg-surf-blue" : "border-coral/50 bg-surf-peach"
+        }`}
+      >
+        <div className="tab-bob">
+          <ChessBuddy piece={piece} size={72} />
+        </div>
       </div>
-      <h3 className="mt-3 font-display text-xl text-cream">{title}</h3>
+      <h3 className="mt-3 font-display text-2xl text-cream">{title}</h3>
       <p className="mt-1 text-sm text-muted">{reaction}</p>
       {stats}
     </GameCard>

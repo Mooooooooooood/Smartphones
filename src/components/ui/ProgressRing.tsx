@@ -28,7 +28,7 @@ export default function ProgressRing({
           cy={size / 2}
           r={r}
           fill="none"
-          stroke="rgba(96,165,250,0.18)"
+          stroke="color-mix(in oklab, var(--color-brass) 20%, transparent)"
           strokeWidth={stroke}
         />
         <circle
@@ -36,7 +36,7 @@ export default function ProgressRing({
           cy={size / 2}
           r={r}
           fill="none"
-          stroke="#60a5fa"
+          stroke="var(--color-brass)"
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={circumference}

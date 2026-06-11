@@ -156,25 +156,29 @@ export default function Dashboard() {
       {/* Hero */}
       <GameCard variant="accent" glow className="relative overflow-hidden p-5">
         <div aria-hidden className="pointer-events-none absolute inset-0 select-none">
-          <span className="absolute -right-2 -top-3 text-7xl text-sky/10">♞</span>
-          <span className="absolute right-10 bottom-1 text-4xl text-lav/30">♟</span>
-          <span className="absolute left-2 -bottom-3 text-5xl text-mint/40">★</span>
+          <span className="absolute -right-3 -top-4 text-8xl text-sky/15">♞</span>
+          <span className="absolute right-24 -bottom-2 text-5xl text-lav/30">♟</span>
+          <span className="tab-twinkle absolute left-3 top-3 text-xl text-sun">✦</span>
+          <span className="tab-twinkle absolute right-6 top-10 text-sm text-mint">✦</span>
         </div>
-        <div className="relative flex items-center gap-4">
-          <ProgressRing value={lvl.progress} size={108}>
-            <span className="font-display text-3xl leading-none text-cream">{lvl.level}</span>
-            <span className="mt-0.5 text-[9px] uppercase tracking-[0.18em] text-muted2">Level</span>
+        <div className="relative flex items-center gap-3.5">
+          <ProgressRing value={lvl.progress} size={104} stroke={11}>
+            <span className="font-display text-4xl leading-none text-cream">{lvl.level}</span>
+            <span className="mt-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-muted2">Level</span>
           </ProgressRing>
           <div className="min-w-0 flex-1">
             <RankBadge title={rank.title} />
             <div className="mt-2 flex items-center gap-1.5 text-xs text-muted">
               <FlameIcon active={streak > 0} />
               <span className="font-semibold text-cream">{streak}</span>
-              <span className="text-muted2">day{streak === 1 ? "" : "s"} streak</span>
+              <span className="text-muted2">day{streak === 1 ? "" : "s"}</span>
             </div>
             <p className="mt-1 text-[11px] text-muted2">
-              {fresh ? "Your journey starts now" : `${xp} XP · ${lvl.span - lvl.intoLevel} to next level`}
+              {fresh ? "Start now" : `${xp} XP · ${lvl.span - lvl.intoLevel} to next`}
             </p>
+          </div>
+          <div className="tab-bob shrink-0 self-end">
+            <ChessBuddy piece="pawn" size={54} />
           </div>
         </div>
         <div className="mt-4">

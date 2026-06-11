@@ -64,18 +64,39 @@ export default function BossScreen({ bossId }: { bossId: string }) {
     return (
       <div className="space-y-4">
         <TopProgress value={0} exitHref="/academy" />
-        <div className="py-10 text-center">
-          <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl border border-line bg-panel2 text-3xl text-muted2">
-            ♛
+
+        <CoachBubble piece="queen">
+          I am {BUDDIES.queen.name}, and this gate is mine to guard. Finish your Tier 0 lessons,
+          then come challenge me!
+        </CoachBubble>
+
+        <div className="relative overflow-hidden rounded-[1.5rem] border border-line p-6 text-center tab-sky">
+          <span className="tab-twinkle absolute left-6 top-6 text-lg text-sun">✦</span>
+          <span className="tab-twinkle absolute right-8 top-12 text-sm text-mint">✦</span>
+          {/* locked gate */}
+          <div className="relative mx-auto flex h-28 w-28 items-center justify-center rounded-3xl border-2 border-line bg-panel/80 shadow-[0_14px_26px_-16px_var(--card-shadow)]">
+            <span className="text-6xl text-muted2/70" aria-hidden>♛</span>
+            <span className="absolute -bottom-3 flex h-9 w-9 items-center justify-center rounded-full border border-line bg-panel text-muted2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="5" y="11" width="14" height="9" rx="2" />
+                <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+              </svg>
+            </span>
           </div>
-          <h1 className="font-display text-2xl text-cream">{boss.title}</h1>
-          <p className="mx-auto mt-2 max-w-xs text-sm text-muted">
-            Finish all Tier 0 lessons to unlock the Trial.
+          <h1 className="mt-5 font-display text-2xl text-cream">{boss.title}</h1>
+          <p className="mx-auto mt-1 max-w-xs text-sm text-muted">
+            A 5-question challenge. Pass {boss.passScore} of {boss.questions.length} to unlock Tier 1!
           </p>
-          <Link href="/academy" className="mt-4 inline-block text-brass">
-            Back to the path
-          </Link>
         </div>
+
+        <div className="flex items-center justify-center gap-2 rounded-2xl border border-brass/30 bg-surf-sun px-4 py-3">
+          <span className="text-sm" aria-hidden>🏆</span>
+          <span className="text-sm font-semibold text-cream">Reward · +{boss.xpReward} XP &amp; Tier 1 unlocked</span>
+        </div>
+
+        <ActionButton href="/academy" variant="secondary">
+          Back to the path
+        </ActionButton>
       </div>
     );
   }
