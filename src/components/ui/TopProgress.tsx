@@ -17,31 +17,19 @@ export default function TopProgress({
 }) {
   const pct = Math.max(0, Math.min(1, value)) * 100;
   const exitClass =
-    "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line bg-panel/60 text-muted2";
+    "px-inset flex h-8 w-8 shrink-0 items-center justify-center text-muted2 active:translate-y-0.5";
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2.5">
       {exitHref ? (
-        <Link href={exitHref} className={exitClass} aria-label="Exit">
-          ✕
-        </Link>
+        <Link href={exitHref} className={exitClass} aria-label="Exit">✕</Link>
       ) : onExit ? (
-        <button type="button" onClick={onExit} className={exitClass} aria-label="Exit">
-          ✕
-        </button>
+        <button type="button" onClick={onExit} className={exitClass} aria-label="Exit">✕</button>
       ) : null}
-      <div className="h-3 flex-1 overflow-hidden rounded-full bg-ink2">
-        <div
-          className="h-full rounded-full transition-[width] duration-500 ease-out"
-          style={{
-            width: `${pct}%`,
-            backgroundImage: "linear-gradient(90deg, #60a5fa, #93c5fd 70%, #bfdbfe)",
-          }}
-        />
+      <div className="px-track h-3 flex-1">
+        <div className="px-track-fill" style={{ width: `${pct}%`, "--fill": "var(--color-good)" } as React.CSSProperties} />
       </div>
-      {trailing ? (
-        <span className="shrink-0 text-xs font-semibold text-muted">{trailing}</span>
-      ) : null}
+      {trailing ? <span className="px-label shrink-0 text-[0.52rem] text-muted">{trailing}</span> : null}
     </div>
   );
 }

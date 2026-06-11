@@ -1,19 +1,28 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Hanken_Grotesk } from "next/font/google";
+import { Press_Start_2P, Pixelify_Sans } from "next/font/google";
 import "./globals.css";
 import BottomNav from "@/components/BottomNav";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import PwaRegister from "@/components/PwaRegister";
 
-const display = Fraunces({ subsets: ["latin"], variable: "--font-fraunces", display: "swap" });
-const body = Hanken_Grotesk({ subsets: ["latin"], variable: "--font-hanken", display: "swap" });
+const display = Press_Start_2P({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-press",
+  display: "swap",
+});
+const body = Pixelify_Sans({
+  subsets: ["latin"],
+  variable: "--font-pixel",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  applicationName: "Tabiya",
-  title: { default: "Tabiya — Chess Learning Game", template: "%s · Tabiya" },
-  description: "A friendly, bright chess learning game — lessons, puzzles, and matches.",
+  applicationName: "The Rang",
+  title: { default: "The Rang — Retro Chess Quest", template: "%s · The Rang" },
+  description: "A retro pixel-art chess adventure — lessons, puzzles, and battles.",
   manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "Tabiya" },
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "The Rang" },
   icons: {
     icon: [
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
@@ -23,16 +32,16 @@ export const metadata: Metadata = {
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
   openGraph: {
-    title: "Tabiya — Chess Learning Game",
-    description: "A friendly, bright chess learning game.",
+    title: "The Rang — Retro Chess Quest",
+    description: "A retro pixel-art chess adventure.",
     type: "website",
   },
 };
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
-    { media: "(prefers-color-scheme: dark)", color: "#0f1729" },
+    { media: "(prefers-color-scheme: light)", color: "#121a3e" },
+    { media: "(prefers-color-scheme: dark)", color: "#080d24" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -48,7 +57,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body className="min-h-full">
         <div id="tabiya-root" className="mx-auto flex min-h-dvh w-full max-w-md flex-col">
-          <main className="flex-1 px-4 pb-28 pt-[max(1.25rem,env(safe-area-inset-top))]">{children}</main>
+          <main className="flex-1 px-3 pb-[88px] pt-[max(0.75rem,env(safe-area-inset-top))]">{children}</main>
           <BottomNav />
         </div>
         <PwaRegister />

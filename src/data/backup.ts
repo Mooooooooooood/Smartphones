@@ -20,7 +20,7 @@ export async function exportAll(): Promise<BackupData> {
 /** Replace local data with a validated backup. Throws on an invalid file. */
 export async function importAll(data: unknown): Promise<void> {
   if (!validateBackup(data)) {
-    throw new Error("That file isn't a valid Tabiya backup.");
+    throw new Error("That file isn't a valid The Rang backup.");
   }
   const db = getDb();
   await db.transaction("rw", [...BACKUP_TABLES], async () => {

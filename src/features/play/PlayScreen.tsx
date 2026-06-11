@@ -8,20 +8,25 @@ import { OPPONENTS, opponentById } from "@/content/opponents";
 import MoveList from "@/components/MoveList";
 import CapturedPieces from "@/components/CapturedPieces";
 import Controls from "@/components/Controls";
-import GameCard from "@/components/ui/GameCard";
-import ActionButton from "@/components/ui/ActionButton";
 import RewardPanel from "@/components/ui/RewardPanel";
 import ChessBuddy from "@/components/characters/ChessBuddy";
+import TopBar from "@/components/pixel/TopBar";
+import PixelPanel, { type PixelHue } from "@/components/pixel/PixelPanel";
+import PixelButton from "@/components/pixel/PixelButton";
+import PixelStat from "@/components/pixel/PixelStat";
 import { BoardSkeleton } from "@/components/ui/Skeleton";
 import type { Color, GameStatus } from "@/domain/chess/types";
 import type { MatchResultState } from "@/state/gameStore";
 import type { Opponent } from "@/content/opponents";
+import type { BuddyPiece } from "@/components/characters/ChessBuddy";
 import type { SideChoice } from "@/domain/chess/side";
 
-const Board = dynamic(() => import("@/components/Board"), {
-  ssr: false,
-  loading: () => <BoardSkeleton />,
-});
+const Board = dynamic(() => import("@/components/Board"), { ssr: false, loading: () => <BoardSkeleton /> });
+
+/** Opponent piece → arcade card hue. */
+const PIECE_HUE: Record<BuddyPiece, PixelHue> = {
+  pawn: "blue", rook: "orange", knight: "green", bishop: "purple", queen: "red", king: "gold",
+};
 
 function statusLabel(status: GameStatus, turn: Color, over: boolean): string {
   if (status === "checkmate") return `Checkmate — ${turn === "w" ? "Black" : "White"} wins`;
@@ -31,7 +36,6 @@ function statusLabel(status: GameStatus, turn: Color, over: boolean): string {
   if (over) return "Game over";
   return `${turn === "w" ? "White" : "Black"} to move`;
 }
-
 function reasonText(reason: string): string {
   if (reason === "checkmate") return "by checkmate";
   if (reason === "stalemate") return "stalemate";
@@ -43,235 +47,152 @@ function reasonText(reason: string): string {
 
 function OpponentSelect({ onChoose, onPractice }: { onChoose: (id: string) => void; onPractice: () => void }) {
   return (
-    <div className="space-y-4">
-      <header>
-        <p className="text-xs uppercase tracking-[0.16em] text-muted2">Play</p>
-        <h1 className="font-display text-3xl text-cream">Choose your match</h1>
-        <p className="mt-1 text-sm text-muted">Pick a friendly opponent — they only play legal moves.</p>
-      </header>
+    <div className="space-y-2.5">
+      <TopBar />
+      <h1 className="px-title px-1 text-[1.5rem] leading-tight">Choose Your Match</h1>
+      <p className="px-1 text-[0.62rem] text-muted">Pick a friendly opponent — they only play legal moves.</p>
 
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         {OPPONENTS.map((o) => (
-          <button
-            key={o.id}
-            type="button"
-            onClick={() => onChoose(o.id)}
-            className={`flex w-full items-center gap-3 rounded-2xl border border-line p-3.5 text-left transition-transform active:scale-[0.99] ${o.surface}`}
-          >
-            <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-line bg-panel">
-              <ChessBuddy piece={o.piece} size={52} />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <h2 className="truncate font-display text-base text-cream">{o.name}</h2>
-                <span className="shrink-0 rounded-full border border-line bg-panel px-2 py-0.5 text-[10px] font-semibold text-muted2">
-                  ~{o.rating}
-                </span>
-                {o.recommended ? (
-                  <span className="shrink-0 rounded-full border border-good/40 bg-good/15 px-2 py-0.5 text-[9px] font-bold uppercase text-gooddeep">
-                    Start here
-                  </span>
-                ) : null}
+          <button key={o.id} type="button" onClick={() => onChoose(o.id)} className="block w-full text-left active:translate-y-0.5">
+            <PixelPanel hue={PIECE_HUE[o.piece]} className="flex items-center gap-2.5 px-2.5 py-2.5">
+              <div className="px-inset flex h-14 w-14 shrink-0 items-center justify-center">
+                <ChessBuddy piece={o.piece} size={44} />
               </div>
-              <p className="text-[11px] font-semibold text-muted">{o.level} · +{o.xpReward} XP</p>
-              <p className="mt-0.5 truncate text-xs text-muted2">{o.line}</p>
-            </div>
-            <span className="shrink-0 rounded-full border border-brassdeep bg-brass px-3 py-2 text-xs font-bold text-[color:var(--color-on-accent)] shadow-[0_3px_0_0_var(--color-brassdeep)]">
-              ›
-            </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <h2 className="truncate px-label text-[0.7rem] text-cream">{o.name}</h2>
+                  <span className="px-inset shrink-0 px-1 py-0.5 text-[0.5rem] font-bold text-muted">~{o.rating}</span>
+                </div>
+                <div className="mt-0.5 flex items-center gap-1.5">
+                  <span className="px-label text-[0.46rem] text-brass">{o.level}</span>
+                  <span className="px-label text-[0.46rem] text-good">+{o.xpReward} XP</span>
+                  {o.recommended ? (
+                    <span className="px-label rounded-[4px] border-2 border-[var(--px-edge)] bg-good px-1 py-0.5 text-[0.42rem] text-[color:#06220f]">Start Here</span>
+                  ) : null}
+                </div>
+                <p className="mt-0.5 truncate text-[0.6rem] text-muted2">{o.line}</p>
+              </div>
+              <span className="px-btn !min-h-0 !px-2.5 !py-2 shrink-0 text-cream" aria-hidden>→</span>
+            </PixelPanel>
           </button>
         ))}
-      </div>
 
-      <button
-        type="button"
-        onClick={onPractice}
-        className="flex w-full items-center gap-3 rounded-2xl border border-line bg-panel p-3.5 text-left active:scale-[0.99]"
-      >
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-line bg-ink2 text-2xl">
-          ♟
-        </div>
-        <div className="min-w-0 flex-1">
-          <h2 className="font-display text-base text-cream">Practice Board</h2>
-          <p className="text-xs text-muted2">Free play — move both sides yourself</p>
-        </div>
-        <span className="shrink-0 text-muted2">›</span>
-      </button>
+        <button type="button" onClick={onPractice} className="block w-full text-left active:translate-y-0.5">
+          <PixelPanel hue="gray" className="flex items-center gap-2.5 px-2.5 py-2.5">
+            <div className="px-inset flex h-12 w-12 shrink-0 items-center justify-center">
+              <ChessBuddy piece="bishop" size={38} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h2 className="px-label text-[0.7rem] text-cream">Practice Board</h2>
+              <p className="text-[0.6rem] text-muted2">Free play — move both sides yourself</p>
+            </div>
+            <span className="shrink-0 text-muted2">›</span>
+          </PixelPanel>
+        </button>
+      </div>
     </div>
   );
 }
 
-/* ---------- match setup / intro ---------- */
+/* ---------- match setup ---------- */
 
 const SIDES: { value: SideChoice; label: string; sub: string; glyph: string }[] = [
   { value: "w", label: "White", sub: "Move first", glyph: "♙" },
-  { value: "b", label: "Black", sub: "Opponent moves first", glyph: "♟" },
-  { value: "random", label: "Random", sub: "Surprise me", glyph: "⁇" },
+  { value: "b", label: "Black", sub: "They move first", glyph: "♟" },
+  { value: "random", label: "Random", sub: "Surprise me", glyph: "?" },
 ];
 
-function MatchSetup({
-  opponent,
-  onStart,
-  onBack,
-}: {
-  opponent: Opponent;
-  onStart: (side: SideChoice) => void;
-  onBack: () => void;
-}) {
+function MatchSetup({ opponent, onStart, onBack }: { opponent: Opponent; onStart: (side: SideChoice) => void; onBack: () => void }) {
   const [side, setSide] = useState<SideChoice>("w");
   return (
-    <div className="space-y-4">
-      <button onClick={onBack} className="text-sm text-muted">
-        ‹ Opponents
-      </button>
+    <div className="space-y-3">
+      <TopBar />
+      <button onClick={onBack} className="px-label px-1 text-[0.56rem] text-muted">‹ Opponents</button>
 
-      <GameCard variant="accent" glow className="p-5 text-center">
-        <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full border border-line bg-surf-blue">
-          <ChessBuddy piece={opponent.piece} size={76} />
+      <PixelPanel hue={PIECE_HUE[opponent.piece]} rivets className="px-4 py-4 text-center">
+        <div className="px-inset mx-auto flex h-24 w-24 items-center justify-center">
+          <ChessBuddy piece={opponent.piece} size={72} />
         </div>
-        <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-brass">You vs</p>
-        <h1 className="font-display text-2xl text-cream">{opponent.name}</h1>
-        <p className="mt-1 text-sm text-muted">&ldquo;{opponent.line}&rdquo;</p>
-        <div className="mt-2 flex items-center justify-center gap-2 text-xs text-muted2">
-          <span className="rounded-full border border-line bg-panel px-2 py-0.5">~{opponent.rating}</span>
-          <span className="rounded-full border border-brass/40 bg-brass/10 px-2 py-0.5 font-semibold text-brass">
-            Win = +{opponent.xpReward} XP
-          </span>
+        <p className="px-label mt-2.5 text-[0.52rem] text-brass">You vs</p>
+        <h1 className="px-title text-[1.1rem] text-cream">{opponent.name}</h1>
+        <p className="mt-1 text-[0.66rem] text-muted">&ldquo;{opponent.line}&rdquo;</p>
+        <div className="mt-2 flex items-center justify-center gap-2">
+          <span className="px-inset px-2 py-0.5 text-[0.54rem] text-muted">~{opponent.rating}</span>
+          <span className="px-inset px-2 py-0.5 text-[0.54rem] font-bold text-brass">Win = +{opponent.xpReward} XP</span>
         </div>
-      </GameCard>
+      </PixelPanel>
 
       <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted2">Choose your side</p>
-        <div className="grid grid-cols-3 gap-2.5">
+        <p className="px-label mb-1.5 text-[0.54rem] text-muted2">Choose your side</p>
+        <div className="grid grid-cols-3 gap-2">
           {SIDES.map((s) => {
             const active = side === s.value;
             return (
-              <button
-                key={s.value}
-                type="button"
-                onClick={() => setSide(s.value)}
-                className={`flex flex-col items-center gap-1 rounded-2xl border p-3 text-center transition-colors ${
-                  active ? "border-brass bg-brass/15 tab-glow" : "border-line bg-panel"
-                }`}
-              >
-                <span className={`text-2xl ${active ? "text-brass" : "text-muted"}`} aria-hidden>
-                  {s.glyph}
-                </span>
-                <span className="text-xs font-bold text-cream">{s.label}</span>
-                <span className="text-[10px] leading-tight text-muted2">{s.sub}</span>
+              <button key={s.value} type="button" onClick={() => setSide(s.value)}
+                className={`px-inset flex flex-col items-center gap-0.5 py-2.5 text-center ${active ? "!border-brass" : ""}`}
+                style={active ? { boxShadow: "inset 0 0 0 2px var(--color-brass)" } : undefined}>
+                <span className={`text-xl ${active ? "text-brass" : "text-muted"}`} aria-hidden>{s.glyph}</span>
+                <span className="px-label text-[0.5rem] text-cream">{s.label}</span>
+                <span className="text-[0.5rem] leading-tight text-muted2">{s.sub}</span>
               </button>
             );
           })}
         </div>
       </div>
 
-      <ActionButton onClick={() => onStart(side)}>Start match →</ActionButton>
+      <PixelButton onClick={() => onStart(side)} tone="gold">⚔ START MATCH ⚔</PixelButton>
     </div>
   );
 }
 
-/* ---------- match recap ---------- */
+/* ---------- recap ---------- */
 
-function StatCard({
-  icon,
-  label,
-  value,
-  tone = "cream",
-}: {
-  icon: string;
-  label: string;
-  value: string;
-  tone?: "cream" | "good" | "bad" | "brass";
-}) {
-  const color =
-    tone === "good" ? "text-gooddeep" : tone === "bad" ? "text-bad" : tone === "brass" ? "text-brass" : "text-cream";
-  return (
-    <div className="rounded-2xl border border-line bg-panel px-2 py-2.5 text-center shadow-[0_3px_0_0_var(--color-line)]">
-      <div className="text-base leading-none" aria-hidden>{icon}</div>
-      <div className={`mt-1 font-display text-lg leading-none ${color}`}>{value}</div>
-      <div className="mt-0.5 text-[9px] uppercase tracking-wide text-muted2">{label}</div>
-    </div>
-  );
-}
-
-function MatchRecap({
-  result,
-  opponent,
-  reviewHref,
-  onRematch,
-  onChange,
-}: {
-  result: MatchResultState;
-  opponent: Opponent | undefined;
-  reviewHref?: string;
-  onRematch: () => void;
-  onChange: () => void;
+function MatchRecap({ result, opponent, reviewHref, onRematch, onChange }: {
+  result: MatchResultState; opponent: Opponent | undefined; reviewHref?: string; onRematch: () => void; onChange: () => void;
 }) {
   const delta = result.ratingAfter - result.ratingBefore;
   const ratingStr = result.pending ? "…" : `${delta >= 0 ? "+" : ""}${delta}`;
   const xpStr = result.pending ? "…" : `+${result.xpAwarded}`;
   const reaction = opponent?.reactions[result.outcome] ?? "Good game!";
   const piece = opponent?.piece ?? "rook";
-
-  const title =
-    result.outcome === "win" ? "Victory!" : result.outcome === "draw" ? "It's a draw!" : "Defeat";
+  const title = result.outcome === "win" ? "Victory!" : result.outcome === "draw" ? "It's a Draw!" : "Defeat";
 
   const stats = (
     <>
       <div className="mt-3 grid grid-cols-3 gap-2">
-        <StatCard icon="✦" label="XP" value={xpStr} tone="brass" />
-        <StatCard icon="⚡" label="Rating" value={ratingStr} tone={delta >= 0 ? "good" : "bad"} />
-        <StatCard icon="♟" label="Moves" value={`${result.moves}`} />
+        <PixelStat label="XP" value={xpStr} tone="gold" />
+        <PixelStat label="Rating" value={ratingStr} tone={delta >= 0 ? "good" : "default"} />
+        <PixelStat label="Moves" value={`${result.moves}`} />
       </div>
-      <p className="mt-2 text-[11px] text-muted2">Match ended {reasonText(result.reason)}</p>
-      <div className="mt-4 space-y-2">
-        {reviewHref ? <ActionButton href={reviewHref}>🔍 Review game</ActionButton> : null}
+      <p className="mt-2 text-[0.58rem] text-muted2">Match ended {reasonText(result.reason)}</p>
+      <div className="mt-3 space-y-2">
+        {reviewHref ? <PixelButton href={reviewHref} tone="blue">🔍 REVIEW GAME</PixelButton> : null}
         <div className="grid grid-cols-2 gap-2">
-          <ActionButton onClick={onChange} variant="secondary">
-            New opponent
-          </ActionButton>
-          <ActionButton onClick={onRematch}>Rematch ›</ActionButton>
+          <PixelButton onClick={onChange} variant="secondary" size="sm">New foe</PixelButton>
+          <PixelButton onClick={onRematch} tone="green" size="sm">Rematch ›</PixelButton>
         </div>
-        <ActionButton href="/" variant="ghost">
-          Continue training →
-        </ActionButton>
+        <PixelButton href="/" variant="ghost" size="sm">Continue training →</PixelButton>
       </div>
     </>
   );
 
   if (result.outcome === "win") {
-    return (
-      <RewardPanel title={title} xp={result.pending ? null : result.xpAwarded} tone="good" piece={piece} subtitle={reaction}>
-        {stats}
-      </RewardPanel>
-    );
+    return <RewardPanel title={title} xp={result.pending ? null : result.xpAwarded} tone="good" piece={piece} subtitle={reaction}>{stats}</RewardPanel>;
   }
-
-  const ribbon =
-    result.outcome === "draw"
-      ? { text: "DRAW", cls: "border-brass/40 bg-brass/10 text-brass" }
-      : { text: "DEFEAT", cls: "border-coral/50 bg-coral/15 text-bad" };
-
+  const hue: PixelHue = result.outcome === "draw" ? "gold" : "red";
   return (
-    <GameCard variant="accent" glow className="tab-animate-pop relative overflow-hidden p-5 text-center">
-      <span className="tab-twinkle absolute left-6 top-5 text-lg text-sun" aria-hidden>✦</span>
-      <span className="tab-twinkle absolute right-7 top-9 text-sm text-mint" aria-hidden>✦</span>
-      <span className={`inline-block rounded-full border px-3 py-0.5 text-[11px] font-bold uppercase tracking-[0.2em] ${ribbon.cls}`}>
-        {ribbon.text}
+    <PixelPanel hue={hue} rivets className="tab-animate-pop px-4 py-4 text-center">
+      <span className="px-label rounded-[4px] border-2 border-[var(--px-edge)] bg-[var(--color-ink)] px-2 py-0.5 text-[0.5rem] text-brass">
+        {result.outcome === "draw" ? "DRAW" : "DEFEAT"}
       </span>
-      <div
-        className={`relative mx-auto mt-3 flex h-24 w-24 items-center justify-center rounded-full border ${
-          result.outcome === "draw" ? "border-brass/40 bg-surf-blue" : "border-coral/50 bg-surf-peach"
-        }`}
-      >
-        <div className="tab-bob">
-          <ChessBuddy piece={piece} size={72} />
-        </div>
+      <div className="tab-bob px-inset mx-auto mt-2.5 flex h-24 w-24 items-center justify-center">
+        <ChessBuddy piece={piece} size={72} />
       </div>
-      <h3 className="mt-3 font-display text-2xl text-cream">{title}</h3>
-      <p className="mt-1 text-[15px] text-muted">{reaction}</p>
+      <h3 className="px-title mt-2.5 text-[1.1rem] text-cream">{title}</h3>
+      <p className="mt-1 text-[0.7rem] text-muted">{reaction}</p>
       {stats}
-    </GameCard>
+    </PixelPanel>
   );
 }
 
@@ -319,16 +240,7 @@ export default function PlayScreen() {
   if (mode === "idle") {
     const setupOpponent = setupId ? opponentById(setupId) : undefined;
     if (setupOpponent) {
-      return (
-        <MatchSetup
-          opponent={setupOpponent}
-          onBack={() => setSetupId(null)}
-          onStart={(side) => {
-            setSetupId(null);
-            startMatch(setupOpponent.id, side);
-          }}
-        />
-      );
+      return <MatchSetup opponent={setupOpponent} onBack={() => setSetupId(null)} onStart={(side) => { setSetupId(null); startMatch(setupOpponent.id, side); }} />;
     }
     return <OpponentSelect onChoose={setSetupId} onPractice={startPractice} />;
   }
@@ -346,97 +258,65 @@ export default function PlayScreen() {
 
   const oppFirst = opponent?.name?.split(" ")[0] ?? "Bot";
   const myTurn = snap.turn === userColor;
-  const turnText = matchOver
-    ? "Game over"
-    : botThinking
-      ? `${oppFirst} is thinking…`
-      : isBot
-        ? myTurn
-          ? "Your move"
-          : `${oppFirst}'s move`
-        : `${snap.turn === "w" ? "White" : "Black"} to move`;
-
+  const turnText = matchOver ? "Game over" : botThinking ? `${oppFirst} is thinking…` : isBot ? (myTurn ? "Your move" : `${oppFirst}'s move`) : `${snap.turn === "w" ? "White" : "Black"} to move`;
   const topLabel = isBot ? oppFirst : topSide === "w" ? "White" : "Black";
   const bottomLabel = isBot ? "You" : bottomSide === "w" ? "White" : "Black";
 
   return (
-    <div className="space-y-3">
-      {/* Match header */}
-      <GameCard className="flex items-center gap-3 p-3">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-line bg-surf-blue">
-          <ChessBuddy piece={opponent?.piece ?? "rook"} size={46} />
+    <div className="space-y-2.5">
+      <TopBar />
+      {/* Battle header */}
+      <PixelPanel hue={opponent ? PIECE_HUE[opponent.piece] : "gray"} className="flex items-center gap-2.5 px-2.5 py-2">
+        <div className="px-inset flex h-12 w-12 shrink-0 items-center justify-center">
+          <ChessBuddy piece={opponent?.piece ?? "rook"} size={38} />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <h1 className="truncate font-display text-base text-cream">{isBot ? opponent?.name ?? "Bot" : "Practice Board"}</h1>
-            {isBot ? (
-              <span className="shrink-0 rounded-full border border-line bg-panel px-2 py-0.5 text-[10px] font-semibold text-muted2">
-                ~{opponent?.rating}
-              </span>
-            ) : null}
+          <div className="flex items-center gap-1.5">
+            <h1 className="truncate px-label text-[0.66rem] text-cream">{isBot ? opponent?.name ?? "Bot" : "Practice Board"}</h1>
+            {isBot ? <span className="px-inset shrink-0 px-1 py-0.5 text-[0.5rem] font-bold text-muted">~{opponent?.rating}</span> : null}
           </div>
-          <p className="mt-0.5 flex items-center gap-1.5 text-xs">
+          <p className="mt-0.5 flex items-center gap-1.5 text-[0.6rem]">
             {botThinking ? <span className="tab-bob inline-block text-brass">●</span> : null}
-            <span className={`font-semibold ${matchOver ? "text-muted" : inCheck ? "text-bad" : "text-brass"}`}>
-              {inCheck && !matchOver ? "Check! " : ""}
-              {turnText}
-            </span>
+            <span className={`font-bold ${matchOver ? "text-muted" : inCheck ? "text-bad" : "text-brass"}`}>{inCheck && !matchOver ? "Check! " : ""}{turnText}</span>
             {isBot ? <span className="text-muted2">· You: {userColor === "w" ? "White" : "Black"}</span> : null}
           </p>
         </div>
-        <button onClick={exitMatch} className="shrink-0 rounded-full border border-line bg-panel/60 px-3 py-1.5 text-xs font-semibold text-muted">
-          Leave
-        </button>
-      </GameCard>
+        <PixelButton onClick={exitMatch} tone="red" variant="solid" size="sm" className="!w-auto">Leave</PixelButton>
+      </PixelPanel>
 
       {justPromoted ? (
-        <div className="tab-animate-rise flex items-center gap-2 rounded-xl border border-brass/30 bg-brass/10 px-3 py-2 text-sm text-brass">
-          <span aria-hidden>♛</span>
-          <span>Promoted to Queen.</span>
+        <div className="px-inset tab-animate-rise flex items-center gap-2 px-3 py-1.5 text-[0.66rem] text-brass">
+          <span aria-hidden>♛</span><span>Promoted to Queen.</span>
         </div>
       ) : null}
 
-      {/* Board with labelled material */}
-      <GameCard className="p-2.5">
+      {/* Board */}
+      <div className="px-board-frame">
         <CapturedPieces side={topSide} label={topLabel} />
-        <div className="tabiya-board-wrap my-1.5 overflow-hidden rounded-lg ring-1 ring-frame">
+        <div className="tabiya-board-wrap my-1 overflow-hidden rounded-[4px]">
           <Board orientation={orientation} />
         </div>
         <CapturedPieces side={bottomSide} label={bottomLabel} />
-      </GameCard>
+      </div>
 
       {notice ? (
-        <div className="tab-animate-rise rounded-xl border border-bad/40 bg-bad/10 px-3 py-2 text-center text-sm text-bad">
-          {notice}
-        </div>
+        <div className="px-inset tab-animate-rise px-3 py-2 text-center text-[0.66rem] text-bad" style={{ borderColor: "var(--color-bad)" }}>{notice}</div>
       ) : null}
 
-      {/* Recap (bot) or game-over note (practice) */}
       {matchOver && result ? (
-        <MatchRecap
-          result={result}
-          opponent={opponent}
-          reviewHref={!result.pending && latestMatchId ? `/play/review?id=${latestMatchId}` : undefined}
-          onRematch={() => startMatch(opponentId!)}
-          onChange={exitMatch}
-        />
+        <MatchRecap result={result} opponent={opponent} reviewHref={!result.pending && latestMatchId ? `/play/review?id=${latestMatchId}` : undefined} onRematch={() => startMatch(opponentId!)} onChange={exitMatch} />
       ) : !isBot && snap.isGameOver ? (
-        <GameCard variant="accent" glow className="tab-animate-pop p-4 text-center">
-          <p className="text-[11px] uppercase tracking-wider text-muted2">Game over</p>
-          <p className="mt-0.5 font-display text-xl text-cream">{statusLabel(snap.status, snap.turn, snap.isGameOver)}</p>
-        </GameCard>
+        <PixelPanel hue="gold" className="tab-animate-pop px-4 py-3 text-center">
+          <p className="px-label text-[0.5rem] text-muted2">Game over</p>
+          <p className="px-title mt-0.5 text-[0.9rem] text-cream">{statusLabel(snap.status, snap.turn, snap.isGameOver)}</p>
+        </PixelPanel>
       ) : null}
 
-      {/* Controls — hidden once a bot match is over */}
       {isBot ? (
         !matchOver ? (
-          <div className="grid grid-cols-2 gap-2.5">
-            <ActionButton onClick={resignMatch} variant="secondary">
-              Resign
-            </ActionButton>
-            <ActionButton onClick={() => setFlip((f) => !f)} variant="secondary">
-              ⇅ Flip
-            </ActionButton>
+          <div className="grid grid-cols-2 gap-2">
+            <PixelButton onClick={resignMatch} variant="secondary" size="sm">⚑ Resign</PixelButton>
+            <PixelButton onClick={() => setFlip((f) => !f)} variant="secondary" size="sm">⇅ Flip</PixelButton>
           </div>
         ) : null
       ) : (

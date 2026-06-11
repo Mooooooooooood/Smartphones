@@ -15,16 +15,11 @@ export default function BadgeEmblem({
   return (
     <div className="flex flex-col items-center gap-1.5 text-center">
       <div
-        className={`relative flex h-16 w-16 items-center justify-center rounded-2xl border text-3xl ${
+        className={`relative flex h-14 w-14 items-center justify-center rounded-[7px] border-[3px] text-2xl ${
           unlocked
-            ? "border-brass/50 text-brass tab-glow"
-            : "border-dashed border-muted2/45 bg-ink2"
+            ? "border-[var(--px-edge)] bg-brass text-[color:var(--color-on-accent)] tab-glow-reward shadow-[0_3px_0_0_var(--color-brassdeep)]"
+            : "border-[var(--px-edge)] bg-ink2"
         }`}
-        style={
-          unlocked
-            ? { backgroundImage: "linear-gradient(160deg, var(--color-surf-sun), var(--color-panel))" }
-            : undefined
-        }
         aria-hidden
       >
         {unlocked ? (

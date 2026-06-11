@@ -20,10 +20,10 @@ export default function StatPill({
   tone?: Tone;
 }) {
   return (
-    <div className="tab-card flex flex-col gap-1 px-3 py-2.5">
-      <span className="text-[10px] uppercase tracking-wider text-muted2">{label}</span>
-      <span className={`font-display text-lg leading-none ${TONE[tone]}`}>{value}</span>
-      {sub ? <span className="text-[10px] text-muted2">{sub}</span> : null}
+    <div className="px-inset flex flex-col items-center gap-0.5 px-2 py-2 text-center">
+      <span className="px-label text-[0.5rem] text-muted2">{label}</span>
+      <span className={`font-display text-[0.8rem] leading-none ${TONE[tone]}`}>{value}</span>
+      {sub ? <span className="text-[0.56rem] text-muted2">{sub}</span> : null}
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import type { BuddyPiece } from "@/components/characters/ChessBuddy";
 import ChessBuddy from "@/components/characters/ChessBuddy";
-import RewardChest from "@/components/ui/RewardChest";
+import PixelChest from "@/components/pixel/PixelChest";
 
 const BURST = [
   "#fbbf24", "#60a5fa", "#86efac", "#c4b5fd", "#fb7185", "#fdba74",
@@ -51,28 +51,23 @@ export default function RewardModal({
       </div>
 
       <div
-        className="tab-card-accent tab-animate-pop tab-glow relative w-full max-w-xs overflow-hidden p-6 text-center"
+        className="px-card tab-animate-pop tab-glow-reward relative w-full max-w-xs overflow-hidden p-5 text-center"
+        style={{ "--hue": "var(--color-brass)", "--hue-deep": "var(--color-brassdeep)" } as React.CSSProperties}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="relative mx-auto flex h-24 w-24 items-center justify-center">
-          <RewardChest state="claimed" size={88} />
-          <div className="absolute -bottom-1 -right-1 flex h-12 w-12 items-center justify-center rounded-full border border-line bg-surf-blue">
-            <ChessBuddy piece={piece} size={40} />
+          <PixelChest state="open" size={84} />
+          <div className="px-inset absolute -bottom-1 -right-1 flex h-12 w-12 items-center justify-center">
+            <ChessBuddy piece={piece} size={38} />
           </div>
         </div>
 
-        <p className="mt-3 text-[11px] uppercase tracking-[0.18em] text-brass">Reward unlocked</p>
-        <h3 className="mt-0.5 font-display text-2xl text-cream">{title}</h3>
-        {xp > 0 ? <p className="mt-1 text-lg font-bold text-brass">+{xp} XP</p> : null}
-        {subtitle ? <p className="mt-1 text-sm text-muted">{subtitle}</p> : null}
+        <p className="px-label mt-3 text-[0.5rem] text-brass">Reward unlocked</p>
+        <h3 className="px-title mt-1 text-[1.05rem] text-cream">{title}</h3>
+        {xp > 0 ? <p className="px-label mt-1.5 text-[0.7rem] text-brass">+{xp} XP</p> : null}
+        {subtitle ? <p className="mt-1 text-[0.66rem] text-muted">{subtitle}</p> : null}
 
-        <button
-          type="button"
-          onClick={onClose}
-          className="mt-5 flex min-h-[48px] w-full items-center justify-center rounded-2xl border border-brassdeep bg-brass text-sm font-semibold text-[color:var(--color-on-accent)] shadow-[0_4px_0_0_var(--color-brassdeep)] active:translate-y-0.5 active:shadow-[0_2px_0_0_var(--color-brassdeep)]"
-        >
-          Awesome!
-        </button>
+        <button type="button" onClick={onClose} className="px-btn mt-4 w-full">Awesome!</button>
       </div>
     </div>
   );

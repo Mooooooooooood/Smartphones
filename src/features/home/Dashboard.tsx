@@ -7,94 +7,54 @@ import { usePuzzleStore, overallAccuracy } from "@/state/puzzleStore";
 import { useGameStore } from "@/state/gameStore";
 import { rankForLevel } from "@/domain/progression/rank";
 import { todayKey } from "@/domain/progression/leveling";
-import {
-  nextRecommended,
-  academyProgress,
-  tierProgress,
-  isTierUnlocked,
-} from "@/domain/academy/progression";
-import {
-  dailyForToday,
-  dailyDoneCount,
-  dailyAllComplete,
-  dailyBonusClaimable,
-  DAILY_BONUS_XP,
-} from "@/domain/training/daily";
-import { lessonsForTier } from "@/content/academy";
-import { BEGINNER_PUZZLES, THEME_LABELS, type PuzzleTheme } from "@/content/puzzles/beginner";
-import GameCard from "@/components/ui/GameCard";
-import SectionHeader from "@/components/ui/SectionHeader";
-import ActionButton from "@/components/ui/ActionButton";
-import ProgressRing from "@/components/ui/ProgressRing";
-import RankBadge from "@/components/ui/RankBadge";
-import StatPill from "@/components/ui/StatPill";
-import XPBar from "@/components/ui/XPBar";
-import FlameIcon from "@/components/ui/FlameIcon";
-import ClaimableChest from "@/components/ui/ClaimableChest";
+import { nextRecommended, academyProgress, tierProgress, isTierUnlocked } from "@/domain/academy/progression";
+import { dailyForToday, dailyDoneCount, dailyAllComplete, dailyBonusClaimable, DAILY_BONUS_XP } from "@/domain/training/daily";
+import TopBar from "@/components/pixel/TopBar";
+import PixelPanel from "@/components/pixel/PixelPanel";
+import PixelButton from "@/components/pixel/PixelButton";
+import PixelStat from "@/components/pixel/PixelStat";
+import PixelChest from "@/components/pixel/PixelChest";
+import SectionLabel from "@/components/pixel/SectionLabel";
+import { AcademyGlyph, PuzzleGlyph, PlayGlyph, StarIcon, FlameIcon } from "@/components/pixel/PixelIcon";
 import ChessBuddy from "@/components/characters/ChessBuddy";
 
 type MilestoneState = "done" | "current" | "locked";
 
-function MissionCard({
-  href,
-  glyph,
-  label,
-  done,
-  surface,
-}: {
-  href: string;
-  glyph: string;
-  label: string;
-  done: boolean;
-  surface: string;
+function QuestRow({ label, done }: { label: string; done: boolean }) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className="px-track h-2.5 flex-1">
+        <div className="px-track-fill" style={{ width: done ? "100%" : "8%", "--fill": done ? "var(--color-good)" : "var(--color-sky)" } as React.CSSProperties} />
+      </div>
+      <span className="w-24 shrink-0 truncate text-[0.62rem] text-muted">{label}</span>
+      <span className={`px-label text-[0.5rem] ${done ? "text-good" : "text-muted2"}`}>{done ? "✓" : "0/1"}</span>
+    </div>
+  );
+}
+
+function ModeCard({ href, glyph, title, cta, hue, deep, sprite }: {
+  href: string; glyph: React.ReactNode; title: string; cta: string;
+  hue: string; deep: string; sprite: React.ReactNode;
 }) {
   return (
-    <Link href={href} className="block transition-transform active:scale-[0.97]">
-      <div className={`flex h-full flex-col items-center gap-2 rounded-2xl border border-line p-3 text-center ${surface}`}>
-        <div
-          className={`flex h-12 w-12 items-center justify-center rounded-full border text-2xl ${
-            done ? "border-good/50 bg-good/20 text-gooddeep" : "border-line bg-panel text-cream"
-          }`}
-          aria-hidden
-        >
-          {done ? "✓" : glyph}
-        </div>
-        <span className="text-[11px] font-semibold leading-tight text-cream">{label}</span>
-        <span className={`text-[10px] font-bold ${done ? "text-gooddeep" : "text-muted2"}`}>
-          {done ? "Done" : "Go ›"}
-        </span>
+    <Link href={href} className="block active:translate-y-0.5">
+      <div className="px-card flex h-full flex-col items-center gap-1 px-1.5 py-2 text-center" style={{ "--hue": hue, "--hue-deep": deep } as React.CSSProperties}>
+        <div className="flex h-9 items-center justify-center">{sprite ?? glyph}</div>
+        <span className="px-label text-[0.5rem] text-cream">{title}</span>
+        <span className="px-label rounded-[4px] border-2 border-[var(--px-edge)] bg-[var(--color-ink)] px-1.5 py-0.5 text-[0.44rem] text-brass">{cta}</span>
       </div>
     </Link>
   );
 }
 
-function MiniNode({ glyph, label, state }: { glyph: string; label: string; state: MilestoneState }) {
-  const cls =
-    state === "current"
-      ? "border-[3px] border-brass bg-surf-blue text-brass tab-pulse"
-      : state === "done"
-        ? "border-2 border-good/50 bg-good/20 text-gooddeep"
-        : "border border-line bg-ink2 text-muted2";
-  return (
-    <div className="flex flex-col items-center gap-1">
-      <div className={`flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold ${cls}`}>
-        {state === "locked" ? "🔒" : state === "done" ? "✓" : glyph}
-      </div>
-      <span className="max-w-[64px] truncate text-[10px] text-muted2">{label}</span>
-    </div>
-  );
-}
-
 export default function Dashboard() {
   const xp = useProfileStore((s) => s.xp);
-  const streak = useProfileStore((s) => s.streak);
   const completed = useProfileStore((s) => s.completed);
   const bossClearedMap = useProfileStore((s) => s.bossCleared);
   const puzzleRating = useProfileStore((s) => s.puzzleRating);
   const solvedIds = useProfileStore((s) => s.solvedPuzzleIds);
   const dailyRaw = useProfileStore((s) => s.daily);
   const claimDailyBonus = useProfileStore((s) => s.claimDailyBonus);
-  const playRating = useProfileStore((s) => s.playRating);
   const matches = useProfileStore((s) => s.matches);
   const attempts = usePuzzleStore((s) => s.attempts);
 
@@ -120,237 +80,119 @@ export default function Dashboard() {
   const doneCount = dailyDoneCount(daily);
   const allDone = dailyAllComplete(daily);
   const claimable = dailyBonusClaimable(daily);
-  const lastMatch = matches[0];
-  const playTaskDone = daily.playTaskDone;
 
-  const missions = [
-    { key: "academy", href: step.href, glyph: "♟", label: "Academy", done: daily.academyTaskDone, surface: "bg-surf-blue" },
-    { key: "puzzle", href: "/puzzles", glyph: "✦", label: "Puzzle", done: daily.puzzleTaskDone, surface: "bg-surf-mint" },
-    { key: "play", href: "/play", glyph: "♞", label: "Play", done: daily.playTaskDone, surface: "bg-surf-lav" },
-  ];
+  const wins = matches.filter((m) => m.result === "win").length;
+  const winRate = matches.length ? Math.round((wins / matches.length) * 100) : 0;
 
-  // Mini-path milestone states.
   const t0State: MilestoneState = t0.total > 0 && t0.done === t0.total ? "done" : "current";
   const bossState: MilestoneState = bossDone ? "done" : t0State === "done" ? "current" : "locked";
-  const t1State: MilestoneState = !tier1Open
-    ? "locked"
-    : t1.total > 0 && t1.done === t1.total
-      ? "done"
-      : "current";
-
-  const recoTheme: PuzzleTheme | null =
-    step.lesson?.relatedPuzzleTheme ??
-    [...lessonsForTier(1)].reverse().find((l) => completed[l.id] && l.relatedPuzzleTheme)
-      ?.relatedPuzzleTheme ??
-    null;
+  const t1State: MilestoneState = !tier1Open ? "locked" : t1.total > 0 && t1.done === t1.total ? "done" : "current";
 
   return (
-    <div className="space-y-6">
-      <header className="pt-1">
-        <p className="text-xs uppercase tracking-[0.18em] text-muted2">
-          {fresh ? "Welcome to" : "Welcome back to"}
-        </p>
-        <h1 className="font-display text-4xl font-semibold text-cream">Tabiya</h1>
-      </header>
+    <div className="space-y-2.5">
+      <TopBar streak />
 
-      {/* Hero */}
-      <GameCard variant="accent" glow className="relative overflow-hidden p-5">
-        <div aria-hidden className="pointer-events-none absolute inset-0 select-none">
-          <span className="absolute -right-3 -top-4 text-8xl text-sky/15">♞</span>
-          <span className="absolute right-24 -bottom-2 text-5xl text-lav/30">♟</span>
-          <span className="tab-twinkle absolute left-3 top-3 text-xl text-sun">✦</span>
-          <span className="tab-twinkle absolute right-6 top-10 text-sm text-mint">✦</span>
-        </div>
-        <div className="relative flex items-center gap-3.5">
-          <ProgressRing value={lvl.progress} size={104} stroke={11}>
-            <span className="font-display text-4xl leading-none text-cream">{lvl.level}</span>
-            <span className="mt-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-muted2">Level</span>
-          </ProgressRing>
+      {/* Hero — The Rang + player card */}
+      <PixelPanel hue="gold" rivets glow="reward" className="px-3 py-2.5">
+        <h1 className="px-title mb-2 text-center text-[1.7rem] leading-none">The Rang</h1>
+        <div className="flex items-stretch gap-2.5">
+          <div className="relative shrink-0 self-end">
+            <div className="px-inset mb-1 max-w-[88px] px-1.5 py-1 text-[0.52rem] leading-tight text-cream">
+              {fresh ? "Let's begin!" : "Every move makes you stronger!"}
+            </div>
+            <ChessBuddy piece="pawn" size={56} className="tab-bob mx-auto" />
+          </div>
           <div className="min-w-0 flex-1">
-            <RankBadge title={rank.title} />
-            <div className="mt-2 flex items-center gap-1.5 text-xs text-muted">
-              <FlameIcon active={streak > 0} />
-              <span className="font-semibold text-cream">{streak}</span>
-              <span className="text-muted2">day{streak === 1 ? "" : "s"}</span>
+            <div className="flex items-center gap-1.5">
+              <ChessBuddy piece={rank.tier >= 5 ? "queen" : rank.tier >= 3 ? "knight" : "pawn"} size={20} />
+              <span className="px-label text-[0.58rem] text-cream">{rank.title}</span>
             </div>
-            <p className="mt-1 text-[11px] text-muted2">
-              {fresh ? "Start now" : `${xp} XP · ${lvl.span - lvl.intoLevel} to next`}
-            </p>
-          </div>
-          <div className="tab-bob shrink-0 self-end">
-            <ChessBuddy piece="pawn" size={54} />
+            <p className="mt-0.5 text-[0.58rem] text-muted2">Keep learning, future master!</p>
+            <div className="px-track mt-1.5 h-3">
+              <div className="px-track-fill" style={{ width: `${Math.round(lvl.progress * 100)}%`, "--fill": "var(--color-brass)" } as React.CSSProperties} />
+            </div>
+            <div className="mt-1.5 grid grid-cols-2 gap-1.5">
+              <PixelStat label="Rating" value={puzzleRating} tone="gold" />
+              <PixelStat label="Win %" value={`${winRate}%`} tone="good" />
+            </div>
           </div>
         </div>
-        <div className="mt-4">
-          <ActionButton href={step.href}>
-            {fresh ? "Begin your path →" : "Continue your journey →"}
-          </ActionButton>
-        </div>
-      </GameCard>
+      </PixelPanel>
 
-      {/* Daily Training */}
-      <section>
-        <SectionHeader eyebrow="Today" title="Daily Training" />
-        <GameCard className="p-4">
-          {/* Guide character + encouragement */}
-          <div className="mb-3 flex items-center gap-2.5 rounded-2xl border border-line bg-surf-blue px-3 py-2">
-            <ChessBuddy piece="pawn" size={42} />
-            <p className="flex-1 text-xs text-cream">
-              {allDone
-                ? "Every mission done — open your chest! 🎉"
-                : doneCount > 0
-                  ? `Nice work — ${3 - doneCount} to go!`
-                  : "Hi, I'm Pip! Let's finish 3 quick missions today."}
-            </p>
+      <PixelButton href={step.href} tone="gold">
+        {fresh ? "★ START JOURNEY ★" : "⚔ CONTINUE JOURNEY ⚔"}
+      </PixelButton>
+
+      {/* Daily Quest */}
+      <PixelPanel className="px-3 py-2.5">
+        <SectionLabel icon={<StarIcon size={12} />}>Daily Quest</SectionLabel>
+        <div className="flex items-center gap-3">
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <QuestRow label="Win a match" done={daily.playTaskDone} />
+            <QuestRow label="Solve a puzzle" done={daily.puzzleTaskDone} />
+            <QuestRow label="Study a lesson" done={daily.academyTaskDone} />
           </div>
-
-          <div className="flex items-center gap-3">
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-cream">{doneCount}/3 missions</span>
-                <span className="text-[11px] text-muted2">resets daily</span>
-              </div>
-              <div className="mt-1.5">
-                <XPBar value={doneCount / 3} />
-              </div>
-            </div>
-            <ClaimableChest
-              state={daily.bonusClaimed ? "claimed" : claimable ? "ready" : "locked"}
-              size={64}
-              onClaim={claimDailyBonus}
-              rewardTitle="Daily Bonus!"
-              rewardPiece="pawn"
-              lockedMessage="Finish all 3 missions first!"
-            />
-          </div>
-
-          <div className="mt-3 grid grid-cols-3 gap-2.5">
-            {missions.map((m) => (
-              <MissionCard
-                key={m.key}
-                href={m.href}
-                glyph={m.glyph}
-                label={m.label}
-                done={m.done}
-                surface={m.surface}
-              />
-            ))}
-          </div>
-
-          {/* Bonus hint */}
-          <p className="mt-3 text-center text-[11px] text-muted2">
-            {daily.bonusClaimed
-              ? `🎉 Daily bonus claimed · +${DAILY_BONUS_XP} XP`
-              : claimable
-                ? "Tap the glowing chest to claim your bonus!"
-                : "Finish all 3 missions to open today's reward chest."}
-          </p>
-        </GameCard>
-      </section>
-
-      {/* Journey mini-path */}
-      <section>
-        <SectionHeader
-          eyebrow="Academy"
-          title="Your Journey"
-          action={
-            <Link href="/academy" className="text-xs font-semibold text-brass">
-              View map ›
-            </Link>
-          }
-        />
-        <GameCard className="p-4">
-          <div className="flex items-center justify-between">
-            <MiniNode glyph="♟" label="Foundations" state={t0State} />
-            <div className={`mx-1 h-0.5 flex-1 rounded-full ${t0State === "done" ? "bg-good/40" : "bg-line"}`} />
-            <MiniNode glyph="♛" label="Trial" state={bossState} />
-            <div className={`mx-1 h-0.5 flex-1 rounded-full ${bossState === "done" ? "bg-good/40" : "bg-line"}`} />
-            <MiniNode glyph="♝" label="Tactics" state={t1State} />
-          </div>
-          <Link
-            href={step.href}
-            className="mt-3 flex items-center gap-2 rounded-xl border border-brass/30 bg-surf-blue px-3 py-2.5 transition-transform active:scale-[0.99]"
+          <button
+            type="button"
+            onClick={claimable ? claimDailyBonus : undefined}
+            disabled={!claimable}
+            className={`flex shrink-0 flex-col items-center ${claimable ? "tab-bob active:translate-y-0.5" : ""}`}
+            aria-label="Daily reward chest"
           >
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-brass">
-              {step.kind === "boss" ? "Trial ready" : step.kind === "done" ? "All done" : "Up next"}
-            </span>
-            <span className="min-w-0 flex-1 truncate text-sm text-cream">{step.title}</span>
-            <span className="shrink-0 text-brass">›</span>
-          </Link>
-        </GameCard>
-      </section>
-
-      {/* Recommended tactic */}
-      <section>
-        <SectionHeader eyebrow="Practice" title="Recommended Tactic" />
-        <Link
-          href={recoTheme ? `/puzzles?theme=${recoTheme}` : "/puzzles"}
-          className="block transition-transform active:scale-[0.99]"
-        >
-          <div className="flex items-center gap-3 rounded-[1.25rem] border border-lav/40 bg-surf-lav p-4 shadow-[0_8px_18px_-10px_rgba(124,58,237,0.25)]">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-lav/50 bg-panel text-2xl text-lavdeep">
-              ✦
-            </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="font-display text-base text-cream">
-                {recoTheme ? THEME_LABELS[recoTheme] : "Mixed tactics"}
-              </h3>
-              <p className="truncate text-xs text-muted2">Sharpen this pattern in the arena</p>
-            </div>
-            <span className="shrink-0 rounded-full border border-lav/50 bg-panel px-3 py-1.5 text-xs font-bold text-lavdeep">
-              Play ›
-            </span>
-          </div>
-        </Link>
-      </section>
-
-      {/* Friendly match */}
-      <section>
-        <SectionHeader eyebrow="Play" title={playTaskDone ? "Friendly Match" : "Daily Match"} />
-        <Link href="/play" className="block transition-transform active:scale-[0.99]">
-          <div
-            className={`relative flex items-center gap-3 overflow-hidden rounded-[1.25rem] border p-4 ${
-              playTaskDone ? "border-line bg-panel" : "border-brass/40 bg-surf-blue tab-glow"
-            }`}
-          >
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-line bg-panel">
-              <ChessBuddy piece="rook" size={46} />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <h3 className="font-display text-base text-cream">
-                  {playTaskDone ? "Play a friendly match" : "Play your Daily Match"}
-                </h3>
-              </div>
-              <p className="truncate text-xs text-muted2">
-                {lastMatch
-                  ? `Last: ${lastMatch.result === "win" ? "Won vs" : lastMatch.result === "draw" ? "Drew vs" : "Lost to"} ${lastMatch.opponentName.split(" ")[0]}`
-                  : "Beat Pip, Bramble or Gallop"}
-                {" · Rating "}
-                <span className="font-semibold text-brass">{playRating}</span>
-              </p>
-            </div>
-            <span className="shrink-0 rounded-full border border-brassdeep bg-brass px-3.5 py-2 text-xs font-bold text-[color:var(--color-on-accent)] shadow-[0_3px_0_0_var(--color-brassdeep)]">
-              {playTaskDone ? "Play ›" : "Start ›"}
-            </span>
-          </div>
-        </Link>
-      </section>
-
-      {/* Secondary stats */}
-      <section>
-        <SectionHeader eyebrow="Progress" title="Skill Snapshot" />
-        <div className="grid grid-cols-4 gap-2">
-          <StatPill label="Rating" value={`${puzzleRating}`} tone="brass" />
-          <StatPill label="Academy" value={`${Math.round(acad.pct * 100)}%`} />
-          <StatPill label="Solved" value={`${solved}`} sub={`/${BEGINNER_PUZZLES.length}`} />
-          <StatPill
-            label="Accuracy"
-            value={acc.total ? `${Math.round(acc.pct * 100)}%` : "—"}
-            tone={acc.total ? "good" : "muted"}
-          />
+            <PixelChest state={daily.bonusClaimed ? "open" : claimable ? "ready" : "locked"} size={48} />
+            <span className="px-label mt-0.5 text-[0.42rem] text-brass">+{DAILY_BONUS_XP} XP</span>
+          </button>
         </div>
-      </section>
+        <p className="mt-1.5 text-center text-[0.56rem] text-muted2">
+          {daily.bonusClaimed ? "Reward claimed — see you tomorrow!" : claimable ? "Tap the chest to claim your bonus!" : allDone ? "All done!" : `${doneCount}/3 quests complete`}
+        </p>
+      </PixelPanel>
+
+      {/* Mode cards */}
+      <div className="grid grid-cols-3 gap-2">
+        <ModeCard href={step.href} title="Academy" cta="ENTER" hue="var(--color-sky)" deep="#1c50b0"
+          glyph={<AcademyGlyph size={26} className="text-sky" />} sprite={<ChessBuddy piece="king" size={34} />} />
+        <ModeCard href="/puzzles" title="Puzzles" cta="SOLVE" hue="var(--color-mint)" deep="#1f8f4d"
+          glyph={<PuzzleGlyph size={26} className="text-mint" />} sprite={<ChessBuddy piece="knight" size={34} />} />
+        <ModeCard href="/play" title="Play" cta="BATTLE" hue="var(--color-bad)" deep="#b32436"
+          glyph={<PlayGlyph size={26} className="text-coral" />} sprite={<ChessBuddy piece="rook" size={34} />} />
+      </div>
+
+      {/* Journey strip */}
+      <PixelPanel className="px-3 py-2.5">
+        <SectionLabel icon={<FlameIcon size={12} />} action={<Link href="/academy" className="px-label text-[0.5rem] text-muted2">VIEW MAP ›</Link>}>
+          Journey
+        </SectionLabel>
+        <div className="flex items-center justify-between">
+          <JourneyNode label="Found." state={t0State} piece="pawn" />
+          <Connector on={t0State === "done"} />
+          <JourneyNode label="Trial" state={bossState} piece="queen" />
+          <Connector on={bossState === "done"} />
+          <JourneyNode label="Tactics" state={t1State} piece="bishop" />
+        </div>
+        <Link href={step.href} className="px-inset mt-2 flex items-center gap-2 px-2 py-1.5 active:translate-y-0.5">
+          <span className="px-label text-[0.5rem] text-brass">{step.kind === "boss" ? "TRIAL" : step.kind === "done" ? "DONE" : "NEXT"}</span>
+          <span className="min-w-0 flex-1 truncate text-[0.66rem] text-cream">{step.title}</span>
+          <span className="text-brass">›</span>
+        </Link>
+        <p className="mt-1 text-center text-[0.52rem] text-muted2">Academy {Math.round(acad.pct * 100)}% · {solved} solved · {acc.total ? `${Math.round(acc.pct * 100)}% acc` : "no puzzles yet"}</p>
+      </PixelPanel>
+    </div>
+  );
+}
+
+function Connector({ on }: { on: boolean }) {
+  return <div className={`mx-1 h-1 flex-1 rounded-[2px] ${on ? "bg-good" : "bg-[var(--px-edge)]"}`} />;
+}
+
+function JourneyNode({ label, state, piece }: { label: string; state: MilestoneState; piece: "pawn" | "queen" | "bishop" }) {
+  const border = state === "current" ? "border-brass tab-pulse" : state === "done" ? "border-good" : "border-[var(--px-edge)]";
+  return (
+    <div className="flex flex-col items-center gap-0.5">
+      <div className={`flex h-11 w-11 items-center justify-center rounded-[6px] border-[3px] bg-[var(--color-ink)] ${border}`}>
+        {state === "locked" ? <span className="text-muted2">🔒</span> : state === "done" ? <span className="font-display text-good">✓</span> : <ChessBuddy piece={piece} size={30} />}
+      </div>
+      <span className="px-label text-[0.42rem] text-muted2">{label}</span>
     </div>
   );
 }

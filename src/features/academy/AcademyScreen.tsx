@@ -14,11 +14,11 @@ import {
   nextRecommended,
   type LessonStatus,
 } from "@/domain/academy/progression";
-import GameCard from "@/components/ui/GameCard";
-import XPBar from "@/components/ui/XPBar";
 import AcademyPath, { type PathStop, type StopStatus } from "@/components/ui/AcademyPath";
 import ChessBuddy from "@/components/characters/ChessBuddy";
 import RewardModal from "@/components/ui/RewardModal";
+import TopBar from "@/components/pixel/TopBar";
+import PixelPanel from "@/components/pixel/PixelPanel";
 
 const MID_REWARD_ID = "tier0-mid";
 const MID_REWARD_XP = 40;
@@ -48,45 +48,26 @@ function TierBand({
   rewardXp: number;
   locked?: boolean;
 }) {
-  const body = (
-    <>
+  return (
+    <PixelPanel hue={locked ? "purple" : "gold"} className="px-3 py-2.5">
       <div className="flex items-center justify-between">
         <div>
-          <p className={`text-[11px] uppercase tracking-[0.16em] ${locked ? "text-lavdeep" : "text-brass"}`}>
-            {eyebrow}
-          </p>
-          <h2 className="font-display text-lg text-cream">{title}</h2>
+          <p className={`px-label text-[0.52rem] ${locked ? "text-lavdeep" : "text-brass"}`}>{eyebrow}</p>
+          <h2 className="px-label mt-0.5 text-[0.78rem] text-cream">{title}</h2>
         </div>
-        <span
-          className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${
-            locked ? "border-lav/50 bg-panel text-lavdeep" : "border-brass/40 bg-brass/10 text-brass"
-          }`}
-        >
-          {locked ? "🔒 Locked" : `${done}/${total}`}
+        <span className="px-inset px-2 py-1 text-[0.54rem] font-bold text-brass">
+          {locked ? "🔒" : `${done}/${total}`}
         </span>
       </div>
       {!locked ? (
-        <div className="mt-3">
-          <XPBar value={pct} />
+        <div className="px-track mt-2 h-3">
+          <div className="px-track-fill" style={{ width: `${Math.round(pct * 100)}%`, "--fill": "var(--color-brass)" } as React.CSSProperties} />
         </div>
       ) : null}
-      <p className="mt-2 text-[11px] text-muted2">
+      <p className="mt-1.5 text-[0.56rem] text-muted2">
         {locked ? "Pass the Tier 0 Trial to unlock this world" : `Reward · ${rewardXp} XP`}
       </p>
-    </>
-  );
-
-  if (locked) {
-    return (
-      <div className="rounded-[1.25rem] border border-lav/40 bg-surf-lav p-4 shadow-[0_8px_18px_-10px_rgba(124,58,237,0.25)]">
-        {body}
-      </div>
-    );
-  }
-  return (
-    <GameCard variant="accent" glow className="p-4">
-      {body}
-    </GameCard>
+    </PixelPanel>
   );
 }
 
@@ -163,26 +144,24 @@ export default function AcademyScreen() {
   }));
 
   return (
-    <div className="space-y-5">
-      <header>
-        <p className="text-xs uppercase tracking-[0.16em] text-muted2">Academy</p>
-        <h1 className="font-display text-3xl text-cream">Your Learning Map</h1>
-      </header>
+    <div className="space-y-3">
+      <TopBar />
+      <h1 className="px-title px-1 text-[1.4rem] leading-tight">Adventure Map</h1>
 
       {/* Next-step banner with academy master */}
-      <Link href={step.href} className="block transition-transform active:scale-[0.99]">
-        <GameCard variant="accent" glow className="flex items-center gap-3 p-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-line bg-surf-sun">
-            <ChessBuddy piece="king" size={48} />
+      <Link href={step.href} className="block transition-transform active:translate-y-0.5">
+        <PixelPanel hue="gold" rivets className="flex items-center gap-2.5 px-3 py-2.5">
+          <div className="px-inset flex h-12 w-12 shrink-0 items-center justify-center">
+            <ChessBuddy piece="king" size={40} />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[11px] uppercase tracking-wider text-brass">Cassius says · next step</p>
-            <h2 className="truncate font-display text-base text-cream">{step.title}</h2>
+            <p className="px-label text-[0.5rem] text-brass">Cassius · next step</p>
+            <h2 className="truncate px-label mt-0.5 text-[0.68rem] text-cream">{step.title}</h2>
           </div>
-          <span className="shrink-0 rounded-full border border-brass/50 bg-brass/15 px-3 py-1.5 text-xs font-bold text-brass">
+          <span className="px-label shrink-0 rounded-[4px] border-2 border-[var(--px-edge)] bg-brass px-2 py-1 text-[0.5rem] text-[color:var(--color-on-accent)]">
             {step.cta} ›
           </span>
-        </GameCard>
+        </PixelPanel>
       </Link>
 
       {/* Tier 0 */}

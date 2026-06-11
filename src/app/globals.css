@@ -1,205 +1,342 @@
 @import "tailwindcss";
 
-/* ---------- Tabiya palette — token names stay stable so the whole app
-   re-themes from here. Light = sunny sky world; .dark = magical night world. */
+/* ============================================================
+   THE RANG — retro pixel-art design system.
+   Token names stay stable so the whole app re-themes from here.
+   Default = "Day Arcade" (navy lobby). .dark = "Night Arcade".
+   ============================================================ */
 @theme {
-  --color-ink: #eef5ff;
-  --color-ink2: #f1f5fb;
-  --color-panel: #ffffff;
-  --color-panel2: #eaf2ff;
-  --color-frame: #e2e8f0;
-  --color-line: #e3eaf5;
-  --color-cream: #16233c;
-  --color-muted: #5a6b87;
-  --color-muted2: #8593ad;
-  --color-brass: #3b9bf6;
-  --color-brassdeep: #2b7fe0;
-  --color-good: #22c55e;
-  --color-gooddeep: #15a34a;
-  --color-bad: #f4516b;
-  --color-warn: #e0890a;
-  --color-on-accent: #ffffff;
-  --color-mint: #86efac;
-  --color-sun: #fde68a;
-  --color-coral: #fda4af;
-  --color-peach: #fdba74;
-  --color-lav: #c4b5fd;
-  --color-lavdeep: #7c3aed;
-  --color-sky: #4aa3f5;
-  --color-skysoft: #bfdbfe;
-  --color-surf-blue: #e7f1ff;
-  --color-surf-mint: #e8fcf1;
-  --color-surf-lav: #f2ebff;
-  --color-surf-sun: #fef3c7;
-  --color-surf-peach: #fff0e4;
-  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
-  --font-body: var(--font-hanken), system-ui, -apple-system, sans-serif;
+  /* Surfaces */
+  --color-ink: #121a3e;
+  --color-ink2: #1a2350;
+  --color-panel: #1f2a63;
+  --color-panel2: #27347a;
+  --color-frame: #4456a8;
+  --color-line: #3a4a96;
+  /* Text */
+  --color-cream: #eef3ff;
+  --color-muted: #aebbed;
+  --color-muted2: #8493cf;
+  /* Primary accent = arcade gold */
+  --color-brass: #f7bd3f;
+  --color-brassdeep: #c98517;
+  /* Semantic */
+  --color-good: #45d36c;
+  --color-gooddeep: #25a34c;
+  --color-bad: #ff5468;
+  --color-warn: #f7bd3f;
+  --color-on-accent: #2a1c02;
+  /* Card accent hues (used as surf-* surfaces + glyph tints) */
+  --color-mint: #57e08a;
+  --color-sun: #ffd76b;
+  --color-coral: #ff7d92;
+  --color-peach: #ffb066;
+  --color-lav: #b69bff;
+  --color-lavdeep: #8b6cff;
+  --color-sky: #4d8dff;
+  --color-skysoft: #9fc0ff;
+  /* Bright card surfaces (arcade cards on navy) */
+  --color-surf-blue: #25387e;
+  --color-surf-mint: #1d4d4a;
+  --color-surf-lav: #322a6e;
+  --color-surf-sun: #4a3a1a;
+  --color-surf-peach: #4a3322;
+  /* Fonts: pixel display + readable pixel body */
+  --font-display: var(--font-press), "Courier New", monospace;
+  --font-body: var(--font-pixel), system-ui, sans-serif;
 }
 
-/* Non-colour scene variables (gradients/scenery), themed below. */
+/* Non-colour scene variables (frames/scenery), themed per mode. */
 :root {
-  --sky-1: #bfe1ff;
-  --sky-2: #eef6ff;
-  --cloud-fill: #ffffff;
-  --cloud-line: #cfe0f5;
-  --cloud-top: rgba(255, 255, 255, 0.9);
-  --star: rgba(255, 255, 255, 0);
-  --card-bg-1: #ffffff;
-  --card-bg-2: #f7faff;
-  --card-shadow: rgba(28, 52, 92, 0.16);
-  --card-top: rgba(255, 255, 255, 0.9);
-  --skeleton-shine: rgba(255, 255, 255, 0.8);
-  --island-grass: #8df0a8;
-  --island-grass2: #45d684;
-  --island-grass-hi: #c8f9d8;
-  --island-dirt: #f1c08a;
-  --island-dirt2: #d99a5b;
-  --island-shadow: rgba(28, 52, 92, 0.2);
-  --horizon: rgba(255, 255, 255, 0.55);
-  --sparkle: #ffffff;
-  --glow-accent: rgba(59, 155, 246, 0.55);
-  --glow-reward: rgba(245, 190, 70, 0.6);
-  /* chessboard squares (theme-aware via inline var()) */
-  --board-light: #eef4fc;
-  --board-dark: #c4d8f0;
-  --board-coord-on-dark: rgba(30, 41, 59, 0.55);
-  --board-coord-on-light: rgba(30, 41, 59, 0.4);
-  /* captured-piece glyph colours (board side panels) */
-  --piece-white: #ffffff;
-  --piece-white-line: #94a3b8;
-  --piece-black: #334155;
-  --piece-black-line: #1e293b;
+  /* Pixel frame palette (Day Arcade) */
+  --px-edge: #0c1230;          /* outer hard edge */
+  --px-bevel-hi: rgba(255, 255, 255, 0.16); /* top inner highlight */
+  --px-bevel-lo: rgba(0, 0, 0, 0.34);        /* bottom inner shadow */
+  --px-rivet: #f7bd3f;
+  --px-rivet-edge: #8a5a0c;
+  --panel-bg-1: #243066;
+  --panel-bg-2: #1c2657;
+  --panel-border: #46579e;
+  --panel-shadow: #0c1230;
+  --card-shadow: rgba(0, 0, 0, 0.45);
+
+  /* Sky / world scenery */
+  --sky-1: #2c3c8a;
+  --sky-2: #18204f;
+  --cloud-fill: #3a4894;
+  --cloud-line: #5061ad;
+  --cloud-top: rgba(180, 200, 255, 0.45);
+  --star: rgba(226, 236, 255, 0.95);
+  --island-grass: #5ad07f;
+  --island-grass2: #36a85c;
+  --island-grass-hi: #8ef0a8;
+  --island-dirt: #b9743a;
+  --island-dirt2: #8a5226;
+  --island-shadow: rgba(0, 0, 0, 0.4);
+  --horizon: rgba(150, 180, 255, 0.25);
+  --sparkle: #fff3c4;
+  --glow-accent: rgba(77, 141, 255, 0.55);
+  --glow-reward: rgba(247, 189, 63, 0.6);
+  --skeleton-shine: rgba(150, 170, 255, 0.14);
+
+  /* Chessboard squares (theme-aware via inline var()) */
+  --board-light: #dfe7fb;
+  --board-dark: #7e9ee6;
+  --board-coord-on-dark: rgba(18, 26, 62, 0.6);
+  --board-coord-on-light: rgba(18, 26, 62, 0.5);
+  /* captured-piece glyph colours */
+  --piece-white: #f4f7ff;
+  --piece-white-line: #8493cf;
+  --piece-black: #1a234e;
+  --piece-black-line: #0c1230;
 }
 
-/* ---------- Magical cartoon NIGHT world ---------- */
+/* ---------- Night Arcade ---------- */
 html.dark {
-  --color-ink: #141b3d;
-  --color-ink2: #202a55;
-  --color-panel: #232c5a;
-  --color-panel2: #2c3168;
-  --color-frame: #3c4585;
-  --color-line: #3a4382;
-  --color-cream: #eef2ff;
-  --color-muted: #b7c2e8;
-  --color-muted2: #93a0d0;
-  --color-brass: #6cb8ff;
-  --color-brassdeep: #4aa0ff;
-  --color-good: #57e7a0;
-  --color-gooddeep: #8ff3c0;
-  --color-bad: #fb7a90;
-  --color-warn: #fbc94a;
-  --color-on-accent: #0a1130;
-  --color-lavdeep: #cbbcff;
-  --color-surf-blue: #28336b;
-  --color-surf-mint: #1d3d52;
-  --color-surf-lav: #322a6b;
-  --color-surf-sun: #3c3520;
-  --color-surf-peach: #3c2c2c;
+  --color-ink: #04061a;
+  --color-ink2: #0a0f2c;
+  --color-panel: #121a46;
+  --color-panel2: #182455;
+  --color-frame: #3a4ba0;
+  --color-line: #2b3a86;
+  --color-cream: #f3f6ff;
+  --color-muted: #aebcf2;
+  --color-muted2: #7e8ed0;
+  --color-brass: #ffd25c;
+  --color-brassdeep: #d18d1a;
+  --color-good: #4ee27a;
+  --color-gooddeep: #2ba84d;
+  --color-bad: #ff6076;
+  --color-warn: #ffc94a;
+  --color-on-accent: #1a1200;
+  --color-lavdeep: #a98bff;
+  --color-surf-blue: #18255e;
+  --color-surf-mint: #123a39;
+  --color-surf-lav: #241e54;
+  --color-surf-sun: #3a2c12;
+  --color-surf-peach: #3a2618;
 
-  --sky-1: #2a3680;
-  --sky-2: #161d49;
-  --cloud-fill: #313c79;
-  --cloud-line: #4a5598;
-  --cloud-top: rgba(150, 170, 255, 0.32);
-  --star: rgba(226, 236, 255, 0.92);
-  --card-bg-1: #28316a;
-  --card-bg-2: #222a58;
-  --card-shadow: rgba(0, 0, 0, 0.5);
-  --card-top: rgba(150, 170, 255, 0.16);
-  --skeleton-shine: rgba(150, 170, 255, 0.1);
-  --island-grass: #54c79a;
-  --island-grass2: #3a9d7a;
-  --island-grass-hi: #8fe6c0;
-  --island-dirt: #565aa0;
-  --island-dirt2: #3c4080;
-  --island-shadow: rgba(0, 0, 0, 0.45);
-  --horizon: rgba(120, 150, 255, 0.16);
-  --sparkle: #e6efff;
-  --glow-accent: rgba(108, 184, 255, 0.6);
-  --glow-reward: rgba(252, 211, 77, 0.55);
-  --board-light: #46518c;
-  --board-dark: #333d70;
-  --board-coord-on-dark: rgba(226, 236, 255, 0.5);
-  --board-coord-on-light: rgba(226, 236, 255, 0.5);
-  --piece-white: #eef2ff;
-  --piece-white-line: #93a0d0;
-  --piece-black: #9aa6cc;
-  --piece-black-line: #5d6b98;
+  --px-edge: #01030f;
+  --px-bevel-hi: rgba(150, 180, 255, 0.16);
+  --px-bevel-lo: rgba(0, 0, 0, 0.5);
+  --panel-bg-1: #16204e;
+  --panel-bg-2: #0d1538;
+  --panel-border: #38489a;
+  --panel-shadow: #01030f;
+  --card-shadow: rgba(0, 0, 0, 0.66);
+
+  --sky-1: #141d52;
+  --sky-2: #05071e;
+  --cloud-fill: #232f6b;
+  --cloud-line: #36448c;
+  --cloud-top: rgba(150, 180, 255, 0.28);
+  --star: rgba(226, 236, 255, 0.98);
+  --island-grass: #3fb069;
+  --island-grass2: #2a8a4d;
+  --island-grass-hi: #6cd692;
+  --island-dirt: #9a5f2e;
+  --island-dirt2: #6e421d;
+  --island-shadow: rgba(0, 0, 0, 0.55);
+  --horizon: rgba(120, 160, 255, 0.18);
+  --sparkle: #fff3c4;
+  --glow-accent: rgba(77, 141, 255, 0.6);
+  --glow-reward: rgba(255, 201, 74, 0.6);
+
+  --board-light: #c6d2f2;
+  --board-dark: #5f7fce;
+  --board-coord-on-dark: rgba(8, 13, 36, 0.6);
+  --board-coord-on-light: rgba(8, 13, 36, 0.5);
+  --piece-white: #eef3ff;
+  --piece-white-line: #7382bf;
+  --piece-black: #131b40;
+  --piece-black-line: #04081c;
 }
 
 html, body { height: 100%; }
 body {
   margin: 0;
   background:
-    radial-gradient(82% 44% at 10% 2%, color-mix(in oklab, var(--color-lav) 26%, transparent) 0%, transparent 58%),
-    radial-gradient(88% 50% at 94% 0%, color-mix(in oklab, var(--color-mint) 22%, transparent) 0%, transparent 52%),
-    radial-gradient(120% 78% at 50% -10%, var(--color-panel2) 0%, var(--color-ink) 60%);
+    radial-gradient(120% 80% at 50% -10%, var(--sky-1) 0%, var(--color-ink) 62%);
   background-attachment: fixed;
   color: var(--color-cream);
   font-family: var(--font-body);
-  -webkit-font-smoothing: antialiased;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+  text-rendering: optimizeSpeed;
 }
-/* Night sky gets a soft scattering of stars behind everything. */
-html.dark body::before {
+/* Starfield behind everything — present in both arcade modes. */
+body::before {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
   background-image:
-    radial-gradient(1.5px 1.5px at 12% 14%, rgba(226,236,255,0.9), transparent),
-    radial-gradient(1.5px 1.5px at 78% 8%, rgba(226,236,255,0.7), transparent),
-    radial-gradient(1px 1px at 44% 22%, rgba(226,236,255,0.8), transparent),
-    radial-gradient(1.5px 1.5px at 88% 32%, rgba(200,220,255,0.7), transparent),
-    radial-gradient(1px 1px at 24% 36%, rgba(226,236,255,0.6), transparent),
-    radial-gradient(1.5px 1.5px at 62% 44%, rgba(226,236,255,0.55), transparent);
+    radial-gradient(1.5px 1.5px at 12% 14%, var(--star), transparent),
+    radial-gradient(1.5px 1.5px at 78% 8%, var(--star), transparent),
+    radial-gradient(1px 1px at 44% 22%, var(--star), transparent),
+    radial-gradient(1.5px 1.5px at 88% 30%, color-mix(in oklab, var(--star) 80%, transparent), transparent),
+    radial-gradient(1px 1px at 24% 34%, color-mix(in oklab, var(--star) 70%, transparent), transparent),
+    radial-gradient(1.5px 1.5px at 62% 42%, color-mix(in oklab, var(--star) 65%, transparent), transparent),
+    radial-gradient(1px 1px at 8% 54%, color-mix(in oklab, var(--star) 60%, transparent), transparent),
+    radial-gradient(1.5px 1.5px at 92% 64%, color-mix(in oklab, var(--star) 70%, transparent), transparent);
   background-repeat: no-repeat;
 }
 * { -webkit-tap-highlight-color: transparent; }
-::selection { background: rgba(96, 165, 250, 0.25); }
+::selection { background: rgba(247, 189, 63, 0.3); }
+
+/* Pixel-crisp rendering for sprites/illustrations that opt in. */
+.px-crisp { image-rendering: pixelated; image-rendering: crisp-edges; }
 
 .tabiya-board-wrap { width: 100%; max-width: 440px; margin: 0 auto; }
 
 /* Content sits above the fixed starfield. */
 #tabiya-root { position: relative; z-index: 1; }
 
-/* ---------- Cards / surfaces ---------- */
-.tab-card {
-  background-image: linear-gradient(180deg, var(--card-bg-1), var(--card-bg-2));
-  border: 1px solid var(--color-line);
-  border-radius: 1.375rem;
+/* ============================================================
+   PIXEL FRAME PRIMITIVES
+   ============================================================ */
+
+/* Chunky framed panel (the workhorse surface). */
+.px-panel {
+  position: relative;
+  background-image: linear-gradient(180deg, var(--panel-bg-1), var(--panel-bg-2));
+  border: 3px solid var(--panel-border);
+  border-radius: 7px;
   box-shadow:
-    0 1px 0 var(--card-top) inset,
-    0 1px 2px rgba(20, 30, 60, 0.04),
-    0 16px 30px -18px var(--card-shadow);
-}
-.tab-card-accent {
-  background-image: linear-gradient(158deg, var(--color-panel2), var(--color-panel) 82%);
-  border: 1px solid color-mix(in oklab, var(--color-brass) 40%, var(--color-line));
-  border-radius: 1.375rem;
-  box-shadow:
-    0 1px 0 var(--card-top) inset,
-    0 18px 34px -18px color-mix(in oklab, var(--color-brass) 42%, var(--card-shadow));
-}
-.tab-glow {
-  box-shadow:
-    0 18px 34px -18px color-mix(in oklab, var(--color-brass) 38%, var(--card-shadow)),
-    0 0 36px -8px var(--glow-accent);
-}
-.tab-glow-reward {
-  box-shadow:
-    0 14px 28px -16px var(--card-shadow),
-    0 0 30px -4px var(--glow-reward);
+    0 0 0 3px var(--px-edge),
+    inset 0 3px 0 var(--px-bevel-hi),
+    inset 0 -3px 0 var(--px-bevel-lo),
+    0 5px 0 0 var(--panel-shadow),
+    0 9px 14px -6px var(--card-shadow);
 }
 
-/* ---------- Sky-world roadmap ---------- */
-.tab-sky {
-  background:
-    radial-gradient(120% 70% at 50% 6%, color-mix(in oklab, var(--sky-1) 70%, #ffffff 16%) 0%, transparent 55%),
-    linear-gradient(180deg, var(--sky-1), var(--sky-2));
-  border: 1px solid var(--color-line);
-  border-radius: 1.5rem;
+/* Tighter inset frame for nested boxes (stat capsules, list rows). */
+.px-inset {
+  position: relative;
+  background: color-mix(in oklab, var(--color-ink) 70%, #000 4%);
+  border: 2px solid var(--px-edge);
+  border-radius: 5px;
+  box-shadow: inset 0 2px 0 var(--px-bevel-lo), inset 0 -2px 0 var(--px-bevel-hi);
+}
+
+/* Coloured arcade card — pass --hue / --hue-deep inline. */
+.px-card {
+  position: relative;
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--hue, var(--color-sky)) 30%, var(--panel-bg-1)),
+    color-mix(in oklab, var(--hue, var(--color-sky)) 14%, var(--panel-bg-2))
+  );
+  border: 3px solid var(--hue, var(--color-sky));
+  border-radius: 7px;
+  box-shadow:
+    0 0 0 3px var(--px-edge),
+    inset 0 3px 0 var(--px-bevel-hi),
+    inset 0 -3px 0 var(--px-bevel-lo),
+    0 5px 0 0 var(--hue-deep, var(--px-edge)),
+    0 10px 16px -8px var(--card-shadow);
+}
+
+/* Glow halos for hero / reward surfaces. */
+.px-glow { box-shadow: 0 0 0 3px var(--px-edge), 0 0 28px -4px var(--glow-accent), 0 5px 0 0 var(--panel-shadow); }
+.px-glow-reward { box-shadow: 0 0 0 3px var(--px-edge), 0 0 30px -2px var(--glow-reward), 0 5px 0 0 var(--panel-shadow); }
+
+/* Corner rivets (decorative) — placed by PixelPanel. */
+.px-rivet {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  background: var(--px-rivet);
+  border: 1.5px solid var(--px-rivet-edge);
+  border-radius: 1px;
+  z-index: 2;
+}
+
+/* ---------- Pixel buttons ---------- */
+.px-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  border: 3px solid var(--px-edge);
+  border-radius: 6px;
+  padding: 0.85rem 1rem;
+  color: var(--color-on-accent);
+  background-image: linear-gradient(180deg, var(--btn-hi, #ffd76b), var(--btn-bg, var(--color-brass)));
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.25),
+    0 4px 0 0 var(--btn-deep, var(--color-brassdeep)),
+    0 7px 10px -4px var(--card-shadow);
+  transition: transform 0.05s, box-shadow 0.05s;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.px-btn:active {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.25),
+    0 1px 0 0 var(--btn-deep, var(--color-brassdeep));
+}
+.px-btn:disabled { opacity: 0.45; transform: none; }
+.px-btn-secondary {
+  color: var(--color-cream);
+  background-image: linear-gradient(180deg, var(--color-panel2), var(--color-panel));
+  --btn-deep: var(--px-edge);
+}
+.px-btn-ghost {
+  color: var(--color-muted);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+.px-btn-ghost:active { transform: none; }
+
+/* ---------- Title text ---------- */
+.px-title {
+  font-family: var(--font-display);
+  color: var(--color-brass);
+  text-shadow:
+    0 2px 0 var(--px-edge),
+    3px 3px 0 rgba(0, 0, 0, 0.35);
+  letter-spacing: 0.01em;
+}
+.px-label {
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ---------- Pixel chessboard frame ---------- */
+.px-board-frame {
+  padding: 8px;
+  background-image: linear-gradient(180deg, var(--panel-bg-1), var(--panel-bg-2));
+  border: 3px solid var(--panel-border);
+  border-radius: 6px;
+  box-shadow: 0 0 0 3px var(--px-edge), inset 0 2px 0 var(--px-bevel-hi), 0 5px 0 0 var(--panel-shadow);
+}
+
+/* ---------- Progress / XP track ---------- */
+.px-track {
+  background: var(--color-ink);
+  border: 2px solid var(--px-edge);
+  border-radius: 4px;
   overflow: hidden;
+  box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.4);
+}
+.px-track-fill {
+  height: 100%;
+  background-image: linear-gradient(180deg, color-mix(in oklab, var(--fill, var(--color-good)) 70%, #fff 30%), var(--fill, var(--color-good)));
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.25);
+  transition: width 0.4s ease;
 }
 
 /* ---------- Skeleton ---------- */
@@ -207,7 +344,8 @@ html.dark body::before {
   position: relative;
   overflow: hidden;
   background: var(--color-ink2);
-  border-radius: 1rem;
+  border: 2px solid var(--px-edge);
+  border-radius: 5px;
 }
 .tab-skeleton::after {
   content: "";
@@ -218,10 +356,41 @@ html.dark body::before {
   animation: tab-shimmer 1.4s ease-in-out infinite;
 }
 
+/* ============================================================
+   LEGACY ALIASES — keep old class names mapping to pixel styles
+   so any un-migrated markup still looks on-theme.
+   ============================================================ */
+.tab-card,
+.tab-card-accent {
+  position: relative;
+  background-image: linear-gradient(180deg, var(--panel-bg-1), var(--panel-bg-2));
+  border: 3px solid var(--panel-border);
+  border-radius: 7px;
+  box-shadow:
+    0 0 0 3px var(--px-edge),
+    inset 0 3px 0 var(--px-bevel-hi),
+    inset 0 -3px 0 var(--px-bevel-lo),
+    0 5px 0 0 var(--panel-shadow);
+}
+.tab-card-accent { border-color: var(--color-brass); }
+.tab-glow { box-shadow: 0 0 0 3px var(--px-edge), 0 0 28px -4px var(--glow-accent), 0 5px 0 0 var(--panel-shadow); }
+.tab-glow-reward { box-shadow: 0 0 0 3px var(--px-edge), 0 0 30px -2px var(--glow-reward), 0 5px 0 0 var(--panel-shadow); }
+.tab-sky {
+  background:
+    radial-gradient(120% 70% at 50% 4%, color-mix(in oklab, var(--sky-1) 70%, #fff 8%) 0%, transparent 58%),
+    linear-gradient(180deg, var(--sky-1), var(--sky-2));
+  border: 3px solid var(--panel-border);
+  border-radius: 7px;
+  box-shadow: 0 0 0 3px var(--px-edge);
+  overflow: hidden;
+}
 .tab-path-line {
-  background: repeating-linear-gradient(to bottom, var(--color-frame) 0 6px, transparent 6px 12px);
+  background: repeating-linear-gradient(to bottom, var(--color-brass) 0 5px, transparent 5px 11px);
 }
 
+/* ============================================================
+   ANIMATIONS (unchanged behaviour)
+   ============================================================ */
 @keyframes tab-shimmer { 100% { transform: translateX(100%); } }
 @keyframes tab-pop {
   0% { transform: scale(0.82); opacity: 0; }
@@ -242,13 +411,13 @@ html.dark body::before {
   100% { transform: translateY(-26px); opacity: 0; }
 }
 @keyframes tab-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.50); }
-  70% { box-shadow: 0 0 0 12px rgba(96, 165, 250, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(96, 165, 250, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(247, 189, 63, 0.5); }
+  70% { box-shadow: 0 0 0 10px rgba(247, 189, 63, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(247, 189, 63, 0); }
 }
 @keyframes tab-bob {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+  50% { transform: translateY(-5px); }
 }
 @keyframes tab-burst {
   0% { transform: translateY(0) scale(0.6); opacity: 0; }

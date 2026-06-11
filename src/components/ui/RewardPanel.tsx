@@ -30,11 +30,9 @@ export default function RewardPanel({
   children?: ReactNode;
 }) {
   const accent = tone === "good" ? "text-good" : "text-brass";
-  const ring =
-    tone === "good" ? "border-good/50 bg-good/15 text-good" : "border-brass/50 bg-brass/15 text-brass";
 
   return (
-    <div className="tab-card-accent tab-animate-pop tab-glow relative overflow-hidden p-5 text-center">
+    <div className="px-card tab-animate-pop tab-glow-reward relative overflow-hidden p-4 text-center" style={{ "--hue": "var(--color-brass)", "--hue-deep": "var(--color-brassdeep)" } as React.CSSProperties}>
       {/* confetti */}
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-16">
         {CONFETTI.map((c, i) => (
@@ -47,29 +45,27 @@ export default function RewardPanel({
       </div>
 
       {piece ? (
-        <div className="relative mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-line bg-surf-blue">
-          <ChessBuddy piece={piece} size={64} />
+        <div className="px-inset relative mx-auto flex h-20 w-20 items-center justify-center">
+          <ChessBuddy piece={piece} size={62} />
           {xp != null && xp > 0 ? (
-            <span className={`tab-floatup absolute -top-1 text-sm font-bold ${accent}`}>+{xp}</span>
+            <span className={`tab-floatup absolute -top-1 font-display text-[0.6rem] ${accent}`}>+{xp}</span>
           ) : null}
         </div>
       ) : (
-        <div
-          className={`relative mx-auto flex h-14 w-14 items-center justify-center rounded-full border text-2xl ${ring}`}
-        >
+        <div className="px-inset relative mx-auto flex h-14 w-14 items-center justify-center text-2xl text-brass">
           <span aria-hidden>✓</span>
           {xp != null && xp > 0 ? (
-            <span className={`tab-floatup absolute -top-1 text-sm font-bold ${accent}`}>+{xp}</span>
+            <span className={`tab-floatup absolute -top-1 font-display text-[0.6rem] ${accent}`}>+{xp}</span>
           ) : null}
         </div>
       )}
 
-      <h3 className="mt-3 font-display text-xl text-cream">{title}</h3>
+      <h3 className="px-title mt-3 text-[1.05rem] text-cream">{title}</h3>
       {xp != null && xp > 0 ? (
-        <p className={`mt-1 text-sm font-semibold ${accent}`}>+{xp} XP earned</p>
+        <p className={`px-label mt-1 text-[0.6rem] ${accent}`}>+{xp} XP earned</p>
       ) : null}
-      {subtitle ? <p className="mt-1 text-sm text-muted">{subtitle}</p> : null}
-      {children ? <div className="mt-4">{children}</div> : null}
+      {subtitle ? <p className="mt-1 text-[0.68rem] text-muted">{subtitle}</p> : null}
+      {children ? <div className="mt-3">{children}</div> : null}
     </div>
   );
 }

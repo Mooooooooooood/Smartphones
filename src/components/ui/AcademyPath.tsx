@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import RewardChest from "@/components/ui/RewardChest";
+import PixelChest from "@/components/pixel/PixelChest";
 import ChessBuddy, { type BuddyPiece } from "@/components/characters/ChessBuddy";
 import { Cloud, Sparkle, FloatingIsland, MiniIslet, Moon } from "@/components/world/Scenery";
 
@@ -99,10 +99,10 @@ function IslandBase({ w }: { w: number }) {
 
 function lessonDisc(stop: PathStop) {
   const size = discFor(stop);
-  const base = "flex items-center justify-center rounded-full font-bold";
+  const base = "flex items-center justify-center rounded-[7px] font-display border-[3px]";
   if (stop.status === "completed") {
     return (
-      <div className={`${base} border-2 border-brass bg-brass text-lg text-[color:var(--color-on-accent)]`} style={{ width: size, height: size }}>
+      <div className={`${base} border-[var(--px-edge)] bg-brass text-base text-[color:var(--color-on-accent)] shadow-[0_3px_0_0_var(--color-brassdeep)]`} style={{ width: size, height: size }}>
         ✓
       </div>
     );
@@ -111,14 +111,14 @@ function lessonDisc(stop: PathStop) {
     return (
       <div className="relative tab-bob">
         <Sparkle className="absolute -right-1 -top-2 tab-twinkle" size={14} />
-        <div className={`${base} tab-pulse border-[3px] border-brass bg-panel text-2xl text-brass shadow-[0_4px_0_0_var(--color-brassdeep)]`} style={{ width: size, height: size }}>
+        <div className={`${base} tab-pulse border-brass bg-[var(--color-ink)] text-lg text-brass shadow-[0_4px_0_0_var(--color-brassdeep)]`} style={{ width: size, height: size }}>
           {stop.order}
         </div>
       </div>
     );
   }
   return (
-    <div className={`${base} border border-line bg-ink2 text-muted2`} style={{ width: size, height: size }}>
+    <div className={`${base} border-[var(--px-edge)] bg-ink2 text-muted2`} style={{ width: size, height: size }}>
       <LockGlyph />
     </div>
   );
@@ -135,8 +135,8 @@ function chestTop(stop: PathStop) {
           <Sparkle className="absolute -right-2 top-1 tab-twinkle" size={14} />
         </>
       ) : null}
-      <div className={`grid place-items-center rounded-2xl ${ready ? "tab-glow" : ""}`}>
-        <RewardChest state={claimed ? "claimed" : stop.status === "locked" ? "locked" : "ready"} size={62} />
+      <div className={`grid place-items-center rounded-[7px] ${ready ? "tab-glow-reward" : ""}`}>
+        <PixelChest state={claimed ? "open" : stop.status === "locked" ? "locked" : "ready"} size={58} />
       </div>
     </div>
   );
@@ -150,12 +150,12 @@ function bossTop(stop: PathStop) {
       {/* gate flags */}
       <span className="absolute -left-1 -top-2 text-sm" aria-hidden>{ready || cleared ? "🚩" : ""}</span>
       <div
-        className={`flex items-center justify-center rounded-2xl border-2 text-3xl ${
+        className={`flex items-center justify-center rounded-[7px] border-[3px] font-display text-2xl ${
           cleared
-            ? "border-brass bg-brass text-[color:var(--color-on-accent)] tab-glow"
+            ? "border-[var(--px-edge)] bg-brass text-[color:var(--color-on-accent)] tab-glow-reward"
             : ready
-              ? "border-brass bg-brass/20 text-brass tab-glow tab-pulse"
-              : "border-line bg-ink2 text-muted2"
+              ? "border-brass bg-[var(--color-ink)] text-brass tab-glow tab-pulse"
+              : "border-[var(--px-edge)] bg-ink2 text-muted2"
         }`}
         style={{ width: 66, height: 66 }}
         aria-hidden
@@ -174,7 +174,7 @@ function NodeIsland({ stop }: { stop: PathStop }) {
       {top}
       <IslandBase w={baseWidthFor(stop)} />
       {stop.caption ? (
-        <span className="-mt-1 rounded-full border border-line bg-panel/85 px-2 text-[10px] font-bold uppercase tracking-wide text-muted2">
+        <span className="px-label -mt-1 rounded-[4px] border-2 border-[var(--px-edge)] bg-[var(--color-panel)] px-1.5 py-0.5 text-[0.46rem] text-muted2">
           {stop.caption}
         </span>
       ) : null}
@@ -187,16 +187,15 @@ function GuideHost({ guide }: { guide: PathGuide }) {
     <div className={`relative flex px-2 pt-3 ${guide.side === "right" ? "justify-end" : "justify-start"}`} style={{ height: HOST_H }}>
       <div className={`relative flex flex-col items-center ${guide.faded ? "opacity-60" : ""}`}>
         {guide.line ? (
-          <div className="relative mb-1 max-w-[150px] rounded-2xl border border-line bg-panel px-3 py-1.5 text-center text-[11px] font-semibold text-cream shadow-[0_6px_12px_-8px_var(--card-shadow)]">
+          <div className="px-inset relative mb-1 max-w-[150px] px-2.5 py-1.5 text-center text-[0.58rem] font-semibold text-cream">
             {guide.line}
-            <span className="absolute -bottom-1 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 border-b border-r border-line bg-panel" />
           </div>
         ) : null}
         <div className="relative tab-bob">
           <Cloud className="absolute -bottom-1 left-1/2 -translate-x-1/2" scale={1.5} />
-          <ChessBuddy piece={guide.piece} size={92} className="relative" />
+          <ChessBuddy piece={guide.piece} size={84} className="relative" />
         </div>
-        <span className="mt-2 rounded-full border border-line bg-panel px-2 py-0.5 text-[9px] font-bold text-muted2">
+        <span className="px-label mt-2 rounded-[4px] border-2 border-[var(--px-edge)] bg-[var(--color-panel)] px-1.5 py-0.5 text-[0.46rem] text-brass">
           {guide.name}
         </span>
       </div>
@@ -253,14 +252,13 @@ export default function AcademyPath({ stops, guide }: { stops: PathStop[]; guide
         {/* Mission banner anchored under the current island */}
         {active ? (
           <div className="absolute left-1/2 w-[86%] -translate-x-1/2" style={{ top: y(activeIndex) + discFor(active) / 2 + 30 }}>
-            <span className="absolute -top-2 left-1/2 h-3.5 w-3.5 -translate-x-1/2 rotate-45 border-l border-t border-brass/50 bg-[var(--color-panel2)]" />
-            <Link href={active.href ?? "#"} className="block transition-transform active:scale-[0.99]">
-              <div className="tab-card-accent tab-glow flex items-center justify-between gap-3 px-4 py-3">
+            <Link href={active.href ?? "#"} className="block transition-transform active:translate-y-0.5">
+              <div className="px-card tab-glow flex items-center justify-between gap-3 px-3.5 py-2.5" style={{ "--hue": "var(--color-brass)", "--hue-deep": "var(--color-brassdeep)" } as React.CSSProperties}>
                 <div className="min-w-0">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-brass">▶ Current mission</p>
-                  <h3 className="truncate font-display text-base text-cream">{active.title}</h3>
+                  <p className="px-label text-[0.5rem] text-brass">▶ Current Mission</p>
+                  <h3 className="truncate px-label mt-0.5 text-[0.68rem] text-cream">{active.title}</h3>
                 </div>
-                <span className="shrink-0 rounded-full border border-brassdeep bg-brass px-3 py-1.5 text-xs font-bold text-[color:var(--color-on-accent)] shadow-[0_3px_0_0_var(--color-brassdeep)]">
+                <span className="px-label shrink-0 rounded-[4px] border-2 border-[var(--px-edge)] bg-brass px-2 py-1 text-[0.5rem] text-[color:var(--color-on-accent)]">
                   +{active.xpReward} XP
                 </span>
               </div>

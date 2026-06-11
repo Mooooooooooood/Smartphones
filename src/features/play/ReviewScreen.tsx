@@ -62,7 +62,7 @@ export default function ReviewScreen() {
   if (!validId || match === null) {
     return (
       <div className="py-12 text-center">
-        <h1 className="font-display text-2xl text-cream">Match not found</h1>
+        <h1 className="px-title text-[1rem] text-cream">Match not found</h1>
         <button onClick={() => router.back()} className="mt-3 text-brass">
           Go back
         </button>
@@ -94,7 +94,7 @@ export default function ReviewScreen() {
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-line bg-surf-blue">
             <ChessBuddy piece="rook" size={52} />
           </div>
-          <h1 className="mt-3 font-display text-xl text-cream">Replay unavailable</h1>
+          <h1 className="mt-3 px-title text-[0.95rem] text-cream">Replay unavailable</h1>
           <p className="mt-1 text-sm text-muted">
             This older match doesn&apos;t have replay data saved. New matches can be reviewed move by move.
           </p>

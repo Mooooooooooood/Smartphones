@@ -13,12 +13,10 @@ export default function SectionHeader({
   className?: string;
 }) {
   return (
-    <div className={`mb-3 flex items-end justify-between gap-3 ${className}`}>
+    <div className={`mb-2 flex items-end justify-between gap-3 ${className}`}>
       <div className="min-w-0">
-        {eyebrow ? (
-          <p className="text-xs uppercase tracking-[0.16em] text-muted2">{eyebrow}</p>
-        ) : null}
-        <h2 className="font-display text-xl text-cream">{title}</h2>
+        {eyebrow ? <p className="px-label text-[0.5rem] text-muted2">{eyebrow}</p> : null}
+        <h2 className="px-title text-[0.92rem] text-cream">{title}</h2>
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}
     </div>

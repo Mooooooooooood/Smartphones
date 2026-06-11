@@ -69,7 +69,7 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
   if (!lesson) {
     return (
       <div className="py-12 text-center">
-        <h1 className="font-display text-2xl text-cream">Lesson not found</h1>
+        <h1 className="px-title text-[1rem] text-cream">Lesson not found</h1>
         <Link href="/academy" className="mt-3 inline-block text-brass">
           Back to Academy
         </Link>
@@ -89,7 +89,7 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
             <path d="M8 11V8a4 4 0 0 1 8 0v3" />
           </svg>
         </div>
-        <h1 className="font-display text-2xl text-cream">Locked</h1>
+        <h1 className="px-title text-[1rem] text-cream">Locked</h1>
         <p className="mt-2 text-sm text-muted">Finish the earlier lessons first.</p>
         <Link href="/academy" className="mt-3 inline-block text-brass">
           Back to Academy
@@ -249,14 +249,10 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
 
       <header className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-brass">
-            {tierTitle} · Stage {lesson.order}
-          </p>
-          <h1 className="truncate font-display text-2xl leading-tight text-cream">{lesson.title}</h1>
+          <p className="px-label text-[0.5rem] text-brass">{tierTitle} · Stage {lesson.order}</p>
+          <h1 className="truncate px-title text-[0.92rem] leading-tight text-cream">{lesson.title}</h1>
         </div>
-        <span className="shrink-0 rounded-full border border-brass/40 bg-surf-sun px-2.5 py-1 text-[11px] font-bold text-warn">
-          +{lesson.xpReward} XP
-        </span>
+        <span className="px-inset shrink-0 px-2 py-1 text-[0.52rem] font-bold text-brass">+{lesson.xpReward} XP</span>
       </header>
 
       {/* stage card */}
@@ -301,8 +297,10 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
 
         {hasBoard(step) ? (
           <div className="space-y-2">
-            <div className="mx-auto w-full max-w-[340px] overflow-hidden rounded-xl ring-1 ring-frame">
-              <LessonInteractiveBoard key={idx} step={step} solved={solved} onResult={handleBoardResult} showHint={showHint} />
+            <div className="px-board-frame mx-auto w-full max-w-[340px]">
+              <div className="overflow-hidden rounded-[4px]">
+                <LessonInteractiveBoard key={idx} step={step} solved={solved} onResult={handleBoardResult} showHint={showHint} />
+              </div>
             </div>
             {step.type === "board-demo" && step.caption ? (
               <p className="text-center text-xs text-muted2">{step.caption}</p>

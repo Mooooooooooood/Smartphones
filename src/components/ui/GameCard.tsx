@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
-/** Layered premium surface used across the app. */
+/** Chunky pixel-framed surface used across the app. `accent` = gold arcade card. */
 export default function GameCard({
   children,
   variant = "default",
@@ -12,6 +12,15 @@ export default function GameCard({
   glow?: boolean;
   className?: string;
 }) {
-  const base = variant === "accent" ? "tab-card-accent" : "tab-card";
-  return <div className={`${base} ${glow ? "tab-glow" : ""} ${className}`}>{children}</div>;
+  if (variant === "accent") {
+    return (
+      <div
+        className={`px-card ${glow ? "px-glow" : ""} ${className}`}
+        style={{ "--hue": "var(--color-brass)", "--hue-deep": "var(--color-brassdeep)" } as CSSProperties}
+      >
+        {children}
+      </div>
+    );
+  }
+  return <div className={`px-panel ${glow ? "px-glow" : ""} ${className}`}>{children}</div>;
 }

@@ -38,7 +38,7 @@ export default function BossScreen({ bossId }: { bossId: string }) {
   if (!boss) {
     return (
       <div className="py-12 text-center">
-        <h1 className="font-display text-2xl text-cream">Trial not found</h1>
+        <h1 className="px-title text-[1rem] text-cream">Trial not found</h1>
         <Link href="/academy" className="mt-3 inline-block text-brass">
           Back to Academy
         </Link>
@@ -83,8 +83,8 @@ export default function BossScreen({ bossId }: { bossId: string }) {
               </svg>
             </span>
           </div>
-          <h1 className="mt-5 font-display text-2xl text-cream">{boss.title}</h1>
-          <p className="mx-auto mt-1 max-w-xs text-sm text-muted">
+          <h1 className="mt-5 px-title text-[1.05rem] text-cream">{boss.title}</h1>
+          <p className="mx-auto mt-1.5 max-w-xs text-[0.66rem] text-muted">
             A 5-question challenge. Pass {boss.passScore} of {boss.questions.length} to unlock Tier 1!
           </p>
         </div>
@@ -192,7 +192,7 @@ export default function BossScreen({ bossId }: { bossId: string }) {
           <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-line bg-surf-sun">
             <ChessBuddy piece="queen" size={62} />
           </div>
-          <h2 className="mt-3 font-display text-xl text-cream">So close — {score}/{total}</h2>
+          <h2 className="mt-3 px-title text-[0.95rem] text-cream">So close — {score}/{total}</h2>
           <p className="mt-1 text-sm text-muted">
             You need {boss.passScore}/{total} to pass. Brush up on these and challenge me again!
           </p>
@@ -228,16 +228,16 @@ export default function BossScreen({ bossId }: { bossId: string }) {
         trailing={`${qIndex + 1}/${total}`}
       />
 
-      <header>
-        <p className="text-[11px] uppercase tracking-[0.16em] text-brass">Boss Trial · Tier {boss.tier}</p>
-        <h1 className="font-display text-2xl text-cream">{boss.title}</h1>
+      <header className="px-1">
+        <p className="px-label text-[0.5rem] text-brass">Boss Trial · Tier {boss.tier}</p>
+        <h1 className="px-title text-[1.05rem] text-cream">{boss.title}</h1>
       </header>
 
       <CoachBubble piece="queen">I am {BUDDIES.queen.name}, your challenge host. {boss.subtitle} — answer {boss.passScore} of {total} correctly to pass.</CoachBubble>
 
       <GameCard className="p-4">
-        <p className="text-[11px] uppercase tracking-wider text-muted2">Question {qIndex + 1}</p>
-        <h2 className="mt-0.5 font-display text-lg text-cream">{question.question}</h2>
+        <p className="px-label text-[0.5rem] text-muted2">Question {qIndex + 1}</p>
+        <h2 className="mt-1 px-title text-[0.82rem] leading-snug text-cream">{question.question}</h2>
         <div className="mt-3 space-y-2.5">
           {question.choices.map((c, i) => {
             const isCorrect = i === question.correctIndex;

@@ -6,22 +6,16 @@ export default function FlameIcon({
   active?: boolean;
   size?: number;
 }) {
+  const hot = active ? "#ff8f3c" : "#5b6896";
+  const core = active ? "#ffd23c" : "#7683b3";
+  const tip = active ? "#ffe27a" : "#94a3b8";
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      className={active ? "tab-flame-icon" : ""}
-      aria-hidden
-    >
-      <path
-        d="M12 2c1 3-1 4.5-2.5 6.5C8 10.3 7 11.8 7 14a5 5 0 0 0 10 0c0-2-1-3.6-2-5-1 1-2 1.4-2.6.4C11.6 8 13 6 12 2z"
-        fill={active ? "#fb923c" : "#cbd5e1"}
-      />
-      <path
-        d="M12 12c.7 1 .4 2-.2 2.7-.5.6-.8 1.3-.8 2a2 2 0 0 0 4 0c0-1.4-1-2-1.4-3-.4.5-1 .6-1.3 0z"
-        fill={active ? "#fde68a" : "#e2e8f0"}
-      />
+    <svg width={size} height={size} viewBox="0 0 8 8" className={`px-crisp ${active ? "tab-flame-icon" : ""}`} shapeRendering="crispEdges" aria-hidden>
+      <rect x="3" y="0" width="2" height="2" fill={hot} />
+      <rect x="2" y="2" width="4" height="2" fill={hot} />
+      <rect x="1" y="4" width="6" height="3" fill={hot} />
+      <rect x="2" y="5" width="4" height="2" fill={core} />
+      <rect x="3" y="3" width="2" height="3" fill={tip} />
     </svg>
   );
 }

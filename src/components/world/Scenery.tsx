@@ -6,7 +6,7 @@
  */
 import type { CSSProperties } from "react";
 
-/* ---------- Soft rounded cloud ---------- */
+/* ---------- Blocky pixel cloud ---------- */
 export function Cloud({
   className = "",
   scale = 1,
@@ -18,23 +18,27 @@ export function Cloud({
   far?: boolean;
   style?: CSSProperties;
 }) {
+  const f = "var(--cloud-fill)";
+  const t = "var(--cloud-top)";
   return (
     <svg
       width={104 * scale}
       height={52 * scale}
-      viewBox="0 0 104 52"
-      className={className}
+      viewBox="0 0 26 13"
+      className={`px-crisp ${className}`}
       style={style}
+      shapeRendering="crispEdges"
       aria-hidden
     >
-      {/* puffy body built from overlapping rounded lobes for a soft toy look */}
-      <g opacity={far ? 0.55 : 1}>
-        <ellipse cx="34" cy="34" rx="22" ry="16" fill="var(--cloud-fill)" />
-        <ellipse cx="58" cy="30" rx="26" ry="20" fill="var(--cloud-fill)" />
-        <ellipse cx="78" cy="36" rx="18" ry="13" fill="var(--cloud-fill)" />
-        <rect x="22" y="36" width="64" height="12" rx="6" fill="var(--cloud-fill)" />
-        {/* soft top highlight */}
-        <ellipse cx="54" cy="24" rx="20" ry="8" fill="var(--cloud-top)" />
+      <g opacity={far ? 0.5 : 1}>
+        {/* stepped puffy silhouette */}
+        <rect x="9" y="2" width="6" height="2" fill={f} />
+        <rect x="6" y="4" width="14" height="2" fill={f} />
+        <rect x="3" y="6" width="20" height="3" fill={f} />
+        <rect x="2" y="9" width="22" height="2" fill={f} />
+        {/* top highlight band */}
+        <rect x="9" y="3" width="6" height="1" fill={t} />
+        <rect x="6" y="5" width="6" height="1" fill={t} />
       </g>
     </svg>
   );
@@ -62,23 +66,25 @@ export function FloatingIsland({
   return (
     <svg
       width={w}
-      height={w * 0.66}
-      viewBox="0 0 100 66"
-      className={className}
+      height={w * 0.7}
+      viewBox="0 0 20 14"
+      className={`px-crisp ${className}`}
       aria-hidden
-      style={{ filter: "drop-shadow(0 8px 6px var(--island-shadow))", ...style }}
+      shapeRendering="crispEdges"
+      style={{ filter: "drop-shadow(0 4px 0 var(--island-shadow))", ...style }}
     >
-      {/* dirt / rock base */}
-      <path d="M7 22 C11 46 27 60 50 60 C73 60 89 46 93 22 C73 33 27 33 7 22 Z" fill="var(--island-dirt)" />
-      <path d="M15 27 C21 47 33 55 50 55 C40 52 29 47 22 38 C18 33 16 29 15 27 Z" fill="var(--island-dirt2)" opacity="0.6" />
-      {/* dangling rocks */}
-      <ellipse cx="33" cy="57" rx="3.2" ry="6.5" fill="var(--island-dirt2)" />
-      <ellipse cx="63" cy="58" rx="2.8" ry="7.5" fill="var(--island-dirt2)" />
-      <ellipse cx="49" cy="61" rx="2.4" ry="5" fill="var(--island-dirt2)" />
-      {/* grass cap — base, mid band, bright highlight */}
-      <ellipse cx="50" cy="20" rx="47" ry="14" fill="var(--island-grass2)" />
-      <ellipse cx="50" cy="18" rx="46" ry="13" fill="var(--island-grass)" />
-      <ellipse cx="46" cy="14" rx="32" ry="6.5" fill="var(--island-grass-hi)" opacity="0.7" />
+      {/* grass cap — highlight, base */}
+      <rect x="2" y="1" width="16" height="2" fill="var(--island-grass-hi)" />
+      <rect x="1" y="3" width="18" height="2" fill="var(--island-grass)" />
+      <rect x="1" y="5" width="18" height="1" fill="var(--island-grass2)" />
+      {/* dirt body, tapering */}
+      <rect x="2" y="6" width="16" height="2" fill="var(--island-dirt)" />
+      <rect x="3" y="8" width="14" height="2" fill="var(--island-dirt)" />
+      <rect x="5" y="10" width="10" height="2" fill="var(--island-dirt2)" />
+      <rect x="7" y="12" width="6" height="1" fill="var(--island-dirt2)" />
+      {/* dangling rock bits */}
+      <rect x="4" y="10" width="1" height="1" fill="var(--island-dirt2)" />
+      <rect x="15" y="9" width="1" height="2" fill="var(--island-dirt2)" />
     </svg>
   );
 }

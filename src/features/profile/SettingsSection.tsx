@@ -28,7 +28,7 @@ export default function SettingsSection() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `tabiya-backup-${todayStamp()}.json`;
+      a.download = `the-rang-backup-${todayStamp()}.json`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -89,18 +89,18 @@ export default function SettingsSection() {
 
       {/* Appearance */}
       <GameCard className="flex flex-col items-center gap-3 p-4">
-        <p className="text-xs text-muted">Choose your world: bright day or cozy night.</p>
+        <p className="text-[0.66rem] text-muted">Choose your world: day arcade or night arcade.</p>
         <ThemeToggle />
       </GameCard>
 
       {/* Install to Home Screen */}
       <GameCard className="space-y-2 p-4">
-        <h3 className="text-sm font-semibold text-cream">Add Tabiya to your iPhone</h3>
-        <ol className="space-y-1 text-[12px] leading-relaxed text-muted">
-          <li>1. Open Tabiya in <span className="text-cream">Safari</span>.</li>
+        <h3 className="px-label text-[0.62rem] text-cream">Add The Rang to your iPhone</h3>
+        <ol className="space-y-1 text-[0.66rem] leading-relaxed text-muted">
+          <li>1. Open The Rang in <span className="text-cream">Safari</span>.</li>
           <li>2. Tap the <span className="text-cream">Share</span> button (the square with an arrow).</li>
           <li>3. Choose <span className="text-cream">Add to Home Screen</span>.</li>
-          <li>4. Tap <span className="text-cream">Add</span> — Tabiya now opens like an app.</li>
+          <li>4. Tap <span className="text-cream">Add</span> — The Rang now opens like an app.</li>
         </ol>
         <p className="text-[11px] text-muted2">
           Works offline after your first visit. Your progress always stays on your device.
@@ -117,20 +117,10 @@ export default function SettingsSection() {
         </div>
 
         <div className="grid grid-cols-2 gap-2.5">
-          <button
-            type="button"
-            disabled={busy}
-            onClick={handleExport}
-            className="flex min-h-[48px] items-center justify-center rounded-2xl border border-line bg-panel text-sm font-semibold text-cream shadow-[0_3px_0_0_var(--color-line)] active:translate-y-0.5 disabled:opacity-50"
-          >
+          <button type="button" disabled={busy} onClick={handleExport} className="px-btn px-btn-secondary min-h-[46px] !text-[0.62rem] disabled:opacity-50">
             Export
           </button>
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => fileRef.current?.click()}
-            className="flex min-h-[48px] items-center justify-center rounded-2xl border border-line bg-panel text-sm font-semibold text-cream shadow-[0_3px_0_0_var(--color-line)] active:translate-y-0.5 disabled:opacity-50"
-          >
+          <button type="button" disabled={busy} onClick={() => fileRef.current?.click()} className="px-btn px-btn-secondary min-h-[46px] !text-[0.62rem] disabled:opacity-50">
             Import
           </button>
         </div>
@@ -147,12 +137,7 @@ export default function SettingsSection() {
           }}
         />
 
-        <button
-          type="button"
-          disabled={busy}
-          onClick={handleReset}
-          className="flex min-h-[44px] w-full items-center justify-center rounded-2xl border border-bad/40 bg-bad/10 text-sm font-semibold text-bad active:translate-y-0.5 disabled:opacity-50"
-        >
+        <button type="button" disabled={busy} onClick={handleReset} className="px-btn min-h-[44px] w-full !text-[0.62rem] disabled:opacity-50" style={{ "--btn-bg": "var(--color-bad)", "--btn-hi": "#ff8f9e", "--btn-deep": "#b32436", color: "#2a0709" } as React.CSSProperties}>
           Reset all progress
         </button>
 
@@ -170,10 +155,10 @@ export default function SettingsSection() {
 
       {/* About */}
       <GameCard className="space-y-1.5 p-4">
-        <h3 className="text-sm font-semibold text-cream">About Tabiya</h3>
-        <p className="text-[12px] leading-relaxed text-muted">
-          Tabiya is a friendly, bright chess learning game — learn the moves, solve puzzles, and
-          play matches at your own pace. Everything you do is saved privately on your device.
+        <h3 className="px-label text-[0.62rem] text-cream">About The Rang</h3>
+        <p className="text-[0.66rem] leading-relaxed text-muted">
+          The Rang is a retro pixel-art chess adventure — learn the moves, solve puzzles, and
+          battle friendly opponents at your own pace. Everything you do is saved privately on your device.
         </p>
         <div className="flex items-center justify-between pt-1 text-[11px] text-muted2">
           <span>Version {APP_VERSION}</span>

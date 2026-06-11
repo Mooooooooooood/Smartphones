@@ -6,15 +6,11 @@ export default function RankBadge({
   title: string;
   size?: "sm" | "md";
 }) {
-  const pad = size === "sm" ? "px-2.5 py-1 text-xs" : "px-3 py-1.5 text-sm";
+  const pad = size === "sm" ? "px-2 py-1 text-[0.52rem]" : "px-2.5 py-1.5 text-[0.6rem]";
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full border border-brass/40 bg-brass/10 ${pad}`}
-    >
-      <span className="text-brass" aria-hidden>
-        ♛
-      </span>
-      <span className="font-display text-cream">{title}</span>
+    <span className={`px-inset inline-flex items-center gap-1.5 ${pad}`}>
+      <span className="text-brass" aria-hidden>♛</span>
+      <span className="px-label text-cream">{title}</span>
     </span>
   );
 }

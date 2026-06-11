@@ -8,14 +8,8 @@ export default function XPBar({
 }) {
   const pct = Math.max(0, Math.min(1, value)) * 100;
   return (
-    <div className={`h-2.5 w-full overflow-hidden rounded-full bg-ink2 ${className}`}>
-      <div
-        className="h-full rounded-full transition-[width] duration-700 ease-out"
-        style={{
-          width: `${pct}%`,
-          backgroundImage: "linear-gradient(90deg, #60a5fa 0%, #93c5fd 60%, #bfdbfe 100%)",
-        }}
-      />
+    <div className={`px-track h-3 w-full ${className}`}>
+      <div className="px-track-fill" style={{ width: `${pct}%`, "--fill": "var(--color-brass)" } as React.CSSProperties} />
     </div>
   );
 }

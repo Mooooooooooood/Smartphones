@@ -6,10 +6,9 @@ import type { ReactNode } from "react";
 type Variant = "primary" | "secondary" | "ghost";
 
 const VARIANTS: Record<Variant, string> = {
-  primary:
-    "border-brassdeep bg-brass text-[color:var(--color-on-accent)] shadow-[0_4px_0_0_var(--color-brassdeep)] active:translate-y-0.5 active:shadow-[0_2px_0_0_var(--color-brassdeep)] hover:bg-brassdeep",
-  secondary: "border-line bg-panel text-cream shadow-[0_3px_0_0_var(--color-line)] hover:border-muted2",
-  ghost: "border-transparent bg-transparent text-muted hover:text-cream",
+  primary: "px-btn",
+  secondary: "px-btn px-btn-secondary",
+  ghost: "px-btn px-btn-ghost",
 };
 
 /**
@@ -33,7 +32,7 @@ export default function ActionButton({
   type?: "button" | "submit";
   className?: string;
 }) {
-  const classes = `flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl border px-4 text-sm font-semibold transition-transform active:scale-[0.98] disabled:opacity-40 ${VARIANTS[variant]} ${className}`;
+  const classes = `${VARIANTS[variant]} min-h-[46px] w-full !text-[0.7rem] ${className}`;
 
   if (href && !disabled) {
     return (

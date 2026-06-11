@@ -19,6 +19,7 @@ import { BEGINNER_PUZZLES, THEME_LABELS, type PuzzleCategory } from "@/content/p
 import GameCard from "@/components/ui/GameCard";
 import SectionHeader from "@/components/ui/SectionHeader";
 import ProgressRing from "@/components/ui/ProgressRing";
+import TopBar from "@/components/pixel/TopBar";
 import RankBadge from "@/components/ui/RankBadge";
 import XPBar from "@/components/ui/XPBar";
 import FlameIcon from "@/components/ui/FlameIcon";
@@ -138,12 +139,10 @@ export default function ProfileScreen() {
           : `Strong work, ${rank.title}! Keep that streak alive.`;
 
   return (
-    <div className="space-y-5">
-      <header className="flex items-start justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-[0.16em] text-muted2">Profile</p>
-          <h1 className="font-display text-3xl text-cream">Player Card</h1>
-        </div>
+    <div className="space-y-3.5">
+      <TopBar streak />
+      <header className="flex items-end justify-between px-1">
+        <h1 className="px-title text-[1.4rem]">Player Card</h1>
         <ThemeToggle compact />
       </header>
 
@@ -156,8 +155,8 @@ export default function ProfileScreen() {
         </div>
         <div className="relative flex items-center gap-3.5">
           <ProgressRing value={lvl.progress} size={104} stroke={11}>
-            <span className="font-display text-4xl leading-none text-cream">{lvl.level}</span>
-            <span className="mt-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-muted2">Level</span>
+            <span className="font-display text-[1.6rem] leading-none text-cream">{lvl.level}</span>
+            <span className="px-label mt-1 text-[0.42rem] text-muted2">Level</span>
           </ProgressRing>
           <div className="min-w-0 flex-1">
             <RankBadge title={rank.title} />
