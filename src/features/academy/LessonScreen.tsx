@@ -4,32 +4,40 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { lessonById, lessonsForTier, tierMeta, TIER0_BOSS } from "@/content/academy";
+import { lessonById, tierMeta, TIER0_BOSS } from "@/content/academy";
 import { THEME_LABELS } from "@/content/puzzles/beginner";
 import { useProfileStore, academyStateFrom } from "@/state/profileStore";
 import { lessonStatus, nextLessonInTier } from "@/domain/academy/progression";
+import { lessonSteps } from "@/domain/academy/lessonRun";
+import { isInteractive, hasBoard, type LessonStep } from "@/domain/academy/lessonSteps";
 import GameCard from "@/components/ui/GameCard";
 import ActionButton from "@/components/ui/ActionButton";
 import RewardPanel from "@/components/ui/RewardPanel";
-import CoachBubble from "@/components/ui/CoachBubble";
 import TopProgress from "@/components/ui/TopProgress";
 import Skeleton from "@/components/ui/Skeleton";
+import ChessBuddy, { BUDDIES } from "@/components/characters/ChessBuddy";
 
-const LessonBoard = dynamic(() => import("@/components/LessonBoard"), {
+const LessonInteractiveBoard = dynamic(() => import("@/components/LessonInteractiveBoard"), {
   ssr: false,
-  loading: () => <div className="mx-auto aspect-square w-full max-w-[320px] tab-skeleton" />,
+  loading: () => <div className="mx-auto aspect-square w-full max-w-[340px] tab-skeleton rounded-xl" />,
 });
 
 const LETTERS = ["A", "B", "C", "D", "E"];
+
+function stepKind(step: LessonStep): "Story" | "Watch" | "Try" | "Checkpoint" {
+  if (step.type === "intro") return "Story";
+  if (step.type === "explain" || step.type === "board-demo") return "Watch";
+  if (step.type === "multiple-choice" || step.type === "true-false") return "Checkpoint";
+  return "Try";
+}
 
 function LessonLoading() {
   return (
     <div className="space-y-4">
       <Skeleton className="h-3 w-full rounded-full" />
       <Skeleton className="h-9 w-3/4" />
-      <Skeleton className="mx-auto aspect-square w-full max-w-[320px]" />
-      <Skeleton className="h-20 w-full" />
-      <Skeleton className="h-40 w-full" />
+      <Skeleton className="mx-auto aspect-square w-full max-w-[340px]" />
+      <Skeleton className="h-24 w-full" />
     </div>
   );
 }
@@ -46,9 +54,16 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
   }, []);
 
   const lesson = useMemo(() => lessonById(lessonId), [lessonId]);
+  const steps = useMemo(() => (lesson ? lessonSteps(lesson) : []), [lesson]);
 
-  const [picked, setPicked] = useState<number | null>(null);
-  const [firstTry, setFirstTry] = useState(true);
+  const [idx, setIdx] = useState(0);
+  const [solved, setSolved] = useState(false);
+  const [mcPicked, setMcPicked] = useState<number | null>(null);
+  const [tfPicked, setTfPicked] = useState<boolean | null>(null);
+  const [stepWrong, setStepWrong] = useState(false);
+  const [showHint, setShowHint] = useState(false);
+  const [anyWrong, setAnyWrong] = useState(false);
+  const [finished, setFinished] = useState(false);
   const [justEarned, setJustEarned] = useState<number | null>(null);
 
   if (!lesson) {
@@ -62,12 +77,9 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
     );
   }
 
-  if (!hydrated) {
-    return <LessonLoading />;
-  }
+  if (!hydrated) return <LessonLoading />;
 
   const state = academyStateFrom(completed, bossClearedMap);
-
   if (lessonStatus(lesson, state) === "locked") {
     return (
       <div className="py-12 text-center">
@@ -86,144 +98,98 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
     );
   }
 
-  const tierLessons = lessonsForTier(lesson.tier);
   const tierTitle = tierMeta(lesson.tier)?.title ?? "Academy";
   const alreadyDone = Boolean(completed[lesson.id]);
-  const correct = picked !== null && picked === lesson.quiz.correctIndex;
   const nextSeq = nextLessonInTier(lesson);
-  const bossNext = !nextSeq && lesson.tier === 0; // last Tier 0 lesson → Trial
-  const mastered = alreadyDone || justEarned !== null;
+  const bossNext = !nextSeq && lesson.tier === 0;
   const theme = lesson.relatedPuzzleTheme;
 
-  function choose(i: number) {
-    if (!lesson || correct) return;
-    setPicked(i);
-    if (i !== lesson.quiz.correctIndex) setFirstTry(false);
+  const step = steps[idx];
+  const isLast = idx === steps.length - 1;
+  const interactive = isInteractive(step);
+  const canAdvance =
+    step.type === "multiple-choice"
+      ? mcPicked === step.correctIndex
+      : step.type === "true-false"
+        ? tfPicked === step.answer
+        : step.type === "tap-square" || step.type === "tap-piece" || step.type === "make-move"
+          ? solved
+          : true;
+
+  const stepGuide = "guide" in step ? step.guide : undefined;
+  const guide = stepGuide ?? lesson.guide ?? "bishop";
+
+  function resetStepState() {
+    setSolved(false);
+    setMcPicked(null);
+    setTfPicked(null);
+    setStepWrong(false);
+    setShowHint(false);
   }
 
   async function finish() {
-    if (!lesson || !correct || alreadyDone) return;
-    const earnedStars = firstTry ? 3 : 2;
-    const ok = await completeLesson(lesson.id, lesson.xpReward, earnedStars);
+    setFinished(true);
+    if (!lesson || alreadyDone) return;
+    const stars = anyWrong ? 2 : 3;
+    const ok = await completeLesson(lesson.id, lesson.xpReward, stars);
     if (ok) setJustEarned(lesson.xpReward);
   }
 
-  const stars = completed[lesson.id]?.stars ?? (firstTry ? 3 : 2);
+  function goNext() {
+    if (!canAdvance) return;
+    if (isLast) {
+      void finish();
+      return;
+    }
+    setIdx((i) => i + 1);
+    resetStepState();
+  }
 
-  return (
-    <div className="space-y-4 pb-4">
-      <TopProgress
-        value={lesson.order / tierLessons.length}
-        exitHref="/academy"
-        trailing={`${lesson.order}/${tierLessons.length}`}
-      />
+  function goBack() {
+    if (idx === 0) return;
+    setIdx((i) => i - 1);
+    resetStepState();
+  }
 
-      <header>
-        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-brass">
-          {tierTitle} · Stage {lesson.order}
-        </p>
-        <div className="mt-1 flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="font-display text-3xl leading-tight text-cream">{lesson.title}</h1>
-            <p className="mt-0.5 text-sm text-muted">{lesson.subtitle}</p>
-          </div>
-          <span className="shrink-0 rounded-full border border-brass/40 bg-surf-sun px-2.5 py-1 text-[11px] font-bold text-warn">
-            ⭐ +{lesson.xpReward} XP
-          </span>
-        </div>
-      </header>
+  function handleBoardResult(correct: boolean) {
+    if (correct) {
+      setSolved(true);
+      setStepWrong(false);
+    } else {
+      setStepWrong(true);
+      setAnyWrong(true);
+    }
+  }
 
-      {lesson.fen ? (
-        <GameCard className="p-3">
-          <div className="mb-2 flex items-center gap-2">
-            <span className="rounded-full border border-brass/30 bg-brass/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brass">
-              Example
-            </span>
-            <span className="h-px flex-1 bg-line" />
-          </div>
-          <div className="mx-auto w-full max-w-[320px] overflow-hidden rounded-xl ring-1 ring-frame">
-            <LessonBoard fen={lesson.fen} />
-          </div>
-          {lesson.boardCaption ? (
-            <p className="mt-2 text-center text-xs text-muted2">{lesson.boardCaption}</p>
-          ) : null}
-        </GameCard>
-      ) : null}
+  function pickChoice(i: number) {
+    if (step.type !== "multiple-choice" || mcPicked === step.correctIndex) return;
+    setMcPicked(i);
+    if (i !== step.correctIndex) setAnyWrong(true);
+  }
 
-      <CoachBubble piece="bishop">{lesson.explanation}</CoachBubble>
+  function pickTrueFalse(v: boolean) {
+    if (step.type !== "true-false" || tfPicked === step.answer) return;
+    setTfPicked(v);
+    if (v !== step.answer) setAnyWrong(true);
+  }
 
-      <ul className="space-y-1.5">
-        {lesson.keyPoints.map((k, i) => (
-          <li key={i} className="flex gap-2 text-sm text-muted">
-            <span className="text-brass">•</span>
-            <span>{k}</span>
-          </li>
-        ))}
-      </ul>
-
-      {/* Quiz */}
-      <GameCard className="p-4">
-        <p className="text-[11px] uppercase tracking-wider text-muted2">Checkpoint</p>
-        <h2 className="mt-0.5 font-display text-lg text-cream">{lesson.quiz.question}</h2>
-        <div className="mt-3 space-y-2.5">
-          {lesson.quiz.choices.map((c, i) => {
-            const isPicked = picked === i;
-            const showCorrect = picked !== null && i === lesson.quiz.correctIndex;
-            const showWrong = isPicked && i !== lesson.quiz.correctIndex;
-            return (
-              <button
-                key={i}
-                onClick={() => choose(i)}
-                disabled={correct}
-                className={`flex min-h-[54px] w-full items-center gap-3 rounded-2xl border px-3 py-3 text-left text-sm transition-transform active:translate-y-0.5 disabled:cursor-default ${
-                  showCorrect
-                    ? "border-good/60 bg-good/15 text-cream shadow-[0_3px_0_0_color-mix(in_oklab,var(--color-good)_45%,var(--color-line))]"
-                    : showWrong
-                      ? "border-bad/60 bg-bad/15 text-cream shadow-[0_3px_0_0_color-mix(in_oklab,var(--color-bad)_45%,var(--color-line))]"
-                      : "border-line bg-panel text-cream shadow-[0_3px_0_0_var(--color-line)] hover:border-brass/50"
-                }`}
-              >
-                <span
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-                    showCorrect
-                      ? "bg-good/20 text-gooddeep"
-                      : showWrong
-                        ? "bg-bad/20 text-bad"
-                        : "bg-ink2 text-muted"
-                  }`}
-                >
-                  {LETTERS[i]}
-                </span>
-                <span className="flex-1">{c}</span>
-                {showCorrect ? <span className="text-good">✓</span> : null}
-                {showWrong ? <span className="text-bad">✗</span> : null}
-              </button>
-            );
-          })}
-        </div>
-        {picked !== null && !correct ? (
-          <p className="mt-3 text-xs text-warn">Not quite — review the lesson and try again.</p>
-        ) : null}
-        {correct && !mastered ? (
-          <p className="mt-3 text-xs text-good">Correct! Claim your reward below.</p>
-        ) : null}
-      </GameCard>
-
-      {/* Completion / actions */}
-      {mastered ? (
+  /* ---------- Reward stage ---------- */
+  if (finished) {
+    const stars = completed[lesson.id]?.stars ?? (anyWrong ? 2 : 3);
+    return (
+      <div className="space-y-4 pb-4">
+        <TopProgress value={1} exitHref="/academy" trailing="Done" />
         <RewardPanel
           title="Lesson mastered!"
           xp={justEarned}
           tone="brass"
-          piece="bishop"
+          piece={guide}
           subtitle={`${stars}★ earned${alreadyDone && justEarned === null ? " · already completed" : ""}`}
         >
           {nextSeq ? (
             <div className="mb-3 flex items-center justify-center gap-2 text-xs text-muted2">
               <span>Unlocks next</span>
-              <span className="rounded-full border border-line bg-ink2 px-2 py-0.5 text-cream">
-                {nextSeq.title}
-              </span>
+              <span className="rounded-full border border-line bg-ink2 px-2 py-0.5 text-cream">{nextSeq.title}</span>
             </div>
           ) : bossNext ? (
             <div className="mb-3 text-center text-xs text-muted2">Tier 0 complete — the Trial awaits!</div>
@@ -250,30 +216,220 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
               Path
             </ActionButton>
             {nextSeq ? (
-              <ActionButton onClick={() => router.push(`/academy/${nextSeq.id}`)}>
-                Continue ›
-              </ActionButton>
+              <ActionButton onClick={() => router.push(`/academy/${nextSeq.id}`)}>Continue ›</ActionButton>
             ) : bossNext ? (
-              <ActionButton onClick={() => router.push(`/academy/boss/${TIER0_BOSS.id}`)}>
-                Take Trial ›
-              </ActionButton>
-            ) : null}
+              <ActionButton onClick={() => router.push(`/academy/boss/${TIER0_BOSS.id}`)}>Take Trial ›</ActionButton>
+            ) : (
+              <ActionButton href="/academy">Finish ✓</ActionButton>
+            )}
           </div>
         </RewardPanel>
-      ) : (
-        <div className="space-y-2.5">
-          {correct ? (
-            <ActionButton onClick={finish}>Complete lesson (+{lesson.xpReward} XP) ✓</ActionButton>
-          ) : (
-            <div className="flex min-h-[48px] items-center justify-center gap-2 rounded-2xl border border-dashed border-line bg-ink2 px-4 text-sm font-semibold text-muted2">
-              <span aria-hidden>👇</span> Answer the checkpoint to finish
-            </div>
-          )}
-          <ActionButton href="/academy" variant="secondary">
-            Back to Path
-          </ActionButton>
+      </div>
+    );
+  }
+
+  /* ---------- Active stage ---------- */
+  const kind = stepKind(step);
+
+  return (
+    <div className="space-y-4 pb-4">
+      <TopProgress value={(idx + 1) / steps.length} exitHref="/academy" trailing={`${idx + 1}/${steps.length}`} />
+
+      {/* step rail */}
+      <div className="flex items-center gap-1.5">
+        {steps.map((s, i) => (
+          <span
+            key={i}
+            className={`h-1.5 flex-1 rounded-full transition-colors ${
+              i < idx ? "bg-good" : i === idx ? "bg-brass" : "bg-line"
+            }`}
+          />
+        ))}
+      </div>
+
+      <header className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-brass">
+            {tierTitle} · Stage {lesson.order}
+          </p>
+          <h1 className="truncate font-display text-2xl leading-tight text-cream">{lesson.title}</h1>
         </div>
-      )}
+        <span className="shrink-0 rounded-full border border-brass/40 bg-surf-sun px-2.5 py-1 text-[11px] font-bold text-warn">
+          +{lesson.xpReward} XP
+        </span>
+      </header>
+
+      {/* stage card */}
+      <GameCard variant={interactive ? "accent" : "default"} glow={interactive} className="p-4">
+        <div className="mb-3 flex items-center gap-2.5">
+          <div className="tab-bob flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-line bg-surf-blue">
+            <ChessBuddy piece={guide} size={38} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-brass">
+              {kind} · {BUDDIES[guide].name}
+            </p>
+            <p className="text-sm font-semibold leading-snug text-cream">
+              {step.type === "intro"
+                ? step.title
+                : step.type === "explain"
+                  ? step.title ?? "Let's learn"
+                  : "prompt" in step
+                    ? step.prompt
+                    : ""}
+            </p>
+          </div>
+        </div>
+
+        {step.type === "intro" ? <p className="text-sm leading-relaxed text-muted">{step.text}</p> : null}
+
+        {step.type === "explain" ? (
+          <div className="space-y-2.5">
+            <p className="text-sm leading-relaxed text-muted">{step.text}</p>
+            {step.points ? (
+              <ul className="space-y-1.5">
+                {step.points.map((p, i) => (
+                  <li key={i} className="flex gap-2 text-sm text-muted">
+                    <span className="text-brass">•</span>
+                    <span>{p}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+        ) : null}
+
+        {hasBoard(step) ? (
+          <div className="space-y-2">
+            <div className="mx-auto w-full max-w-[340px] overflow-hidden rounded-xl ring-1 ring-frame">
+              <LessonInteractiveBoard key={idx} step={step} solved={solved} onResult={handleBoardResult} showHint={showHint} />
+            </div>
+            {step.type === "board-demo" && step.caption ? (
+              <p className="text-center text-xs text-muted2">{step.caption}</p>
+            ) : null}
+
+            {interactive ? (
+              solved ? (
+                <p className="rounded-xl border border-good/40 bg-good/10 px-3 py-2 text-center text-sm font-semibold text-gooddeep">
+                  {"successText" in step ? step.successText : "Correct!"}
+                </p>
+              ) : stepWrong ? (
+                <div className="flex items-center justify-between gap-2 rounded-xl border border-warn/40 bg-surf-sun px-3 py-2">
+                  <span className="text-xs font-medium text-warn">
+                    {("failureText" in step && step.failureText) || "Not quite — try again!"}
+                  </span>
+                  {"hint" in step && step.hint ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowHint(true)}
+                      className="shrink-0 rounded-full border border-brass/40 bg-brass/10 px-2.5 py-1 text-[11px] font-bold text-brass"
+                    >
+                      Hint
+                    </button>
+                  ) : null}
+                </div>
+              ) : (
+                <p className="text-center text-xs text-muted2">👆 {step.type === "make-move" ? "Make your move on the board" : "Tap the board to answer"}</p>
+              )
+            ) : null}
+
+            {showHint && "hint" in step && step.hint && !solved ? (
+              <p className="text-center text-[11px] text-brass">💡 {step.hint}</p>
+            ) : null}
+          </div>
+        ) : null}
+
+        {/* multiple choice */}
+        {step.type === "multiple-choice" ? (
+          <div className="mt-1 space-y-2.5">
+            {step.choices.map((c, i) => {
+              const isPicked = mcPicked === i;
+              const showCorrect = mcPicked !== null && i === step.correctIndex;
+              const showWrong = isPicked && i !== step.correctIndex;
+              return (
+                <button
+                  key={i}
+                  onClick={() => pickChoice(i)}
+                  disabled={canAdvance}
+                  className={`flex min-h-[52px] w-full items-center gap-3 rounded-2xl border px-3 py-3 text-left text-sm transition-transform active:translate-y-0.5 disabled:cursor-default ${
+                    showCorrect
+                      ? "border-good/60 bg-good/15 text-cream"
+                      : showWrong
+                        ? "border-bad/60 bg-bad/15 text-cream"
+                        : "border-line bg-panel text-cream shadow-[0_3px_0_0_var(--color-line)] hover:border-brass/50"
+                  }`}
+                >
+                  <span
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                      showCorrect ? "bg-good/20 text-gooddeep" : showWrong ? "bg-bad/20 text-bad" : "bg-ink2 text-muted"
+                    }`}
+                  >
+                    {LETTERS[i]}
+                  </span>
+                  <span className="flex-1">{c}</span>
+                  {showCorrect ? <span className="text-good">✓</span> : null}
+                  {showWrong ? <span className="text-bad">✗</span> : null}
+                </button>
+              );
+            })}
+            {canAdvance ? (
+              <p className="text-center text-sm font-semibold text-gooddeep">{step.successText ?? "Correct!"}</p>
+            ) : mcPicked !== null ? (
+              <p className="text-center text-xs text-warn">Not quite — try another answer.</p>
+            ) : null}
+          </div>
+        ) : null}
+
+        {/* true / false */}
+        {step.type === "true-false" ? (
+          <div className="mt-1 space-y-2.5">
+            <div className="grid grid-cols-2 gap-2.5">
+              {[true, false].map((v) => {
+                const isPicked = tfPicked === v;
+                const correct = canAdvance && v === step.answer;
+                const wrong = isPicked && v !== step.answer;
+                return (
+                  <button
+                    key={String(v)}
+                    onClick={() => pickTrueFalse(v)}
+                    disabled={tfPicked === step.answer}
+                    className={`flex min-h-[56px] items-center justify-center gap-2 rounded-2xl border text-sm font-bold transition-transform active:translate-y-0.5 ${
+                      correct
+                        ? "border-good/60 bg-good/15 text-gooddeep"
+                        : wrong
+                          ? "border-bad/60 bg-bad/15 text-bad"
+                          : "border-line bg-panel text-cream shadow-[0_3px_0_0_var(--color-line)]"
+                    }`}
+                  >
+                    {v ? "✓ True" : "✗ False"}
+                  </button>
+                );
+              })}
+            </div>
+            {canAdvance ? (
+              <p className="text-center text-sm font-semibold text-gooddeep">{step.successText ?? "Correct!"}</p>
+            ) : tfPicked !== null ? (
+              <p className="text-center text-xs text-warn">Not quite — think again!</p>
+            ) : null}
+          </div>
+        ) : null}
+      </GameCard>
+
+      {/* nav */}
+      <div className="flex gap-2.5">
+        {idx > 0 ? (
+          <ActionButton onClick={goBack} variant="secondary" className="max-w-[110px]">
+            ‹ Back
+          </ActionButton>
+        ) : (
+          <ActionButton href="/academy" variant="secondary" className="max-w-[110px]">
+            Exit
+          </ActionButton>
+        )}
+        <ActionButton onClick={goNext} disabled={!canAdvance}>
+          {isLast ? `Finish (+${lesson.xpReward} XP) ✓` : interactive ? (canAdvance ? "Continue ›" : "Solve to continue") : "Continue ›"}
+        </ActionButton>
+      </div>
     </div>
   );
 }

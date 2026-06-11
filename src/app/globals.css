@@ -1,23 +1,23 @@
 @import "tailwindcss";
 
 /* ---------- Tabiya palette — token names stay stable so the whole app
-   re-themes from here. Light = bright cartoon; .dark = soft cartoon night. */
+   re-themes from here. Light = sunny sky world; .dark = magical night world. */
 @theme {
-  --color-ink: #f8fafc;
-  --color-ink2: #f1f5f9;
+  --color-ink: #eef5ff;
+  --color-ink2: #f1f5fb;
   --color-panel: #ffffff;
-  --color-panel2: #eaf3ff;
+  --color-panel2: #eaf2ff;
   --color-frame: #e2e8f0;
-  --color-line: #e2e8f0;
-  --color-cream: #1e293b;
-  --color-muted: #64748b;
-  --color-muted2: #94a3b8;
-  --color-brass: #60a5fa;
-  --color-brassdeep: #3b82f6;
+  --color-line: #e3eaf5;
+  --color-cream: #16233c;
+  --color-muted: #5a6b87;
+  --color-muted2: #8593ad;
+  --color-brass: #3b9bf6;
+  --color-brassdeep: #2b7fe0;
   --color-good: #22c55e;
-  --color-gooddeep: #16a34a;
-  --color-bad: #f43f5e;
-  --color-warn: #d97706;
+  --color-gooddeep: #15a34a;
+  --color-bad: #f4516b;
+  --color-warn: #e0890a;
   --color-on-accent: #ffffff;
   --color-mint: #86efac;
   --color-sun: #fde68a;
@@ -25,34 +25,45 @@
   --color-peach: #fdba74;
   --color-lav: #c4b5fd;
   --color-lavdeep: #7c3aed;
-  --color-sky: #60a5fa;
+  --color-sky: #4aa3f5;
   --color-skysoft: #bfdbfe;
-  --color-surf-blue: #eaf3ff;
-  --color-surf-mint: #ecfdf5;
-  --color-surf-lav: #f3e8ff;
+  --color-surf-blue: #e7f1ff;
+  --color-surf-mint: #e8fcf1;
+  --color-surf-lav: #f2ebff;
   --color-surf-sun: #fef3c7;
-  --color-surf-peach: #fff1e6;
+  --color-surf-peach: #fff0e4;
   --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
   --font-body: var(--font-hanken), system-ui, -apple-system, sans-serif;
 }
 
 /* Non-colour scene variables (gradients/scenery), themed below. */
 :root {
-  --sky-1: #c3e1ff;
-  --sky-2: #eaf3ff;
+  --sky-1: #bfe1ff;
+  --sky-2: #eef6ff;
   --cloud-fill: #ffffff;
-  --cloud-line: #cdddf2;
+  --cloud-line: #cfe0f5;
+  --cloud-top: rgba(255, 255, 255, 0.9);
   --star: rgba(255, 255, 255, 0);
-  --card-shadow: rgba(30, 41, 59, 0.16);
-  --card-top: rgba(255, 255, 255, 0.85);
+  --card-bg-1: #ffffff;
+  --card-bg-2: #f7faff;
+  --card-shadow: rgba(28, 52, 92, 0.16);
+  --card-top: rgba(255, 255, 255, 0.9);
   --skeleton-shine: rgba(255, 255, 255, 0.8);
-  --island-grass: #8ef0a6;
-  --island-grass2: #4ade80;
-  --island-dirt: #b67d4f;
-  --island-dirt2: #8a5a37;
-  --island-shadow: rgba(30, 41, 59, 0.18);
-  --horizon: rgba(255, 255, 255, 0.5);
+  --island-grass: #8df0a8;
+  --island-grass2: #45d684;
+  --island-grass-hi: #c8f9d8;
+  --island-dirt: #f1c08a;
+  --island-dirt2: #d99a5b;
+  --island-shadow: rgba(28, 52, 92, 0.2);
+  --horizon: rgba(255, 255, 255, 0.55);
   --sparkle: #ffffff;
+  --glow-accent: rgba(59, 155, 246, 0.55);
+  --glow-reward: rgba(245, 190, 70, 0.6);
+  /* chessboard squares (theme-aware via inline var()) */
+  --board-light: #eef4fc;
+  --board-dark: #c4d8f0;
+  --board-coord-on-dark: rgba(30, 41, 59, 0.55);
+  --board-coord-on-light: rgba(30, 41, 59, 0.4);
   /* captured-piece glyph colours (board side panels) */
   --piece-white: #ffffff;
   --piece-white-line: #94a3b8;
@@ -60,96 +71,132 @@
   --piece-black-line: #1e293b;
 }
 
-/* ---------- Soft cartoon NIGHT theme ---------- */
+/* ---------- Magical cartoon NIGHT world ---------- */
 html.dark {
-  --color-ink: #0f1729;
-  --color-ink2: #1a2540;
-  --color-panel: #1e2a47;
-  --color-panel2: #243358;
-  --color-frame: #2c3b5e;
-  --color-line: #2c3b5e;
-  --color-cream: #e8eefc;
-  --color-muted: #aebbd6;
-  --color-muted2: #7e8db0;
-  --color-brass: #7cb0ff;
-  --color-brassdeep: #5b9bff;
-  --color-good: #4ade80;
-  --color-gooddeep: #86efac;
-  --color-bad: #fb7185;
-  --color-warn: #fbbf24;
-  --color-on-accent: #0b1220;
-  --color-lavdeep: #c4b5fd;
-  --color-surf-blue: #1f2d4d;
-  --color-surf-mint: #16302a;
-  --color-surf-lav: #271f44;
-  --color-surf-sun: #322a14;
-  --color-surf-peach: #33241a;
+  --color-ink: #141b3d;
+  --color-ink2: #202a55;
+  --color-panel: #232c5a;
+  --color-panel2: #2c3168;
+  --color-frame: #3c4585;
+  --color-line: #3a4382;
+  --color-cream: #eef2ff;
+  --color-muted: #b7c2e8;
+  --color-muted2: #93a0d0;
+  --color-brass: #6cb8ff;
+  --color-brassdeep: #4aa0ff;
+  --color-good: #57e7a0;
+  --color-gooddeep: #8ff3c0;
+  --color-bad: #fb7a90;
+  --color-warn: #fbc94a;
+  --color-on-accent: #0a1130;
+  --color-lavdeep: #cbbcff;
+  --color-surf-blue: #28336b;
+  --color-surf-mint: #1d3d52;
+  --color-surf-lav: #322a6b;
+  --color-surf-sun: #3c3520;
+  --color-surf-peach: #3c2c2c;
 
-  --sky-1: #16233f;
-  --sky-2: #0f1729;
-  --cloud-fill: #243358;
-  --cloud-line: #324a73;
-  --star: rgba(226, 236, 255, 0.55);
-  --card-shadow: rgba(0, 0, 0, 0.45);
-  --card-top: rgba(255, 255, 255, 0.06);
-  --skeleton-shine: rgba(255, 255, 255, 0.06);
-  --island-grass: #4ea96f;
-  --island-grass2: #3c8a59;
-  --island-dirt: #6b4a34;
-  --island-dirt2: #4f3726;
-  --island-shadow: rgba(0, 0, 0, 0.4);
-  --horizon: rgba(124, 176, 255, 0.10);
-  --sparkle: #dfeaff;
-  --piece-white: #e8eefc;
-  --piece-white-line: #7e8db0;
-  --piece-black: #94a2c2;
-  --piece-black-line: #5b6b8f;
+  --sky-1: #2a3680;
+  --sky-2: #161d49;
+  --cloud-fill: #313c79;
+  --cloud-line: #4a5598;
+  --cloud-top: rgba(150, 170, 255, 0.32);
+  --star: rgba(226, 236, 255, 0.92);
+  --card-bg-1: #28316a;
+  --card-bg-2: #222a58;
+  --card-shadow: rgba(0, 0, 0, 0.5);
+  --card-top: rgba(150, 170, 255, 0.16);
+  --skeleton-shine: rgba(150, 170, 255, 0.1);
+  --island-grass: #54c79a;
+  --island-grass2: #3a9d7a;
+  --island-grass-hi: #8fe6c0;
+  --island-dirt: #565aa0;
+  --island-dirt2: #3c4080;
+  --island-shadow: rgba(0, 0, 0, 0.45);
+  --horizon: rgba(120, 150, 255, 0.16);
+  --sparkle: #e6efff;
+  --glow-accent: rgba(108, 184, 255, 0.6);
+  --glow-reward: rgba(252, 211, 77, 0.55);
+  --board-light: #46518c;
+  --board-dark: #333d70;
+  --board-coord-on-dark: rgba(226, 236, 255, 0.5);
+  --board-coord-on-light: rgba(226, 236, 255, 0.5);
+  --piece-white: #eef2ff;
+  --piece-white-line: #93a0d0;
+  --piece-black: #9aa6cc;
+  --piece-black-line: #5d6b98;
 }
 
 html, body { height: 100%; }
 body {
   margin: 0;
   background:
-    radial-gradient(90% 50% at 12% 4%, color-mix(in oklab, var(--color-lav) 22%, transparent) 0%, transparent 60%),
-    radial-gradient(95% 55% at 92% 2%, color-mix(in oklab, var(--color-mint) 20%, transparent) 0%, transparent 55%),
-    radial-gradient(130% 80% at 50% -12%, var(--color-panel2) 0%, var(--color-ink) 62%);
+    radial-gradient(82% 44% at 10% 2%, color-mix(in oklab, var(--color-lav) 26%, transparent) 0%, transparent 58%),
+    radial-gradient(88% 50% at 94% 0%, color-mix(in oklab, var(--color-mint) 22%, transparent) 0%, transparent 52%),
+    radial-gradient(120% 78% at 50% -10%, var(--color-panel2) 0%, var(--color-ink) 60%);
   background-attachment: fixed;
   color: var(--color-cream);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
+}
+/* Night sky gets a soft scattering of stars behind everything. */
+html.dark body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 14%, rgba(226,236,255,0.9), transparent),
+    radial-gradient(1.5px 1.5px at 78% 8%, rgba(226,236,255,0.7), transparent),
+    radial-gradient(1px 1px at 44% 22%, rgba(226,236,255,0.8), transparent),
+    radial-gradient(1.5px 1.5px at 88% 32%, rgba(200,220,255,0.7), transparent),
+    radial-gradient(1px 1px at 24% 36%, rgba(226,236,255,0.6), transparent),
+    radial-gradient(1.5px 1.5px at 62% 44%, rgba(226,236,255,0.55), transparent);
+  background-repeat: no-repeat;
 }
 * { -webkit-tap-highlight-color: transparent; }
 ::selection { background: rgba(96, 165, 250, 0.25); }
 
 .tabiya-board-wrap { width: 100%; max-width: 440px; margin: 0 auto; }
 
+/* Content sits above the fixed starfield. */
+#tabiya-root { position: relative; z-index: 1; }
+
 /* ---------- Cards / surfaces ---------- */
 .tab-card {
-  background: var(--color-panel);
+  background-image: linear-gradient(180deg, var(--card-bg-1), var(--card-bg-2));
   border: 1px solid var(--color-line);
   border-radius: 1.375rem;
   box-shadow:
     0 1px 0 var(--card-top) inset,
-    0 1px 2px rgba(30, 41, 59, 0.04),
-    0 14px 26px -16px var(--card-shadow);
+    0 1px 2px rgba(20, 30, 60, 0.04),
+    0 16px 30px -18px var(--card-shadow);
 }
 .tab-card-accent {
-  background-image: linear-gradient(160deg, var(--color-panel2), var(--color-panel) 78%);
-  border: 1px solid color-mix(in oklab, var(--color-brass) 38%, var(--color-line));
+  background-image: linear-gradient(158deg, var(--color-panel2), var(--color-panel) 82%);
+  border: 1px solid color-mix(in oklab, var(--color-brass) 40%, var(--color-line));
   border-radius: 1.375rem;
   box-shadow:
     0 1px 0 var(--card-top) inset,
-    0 16px 30px -16px color-mix(in oklab, var(--color-brass) 40%, var(--card-shadow));
+    0 18px 34px -18px color-mix(in oklab, var(--color-brass) 42%, var(--card-shadow));
 }
 .tab-glow {
   box-shadow:
-    0 16px 30px -16px color-mix(in oklab, var(--color-brass) 36%, var(--card-shadow)),
-    0 0 34px -8px color-mix(in oklab, var(--color-brass) 55%, transparent);
+    0 18px 34px -18px color-mix(in oklab, var(--color-brass) 38%, var(--card-shadow)),
+    0 0 36px -8px var(--glow-accent);
+}
+.tab-glow-reward {
+  box-shadow:
+    0 14px 28px -16px var(--card-shadow),
+    0 0 30px -4px var(--glow-reward);
 }
 
 /* ---------- Sky-world roadmap ---------- */
 .tab-sky {
-  background: linear-gradient(180deg, var(--sky-1), var(--sky-2));
+  background:
+    radial-gradient(120% 70% at 50% 6%, color-mix(in oklab, var(--sky-1) 70%, #ffffff 16%) 0%, transparent 55%),
+    linear-gradient(180deg, var(--sky-1), var(--sky-2));
   border: 1px solid var(--color-line);
   border-radius: 1.5rem;
   overflow: hidden;

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import RewardChest from "@/components/ui/RewardChest";
 import ChessBuddy, { type BuddyPiece } from "@/components/characters/ChessBuddy";
+import { Cloud, Sparkle, FloatingIsland, MiniIslet, Moon } from "@/components/world/Scenery";
 
 export type StopStatus = "completed" | "active" | "locked" | "ready";
 
@@ -57,53 +58,23 @@ function LockGlyph({ size = 18 }: { size?: number }) {
 
 /* ---------- scenery ---------- */
 
-function Cloud({ className = "", scale = 1, far = false }: { className?: string; scale?: number; far?: boolean }) {
-  return (
-    <svg width={90 * scale} height={48 * scale} viewBox="0 0 90 48" className={className} aria-hidden>
-      <path
-        d="M22 40 C10 40 6 30 14 26 C12 16 26 12 31 20 C34 10 52 10 55 21 C66 16 78 24 72 33 C80 35 78 44 68 42 Z"
-        fill="var(--cloud-fill)"
-        stroke="var(--cloud-line)"
-        strokeWidth={far ? 1.2 : 2}
-        strokeLinejoin="round"
-        opacity={far ? 0.6 : 1}
-      />
-    </svg>
-  );
-}
-
-function Sparkle({ className = "", size = 10 }: { className?: string; size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 12 12" className={className} aria-hidden>
-      <path d="M6 0 L7 5 L12 6 L7 7 L6 12 L5 7 L0 6 L5 5 Z" fill="var(--sparkle)" />
-    </svg>
-  );
-}
-
-function MiniIslet({ className = "", w = 34 }: { className?: string; w?: number }) {
-  return (
-    <svg width={w} height={w * 0.6} viewBox="0 0 50 30" className={className} aria-hidden style={{ opacity: 0.55 }}>
-      <ellipse cx="25" cy="11" rx="22" ry="7" fill="var(--island-grass)" />
-      <path d="M4 12 C6 22 14 27 25 27 C36 27 44 22 46 12 C36 18 14 18 4 12 Z" fill="var(--island-dirt)" />
-    </svg>
-  );
-}
-
-/** Layered clouds, sparkles and far islets behind the whole roadmap. */
+/** Layered clouds, sparkles, moon and far islets behind the whole roadmap. */
 function SkyDecor() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
       {/* horizon glow near the bottom */}
       <div className="absolute inset-x-0 bottom-0 h-1/3" style={{ background: "linear-gradient(to top, var(--horizon), transparent)" }} />
+      {/* crescent moon — only visible at night (hidden in light via opacity token) */}
+      <Moon className="absolute right-5 top-6 hidden dark:block" size={46} />
       {/* far clouds */}
       <Cloud className="absolute left-4 top-44 tab-drift" scale={0.6} far />
       <Cloud className="absolute right-6 top-72 tab-drift" scale={0.7} far />
       <Cloud className="absolute left-10 top-[420px] tab-drift" scale={0.55} far />
       {/* medium clouds */}
-      <Cloud className="absolute -left-2 top-24 tab-bob" scale={1} />
-      <Cloud className="absolute -right-3 top-52 tab-bob" scale={1.2} />
+      <Cloud className="absolute -left-3 top-24 tab-bob" scale={1} />
+      <Cloud className="absolute -right-4 top-52 tab-bob" scale={1.2} />
       <Cloud className="absolute left-2 top-[340px] tab-bob" scale={0.9} />
-      <Cloud className="absolute -right-2 top-[520px] tab-bob" scale={1.05} />
+      <Cloud className="absolute -right-3 top-[520px] tab-bob" scale={1.05} />
       {/* sparkles + stars */}
       <Sparkle className="absolute right-10 top-32 tab-twinkle" size={12} />
       <Sparkle className="absolute left-1/4 top-60 tab-twinkle" size={9} />
@@ -119,25 +90,10 @@ function SkyDecor() {
   );
 }
 
-/** A grass-topped, dirt-bottomed floating island with a soft shadow. */
+/** A grass-topped floating island that tucks under its node disc. */
 function IslandBase({ w }: { w: number }) {
   return (
-    <svg
-      width={w}
-      height={w * 0.6}
-      viewBox="0 0 100 60"
-      aria-hidden
-      style={{ marginTop: `-${Math.round(w * 0.28)}px`, filter: "drop-shadow(0 7px 5px var(--island-shadow))" }}
-    >
-      <path d="M6 20 C10 44 26 57 50 57 C74 57 90 44 94 20 C74 32 26 32 6 20 Z" fill="var(--island-dirt)" />
-      <path d="M14 26 C20 46 32 53 50 53 C50 53 30 50 22 38 C18 32 15 28 14 26 Z" fill="var(--island-dirt2)" opacity="0.55" />
-      {/* dangling rocks/roots */}
-      <ellipse cx="34" cy="55" rx="3" ry="6" fill="var(--island-dirt2)" />
-      <ellipse cx="64" cy="56" rx="2.6" ry="7" fill="var(--island-dirt2)" />
-      {/* grass cap */}
-      <ellipse cx="50" cy="18" rx="46" ry="13" fill="var(--island-grass)" />
-      <ellipse cx="50" cy="15" rx="38" ry="8.5" fill="var(--island-grass2)" opacity="0.5" />
-    </svg>
+    <FloatingIsland w={w} style={{ marginTop: `-${Math.round(w * 0.3)}px` }} />
   );
 }
 

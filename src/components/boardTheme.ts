@@ -1,10 +1,11 @@
 /**
- * Shared bright-cartoon board styling, so every board uses the same soft
- * light-blue squares. Colours live here rather than scattered per component.
+ * Shared chessboard styling. Colours come from CSS variables (resolved inline)
+ * so every board re-themes automatically: soft light-blue squares by day,
+ * moonlit indigo squares at night. Tokens live in globals.css.
  */
 export const BOARD_SQUARE_STYLES = {
-  darkSquareStyle: { backgroundColor: "#c4d8f0" },
-  lightSquareStyle: { backgroundColor: "#eef4fc" },
-  darkSquareNotationStyle: { color: "rgba(30,41,59,0.55)" },
-  lightSquareNotationStyle: { color: "rgba(30,41,59,0.40)" },
+  darkSquareStyle: { backgroundColor: "var(--board-dark)" },
+  lightSquareStyle: { backgroundColor: "var(--board-light)" },
+  darkSquareNotationStyle: { color: "var(--board-coord-on-dark)" },
+  lightSquareNotationStyle: { color: "var(--board-coord-on-light)" },
 } as const;

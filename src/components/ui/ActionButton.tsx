@@ -7,8 +7,8 @@ type Variant = "primary" | "secondary" | "ghost";
 
 const VARIANTS: Record<Variant, string> = {
   primary:
-    "border-brassdeep bg-brass text-[color:var(--color-on-accent)] shadow-[0_4px_0_0_#3b82f6] active:translate-y-0.5 active:shadow-[0_2px_0_0_#3b82f6] hover:bg-brassdeep",
-  secondary: "border-line bg-panel text-cream shadow-[0_3px_0_0_#e2e8f0] hover:border-muted2",
+    "border-brassdeep bg-brass text-[color:var(--color-on-accent)] shadow-[0_4px_0_0_var(--color-brassdeep)] active:translate-y-0.5 active:shadow-[0_2px_0_0_var(--color-brassdeep)] hover:bg-brassdeep",
+  secondary: "border-line bg-panel text-cream shadow-[0_3px_0_0_var(--color-line)] hover:border-muted2",
   ghost: "border-transparent bg-transparent text-muted hover:text-cream",
 };
 
