@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useProfileStore, selectLevel, puzzlesSolvedCount, academyStateFrom } from "@/state/profileStore";
 import { usePuzzleStore, overallAccuracy } from "@/state/puzzleStore";
@@ -12,17 +12,22 @@ import PixelPanel from "@/components/pixel/PixelPanel";
 import PixelStatPill from "@/components/pixel/PixelStatPill";
 import PixelCharacterFrame from "@/components/pixel/PixelCharacterFrame";
 import PlayerAvatar from "@/components/pixel/PlayerAvatar";
+import PixelSettingsModal from "@/components/pixel/PixelSettingsModal";
 import BadgeEmblem from "@/components/ui/BadgeEmblem";
-import ChessBuddy, { BUDDIES, type BuddyPiece } from "@/components/characters/ChessBuddy";
-import { CoinIcon } from "@/components/pixel/PixelIcon";
+import ChessBuddy, { type BuddyPiece } from "@/components/characters/ChessBuddy";
+import { PLAYER_PALETTES, type SpritePalette } from "@/components/pixel/PixelSprite";
+import { CoinIcon, GearGlyph } from "@/components/pixel/PixelIcon";
 
-const GUIDES: { piece: BuddyPiece; hue: "gold" | "purple" | "blue" | "red" | "orange" | "green" }[] = [
-  { piece: "king", hue: "gold" },
-  { piece: "queen", hue: "red" },
-  { piece: "bishop", hue: "purple" },
-  { piece: "knight", hue: "green" },
-  { piece: "rook", hue: "orange" },
-  { piece: "pawn", hue: "blue" },
+const STONE: SpritePalette = { body: "#8b97c4", hi: "#aab6e0", line: "#3a4a8c", accent: "#cfd8f0" };
+const TAN: SpritePalette = { body: "#e0b884", hi: "#f3d8aa", line: "#9a6f3c", accent: "#fff0d8" };
+
+const GUIDE_ROSTER: { name: string; piece: BuddyPiece; hue: "gold" | "purple" | "blue" | "red" | "orange" | "green"; palette?: SpritePalette }[] = [
+  { name: "King Arthur", piece: "king", hue: "gold", palette: PLAYER_PALETTES.gold },
+  { name: "Queen Luna", piece: "queen", hue: "purple", palette: PLAYER_PALETTES.purple },
+  { name: "Bishop Eli", piece: "bishop", hue: "blue", palette: PLAYER_PALETTES.blue },
+  { name: "Knight Rex", piece: "knight", hue: "red", palette: PLAYER_PALETTES.red },
+  { name: "Rooky", piece: "rook", hue: "gray" as "blue", palette: STONE },
+  { name: "Pawnie", piece: "pawn", hue: "orange", palette: TAN },
 ];
 
 export default function ProfileScreen() {
@@ -34,6 +39,7 @@ export default function ProfileScreen() {
   const solvedIds = useProfileStore((s) => s.solvedPuzzleIds);
   const matches = useProfileStore((s) => s.matches);
   const attempts = usePuzzleStore((s) => s.attempts);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     void usePuzzleStore.getState().hydrate();
@@ -77,7 +83,7 @@ export default function ProfileScreen() {
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            <span className="px-label text-[0.78rem] text-cream">Player</span>
+            <span className="px-label text-[0.78rem] text-cream">TABIYA</span>
             <span className="text-[0.6rem] text-muted2" aria-hidden>✎</span>
           </div>
           <div className="mt-1 flex items-center gap-1.5">
@@ -104,12 +110,12 @@ export default function ProfileScreen() {
       {/* Guides */}
       <PixelPanel hue="purple" label="Your Guides" labelHue="purple" className="px-2.5 pb-2.5 pt-3">
         <div className="grid grid-cols-6 gap-1">
-          {GUIDES.map(({ piece, hue }) => (
-            <div key={piece} className="flex min-w-0 flex-col items-center gap-0.5">
+          {GUIDE_ROSTER.map(({ name, piece, hue, palette }) => (
+            <div key={name} className="flex min-w-0 flex-col items-center gap-0.5">
               <PixelCharacterFrame hue={hue} size={40}>
-                <ChessBuddy piece={piece} size={32} />
+                <ChessBuddy piece={piece} size={32} palette={palette} />
               </PixelCharacterFrame>
-              <span className="px-label w-full truncate text-center text-[0.4rem] text-muted2">{BUDDIES[piece].name}</span>
+              <span className="px-label w-full truncate text-center text-[0.38rem] text-muted2">{name}</span>
             </div>
           ))}
         </div>
@@ -154,7 +160,12 @@ export default function ProfileScreen() {
         )}
       </PixelPanel>
 
-      <p className="px-label pb-1 text-center text-[0.46rem] text-muted2">Tap the ⚙ gear up top for settings</p>
+      {/* Settings button */}
+      <button type="button" onClick={() => setSettingsOpen(true)} className="px-btn px-btn-secondary mx-auto flex w-[70%] items-center justify-center gap-2 !text-[0.62rem]">
+        <GearGlyph size={14} /> SETTINGS ›
+      </button>
+
+      <PixelSettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   );
 }
