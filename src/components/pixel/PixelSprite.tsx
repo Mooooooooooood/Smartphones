@@ -81,16 +81,37 @@ const PALETTE: Record<BuddyPiece, { body: string; hi: string; line: string; acce
   king: { body: "#ffd24a", hi: "#ffe79a", line: "#b8841a", accent: "#fff3c4" },
 };
 
+export interface SpritePalette {
+  body: string;
+  hi: string;
+  line: string;
+  accent: string;
+}
+
+/** Named palette overrides for special identities (player avatar, rival). */
+export const PLAYER_PALETTES: Record<string, SpritePalette> = {
+  gold: { body: "#ffd24a", hi: "#ffe79a", line: "#b8841a", accent: "#fff3c4" },
+  red: { body: "#ff5468", hi: "#ff8f9e", line: "#a01b2c", accent: "#ffd0d6" },
+  blue: { body: "#4d8dff", hi: "#9cc3ff", line: "#1d3f8a", accent: "#dbe9ff" },
+  green: { body: "#45d36c", hi: "#8ef0a8", line: "#1d7344", accent: "#d6ffe4" },
+  purple: { body: "#8a6fe0", hi: "#cdb8ff", line: "#4a2fa0", accent: "#efe6ff" },
+};
+
+/** The striking elite-rival palette (intense crimson with a hot rim). */
+export const RIVAL_PALETTE: SpritePalette = { body: "#e01034", hi: "#ff5a72", line: "#6e0014", accent: "#ffd23c" };
+
 export default function PixelSprite({
   piece,
   size = 56,
   className = "",
+  palette,
 }: {
   piece: BuddyPiece;
   size?: number;
   className?: string;
+  palette?: SpritePalette;
 }) {
-  const p = PALETTE[piece];
+  const p = palette ?? PALETTE[piece];
   const grid = [...TOPPERS[piece], ...BODY];
   const H = grid.length;
   const fill = (ch: string): string | null => {

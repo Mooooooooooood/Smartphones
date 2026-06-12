@@ -16,6 +16,7 @@ import PixelButton from "@/components/pixel/PixelButton";
 import PixelStat from "@/components/pixel/PixelStat";
 import PixelCharacterFrame from "@/components/pixel/PixelCharacterFrame";
 import PixelBoardFrame from "@/components/pixel/PixelBoardFrame";
+import { RIVAL_PALETTE } from "@/components/pixel/PixelSprite";
 import { BoardSkeleton } from "@/components/ui/Skeleton";
 import type { Color, GameStatus } from "@/domain/chess/types";
 import type { MatchResultState } from "@/state/gameStore";
@@ -69,15 +70,15 @@ function OpponentSelect({ onChoose, onPractice }: { onChoose: (id: string) => vo
   return (
     <div className="space-y-2.5">
       <PixelTopBar />
-      <h1 className="px-title px-1 text-[1.5rem] leading-tight">Choose Your Match</h1>
-      <p className="px-1 text-[0.62rem] text-muted">Pick a friendly opponent — they only play legal moves.</p>
+      <h1 className="px-title px-1 text-[1.4rem] leading-tight">Choose Your Challenger</h1>
+      <p className="px-1 text-[0.62rem] text-muted">Battle the guide cast — they only play legal moves.</p>
 
       <div className="space-y-2.5">
         {OPPONENTS.map((o) => (
           <button key={o.id} type="button" onClick={() => onChoose(o.id)} className="block w-full text-left active:translate-y-0.5">
-            <PixelPanel hue={PIECE_HUE[o.piece]} className="flex items-center gap-2.5 px-2.5 py-2.5">
+            <PixelPanel hue={PIECE_HUE[o.piece]} glow={o.rival ? "reward" : undefined} className="flex items-center gap-2.5 px-2.5 py-2.5">
               <PixelCharacterFrame hue={PIECE_HUE[o.piece] as "blue"} size={52} className="shrink-0">
-                <ChessBuddy piece={o.piece} size={42} />
+                <ChessBuddy piece={o.piece} size={42} palette={o.rival ? RIVAL_PALETTE : undefined} />
               </PixelCharacterFrame>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
@@ -89,6 +90,9 @@ function OpponentSelect({ onChoose, onPractice }: { onChoose: (id: string) => vo
                   <span className="px-label text-[0.46rem] text-good">+{o.xpReward} XP</span>
                   {o.recommended ? (
                     <span className="px-label rounded-[4px] border-2 border-[var(--px-edge)] bg-good px-1 py-0.5 text-[0.42rem] text-[color:#06220f]">Start Here</span>
+                  ) : null}
+                  {o.rival ? (
+                    <span className="px-label rounded-[4px] border-2 border-[var(--px-edge)] bg-bad px-1 py-0.5 text-[0.42rem] text-[color:#2a0709]">Rival</span>
                   ) : null}
                 </div>
                 <p className="mt-0.5 truncate text-[0.6rem] text-muted2">{o.line}</p>
@@ -130,9 +134,9 @@ function MatchSetup({ opponent, onStart, onBack }: { opponent: Opponent; onStart
       <PixelTopBar />
       <button onClick={onBack} className="px-label px-1 text-[0.56rem] text-muted">‹ Opponents</button>
 
-      <PixelPanel hue={PIECE_HUE[opponent.piece]} rivets className="px-4 py-4 text-center">
+      <PixelPanel hue={PIECE_HUE[opponent.piece]} rivets glow={opponent.rival ? "reward" : undefined} className="px-4 py-4 text-center">
         <div className="px-inset mx-auto flex h-24 w-24 items-center justify-center">
-          <ChessBuddy piece={opponent.piece} size={72} />
+          <ChessBuddy piece={opponent.piece} size={72} palette={opponent.rival ? RIVAL_PALETTE : undefined} />
         </div>
         <p className="px-label mt-2.5 text-[0.52rem] text-brass">You vs</p>
         <h1 className="px-title text-[1.1rem] text-cream">{opponent.name}</h1>
@@ -207,7 +211,7 @@ function MatchRecap({ result, opponent, reviewHref, onRematch, onChange }: {
         {result.outcome === "draw" ? "DRAW" : "DEFEAT"}
       </span>
       <div className="tab-bob px-inset mx-auto mt-2.5 flex h-24 w-24 items-center justify-center">
-        <ChessBuddy piece={piece} size={72} />
+        <ChessBuddy piece={piece} size={72} palette={opponent?.rival ? RIVAL_PALETTE : undefined} />
       </div>
       <h3 className="px-title mt-2.5 text-[1.1rem] text-cream">{title}</h3>
       <p className="mt-1 text-[0.7rem] text-muted">{reaction}</p>
@@ -288,7 +292,7 @@ export default function PlayScreen() {
       {/* Battle header */}
       <PixelPanel hue={opponent ? PIECE_HUE[opponent.piece] : "gray"} className="flex items-center gap-2.5 px-2.5 py-2">
         <PixelCharacterFrame hue={opponent ? (PIECE_HUE[opponent.piece] as "blue") : "gray"} size={44} className="shrink-0">
-          <ChessBuddy piece={opponent?.piece ?? "rook"} size={36} />
+          <ChessBuddy piece={opponent?.piece ?? "rook"} size={36} palette={opponent?.rival ? RIVAL_PALETTE : undefined} />
         </PixelCharacterFrame>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">

@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
 import { useProfileStore, selectLevel, puzzlesSolvedCount } from "@/state/profileStore";
 import { CoinIcon, GemIcon, StarIcon, GearGlyph } from "@/components/pixel/PixelIcon";
+import PixelSettingsModal from "@/components/pixel/PixelSettingsModal";
 
 /**
  * The arcade status strip from the mockups. Left: a crowned level badge + green
@@ -16,6 +17,7 @@ export default function PixelTopBar({ star = false }: { star?: boolean }) {
   const lvl = selectLevel(xp);
   const gems = puzzlesSolvedCount(solvedIds);
   const stars = Math.round(xp / 32);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const fmt = (n: number) => (n > 9999 ? `${(n / 1000).toFixed(n >= 100000 ? 0 : 1)}k` : n.toLocaleString());
 
@@ -35,9 +37,10 @@ export default function PixelTopBar({ star = false }: { star?: boolean }) {
       <Capsule icon={<CoinIcon size={13} />} value={fmt(xp)} />
       <Capsule icon={<GemIcon size={13} />} value={fmt(gems)} />
       {star ? <Capsule icon={<StarIcon size={13} />} value={fmt(stars)} /> : null}
-      <Link href="/profile" aria-label="Settings" className="px-inset flex h-7 w-7 shrink-0 items-center justify-center text-muted2 active:translate-y-0.5">
+      <button type="button" onClick={() => setSettingsOpen(true)} aria-label="Settings" className="px-inset flex h-7 w-7 shrink-0 items-center justify-center text-muted2 active:translate-y-0.5">
         <GearGlyph size={15} />
-      </Link>
+      </button>
+      <PixelSettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   );
 }

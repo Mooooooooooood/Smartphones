@@ -3,7 +3,7 @@
  * pixel-art sprite (see PixelSprite) so every `<ChessBuddy>` across the app
  * renders as a retro mascot automatically.
  */
-import PixelSprite, { type BuddyPiece } from "@/components/pixel/PixelSprite";
+import PixelSprite, { type BuddyPiece, type SpritePalette } from "@/components/pixel/PixelSprite";
 
 export type { BuddyPiece };
 
@@ -26,10 +26,12 @@ export default function ChessBuddy({
   piece,
   size = 64,
   className = "",
+  palette,
 }: {
   piece: BuddyPiece;
   size?: number;
   className?: string;
+  palette?: SpritePalette;
 }) {
-  return <PixelSprite piece={piece} size={size} className={className} />;
+  return <PixelSprite piece={piece} size={size} className={className} palette={palette} />;
 }

@@ -3,7 +3,8 @@
 import { useMemo, useState, type CSSProperties } from "react";
 import { Chessboard } from "react-chessboard";
 import { Chess, type Square } from "chess.js";
-import { BOARD_SQUARE_STYLES } from "@/components/boardTheme";
+import { BOARD_SQUARE_STYLES, BOARD_HL } from "@/components/boardTheme";
+import { PIXEL_PIECES } from "@/components/pixel/PixelChessPieces";
 import {
   isMoveCorrect,
   isTapCorrect,
@@ -15,25 +16,13 @@ import {
 
 type BoardStep = BoardDemoStep | TapSquareStep | TapPieceStep | MakeMoveStep;
 
-const demoHighlight: CSSProperties = {
-  boxShadow: "inset 0 0 0 4px rgba(96,165,250,0.85)",
-  borderRadius: "6px",
-};
-const moveDot: CSSProperties = {
-  backgroundImage: "radial-gradient(circle, rgba(96,165,250,0.6) 17%, transparent 19%)",
-};
-const captureRing: CSSProperties = {
-  boxShadow: "inset 0 0 0 5px rgba(244,63,94,0.6)",
-  borderRadius: "4px",
-};
-const selectedStyle: CSSProperties = { boxShadow: "inset 0 0 0 3px #3b82f6" };
-const correctStyle: CSSProperties = {
-  backgroundImage: "linear-gradient(rgba(134,239,172,0.6), rgba(134,239,172,0.6))",
-};
-const wrongStyle: CSSProperties = {
-  backgroundImage: "linear-gradient(rgba(244,63,94,0.5), rgba(244,63,94,0.5))",
-};
-const hintStyle: CSSProperties = { boxShadow: "inset 0 0 0 3px rgba(96,165,250,0.9)" };
+const demoHighlight = BOARD_HL.demo;
+const moveDot = BOARD_HL.moveDot;
+const captureRing = BOARD_HL.captureRing;
+const selectedStyle = BOARD_HL.selected;
+const correctStyle = BOARD_HL.correct;
+const wrongStyle = BOARD_HL.wrong;
+const hintStyle = BOARD_HL.hint;
 
 /**
  * Interactive board for lesson stages. Supports read-only demos with
@@ -204,7 +193,8 @@ export default function LessonInteractiveBoard({
         animationDurationInMs: 200,
         allowDragging: step.type === "make-move" && !solved,
         showNotation: true,
-        boardStyle: { borderRadius: "10px", overflow: "hidden" },
+        boardStyle: { borderRadius: "4px", overflow: "hidden" },
+        pieces: PIXEL_PIECES,
         ...BOARD_SQUARE_STYLES,
         squareStyles: styles,
         onSquareClick: ({ square }) => handleTap(square as Square),

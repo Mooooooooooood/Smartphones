@@ -11,11 +11,10 @@ import PixelTopBar from "@/components/pixel/PixelTopBar";
 import PixelPanel from "@/components/pixel/PixelPanel";
 import PixelStatPill from "@/components/pixel/PixelStatPill";
 import PixelCharacterFrame from "@/components/pixel/PixelCharacterFrame";
+import PlayerAvatar from "@/components/pixel/PlayerAvatar";
 import BadgeEmblem from "@/components/ui/BadgeEmblem";
-import ThemeToggle from "@/components/ui/ThemeToggle";
 import ChessBuddy, { BUDDIES, type BuddyPiece } from "@/components/characters/ChessBuddy";
 import { CoinIcon } from "@/components/pixel/PixelIcon";
-import SettingsSection from "./SettingsSection";
 
 const GUIDES: { piece: BuddyPiece; hue: "gold" | "purple" | "blue" | "red" | "orange" | "green" }[] = [
   { piece: "king", hue: "gold" },
@@ -66,17 +65,13 @@ export default function ProfileScreen() {
     <div className="space-y-2.5">
       <PixelTopBar star />
 
-      <div className="flex items-center justify-between px-1">
-        <span className="w-9" />
-        <h1 className="px-title text-[1.4rem]">Profile</h1>
-        <ThemeToggle compact />
-      </div>
+      <h1 className="px-title text-center text-[1.4rem]">Profile</h1>
 
       {/* Player card */}
       <PixelPanel hue="blue" label="Player Card" className="flex items-stretch gap-2.5 px-2.5 pb-2.5 pt-3">
         <div className="flex shrink-0 flex-col items-center gap-1">
           <PixelCharacterFrame hue="gold" size={66}>
-            <ChessBuddy piece="king" size={54} />
+            <PlayerAvatar size={54} />
           </PixelCharacterFrame>
           <span className="px-label rounded-[4px] border-2 border-[var(--px-edge)] bg-brass px-1.5 py-0.5 text-[0.46rem] text-[color:var(--color-on-accent)]">Lv. {lvl.level}</span>
         </div>
@@ -159,7 +154,7 @@ export default function ProfileScreen() {
         )}
       </PixelPanel>
 
-      <SettingsSection />
+      <p className="px-label pb-1 text-center text-[0.46rem] text-muted2">Tap the ⚙ gear up top for settings</p>
     </div>
   );
 }

@@ -5,26 +5,14 @@ import { Chessboard } from "react-chessboard";
 import type { Square } from "chess.js";
 import { usePuzzleStore, currentPuzzle } from "@/state/puzzleStore";
 import { legalTargets } from "@/domain/puzzles/puzzleEngine";
-import { BOARD_SQUARE_STYLES } from "@/components/boardTheme";
+import { BOARD_SQUARE_STYLES, BOARD_HL } from "@/components/boardTheme";
+import { PIXEL_PIECES } from "@/components/pixel/PixelChessPieces";
 
-const ACCENT = "#3b82f6";
-
-const moveDot: CSSProperties = {
-  backgroundImage: "radial-gradient(circle, rgba(96,165,250,0.60) 17%, transparent 19%)",
-};
-const captureRing: CSSProperties = {
-  boxShadow: "inset 0 0 0 5px rgba(244,63,94,0.65)",
-  borderRadius: "4px",
-};
-const selectedStyle: CSSProperties = {
-  boxShadow: `inset 0 0 0 3px ${ACCENT}`,
-};
-const solvedStyle: CSSProperties = {
-  backgroundImage: "linear-gradient(rgba(134,239,172,0.55), rgba(134,239,172,0.55))",
-};
-const hintStyle: CSSProperties = {
-  boxShadow: `inset 0 0 0 3px rgba(96,165,250,0.85)`,
-};
+const moveDot = BOARD_HL.moveDot;
+const captureRing = BOARD_HL.captureRing;
+const selectedStyle = BOARD_HL.selected;
+const solvedStyle = BOARD_HL.correct;
+const hintStyle = BOARD_HL.hint;
 
 export default function PuzzleBoard() {
   const queue = usePuzzleStore((s) => s.queue);
@@ -100,7 +88,8 @@ export default function PuzzleBoard() {
         animationDurationInMs: 180,
         allowDragging: !solved,
         showNotation: true,
-        boardStyle: { borderRadius: "8px", overflow: "hidden" },
+        boardStyle: { borderRadius: "4px", overflow: "hidden" },
+        pieces: PIXEL_PIECES,
         ...BOARD_SQUARE_STYLES,
         squareStyles: styles,
         onSquareClick: ({ square }) => handleSquareClick(square as Square),

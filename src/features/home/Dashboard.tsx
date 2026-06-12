@@ -17,6 +17,7 @@ import PixelCard from "@/components/pixel/PixelCard";
 import PixelRewardChest from "@/components/pixel/PixelRewardChest";
 import { CoinIcon, GemIcon, StarIcon, FlameIcon } from "@/components/pixel/PixelIcon";
 import ChessBuddy from "@/components/characters/ChessBuddy";
+import PlayerAvatar from "@/components/pixel/PlayerAvatar";
 
 function QuestRow({ label, done, coin }: { label: string; done: boolean; coin: number }) {
   return (
@@ -106,7 +107,7 @@ export default function Dashboard() {
             <div className="px-inset mb-1 px-1.5 py-1 text-center text-[0.46rem] leading-tight text-cream">
               {fresh ? "Let's begin!" : "Every move makes you stronger!"}
             </div>
-            <ChessBuddy piece="pawn" size={48} className="tab-bob" />
+            <PlayerAvatar size={48} className="tab-bob" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
@@ -151,7 +152,7 @@ export default function Dashboard() {
       {/* Mode cards */}
       <div className="grid grid-cols-3 gap-2">
         <PixelCard href={step.href} hue="blue" title="Academy" desc="Learn tactics and strategies." cta="ENTER"
-          art={<ChessBuddy piece="rook" size={36} />} />
+          art={<ChessBuddy piece="pawn" size={36} />} />
         <PixelCard href="/puzzles" hue="green" title="Puzzles" desc="Sharpen your mind with puzzles." cta="SOLVE"
           art={<ChessBuddy piece="knight" size={36} />} />
         <PixelCard href="/play" hue="red" title="Play" desc="Battle a friendly opponent." cta="BATTLE"
