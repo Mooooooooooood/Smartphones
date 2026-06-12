@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import PixelChest from "@/components/pixel/PixelChest";
+import PixelOrnateChest from "@/components/pixel/PixelOrnateChest";
 
 /**
  * A treasure chest with an optional "REWARD" caption and reward chips beneath,
@@ -20,7 +20,7 @@ export default function PixelRewardChest({
 }) {
   return (
     <div className={`flex flex-col items-center gap-0.5 ${className}`}>
-      <PixelChest state={state} size={size} className={state === "ready" ? "tab-bob" : ""} />
+      <PixelOrnateChest state={state} size={size} />
       {caption ? <span className="px-label text-[0.44rem] text-brass">{caption}</span> : null}
       {rewards ? <div className="flex items-center gap-1.5">{rewards}</div> : null}
     </div>

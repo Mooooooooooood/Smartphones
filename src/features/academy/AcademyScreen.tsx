@@ -14,7 +14,7 @@ import {
 import PixelTopBar from "@/components/pixel/PixelTopBar";
 import PixelPanel from "@/components/pixel/PixelPanel";
 import PixelMapNode, { type MapNodeStatus } from "@/components/pixel/PixelMapNode";
-import PixelChest from "@/components/pixel/PixelChest";
+import PixelOrnateChest from "@/components/pixel/PixelOrnateChest";
 import { StarIcon } from "@/components/pixel/PixelIcon";
 import ChessBuddy from "@/components/characters/ChessBuddy";
 import { GUIDES } from "@/content/guides";
@@ -126,7 +126,7 @@ function TierWorld({
           {/* Treasure */}
           <button type="button" onClick={midReady ? onClaimMid : undefined} className="absolute" style={{ right: "8%", bottom: "44%" }}>
             <div className="flex flex-col items-center">
-              <PixelChest state={tier === 0 && midClaimed ? "open" : midReady ? "ready" : "locked"} size={40} className={midReady ? "tab-bob" : ""} />
+              <PixelOrnateChest state={tier === 0 && midClaimed ? "open" : midReady ? "ready" : "locked"} size={44} />
               <span className="px-label rounded-[3px] border border-[var(--px-edge)] bg-[#5a3a18] px-1 text-[0.4rem] text-[#ffe0a0]">Treasure</span>
             </div>
           </button>
@@ -190,7 +190,7 @@ function TierWorld({
           <p className="px-label text-[0.5rem] text-brass">Tier {tier}: {tierName}</p>
           <p className="truncate text-[0.5rem] text-muted2">{prog.done}/{prog.total} lessons · master the basics.</p>
         </div>
-        <PixelChest state={tier === 0 && midClaimed ? "open" : "locked"} size={26} />
+        <PixelOrnateChest state={tier === 0 && midClaimed ? "open" : "locked"} size={28} />
       </PixelPanel>
     </div>
   );

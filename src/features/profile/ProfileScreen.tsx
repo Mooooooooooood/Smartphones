@@ -11,7 +11,7 @@ import PixelTopBar from "@/components/pixel/PixelTopBar";
 import PixelPanel from "@/components/pixel/PixelPanel";
 import PixelStatPill from "@/components/pixel/PixelStatPill";
 import PixelCharacterFrame from "@/components/pixel/PixelCharacterFrame";
-import PlayerAvatar from "@/components/pixel/PlayerAvatar";
+import AvatarPortrait from "@/components/pixel/AvatarPortrait";
 import PixelSettingsModal from "@/components/pixel/PixelSettingsModal";
 import BadgeEmblem from "@/components/ui/BadgeEmblem";
 import ChessBuddy, { type BuddyPiece } from "@/components/characters/ChessBuddy";
@@ -77,7 +77,7 @@ export default function ProfileScreen() {
       <PixelPanel hue="blue" label="Player Card" className="flex items-stretch gap-2.5 px-2.5 pb-2.5 pt-3">
         <div className="flex shrink-0 flex-col items-center gap-1">
           <PixelCharacterFrame hue="gold" size={66}>
-            <PlayerAvatar size={54} />
+            <AvatarPortrait size={56} />
           </PixelCharacterFrame>
           <span className="px-label rounded-[4px] border-2 border-[var(--px-edge)] bg-brass px-1.5 py-0.5 text-[0.46rem] text-[color:var(--color-on-accent)]">Lv. {lvl.level}</span>
         </div>

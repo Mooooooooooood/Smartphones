@@ -17,7 +17,7 @@ import PixelCard from "@/components/pixel/PixelCard";
 import PixelRewardChest from "@/components/pixel/PixelRewardChest";
 import { CoinIcon, GemIcon, FlameIcon } from "@/components/pixel/PixelIcon";
 import ChessBuddy from "@/components/characters/ChessBuddy";
-import PlayerAvatar from "@/components/pixel/PlayerAvatar";
+import CapedHero from "@/components/pixel/CapedHero";
 
 function QuestRow({ label, done, coin }: { label: string; done: boolean; coin: number }) {
   return (
@@ -135,8 +135,8 @@ export default function Dashboard() {
             <div className="relative h-[58px] w-full overflow-hidden rounded-[5px] border-2 border-[var(--px-edge)]" style={{ background: "linear-gradient(180deg,#3a78c4,#74b0e0 70%)" }}>
               <div className="absolute inset-x-0 bottom-0 h-3" style={{ background: "linear-gradient(#3f8a4a,#2c6837)" }} />
               <div className="absolute bottom-1.5 left-1/2 h-2 w-11 -translate-x-1/2 rounded-full" style={{ background: "linear-gradient(#9aa6c8,#5a648a)", boxShadow: "0 0 0 2px var(--px-edge)" }} />
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2">
-                <PlayerAvatar size={40} className="tab-bob" />
+              <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2">
+                <CapedHero size={42} />
               </div>
             </div>
           </div>
