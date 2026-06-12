@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect } from "react";
 import type { BuddyPiece } from "@/components/characters/ChessBuddy";
 import ChessBuddy from "@/components/characters/ChessBuddy";
 import PixelChest from "@/components/pixel/PixelChest";
+import { fx } from "@/lib/feedback";
 
 const BURST = [
   "#fbbf24", "#60a5fa", "#86efac", "#c4b5fd", "#fb7185", "#fdba74",
@@ -26,6 +28,10 @@ export default function RewardModal({
   piece?: BuddyPiece;
   subtitle?: string;
 }) {
+  useEffect(() => {
+    if (open) fx.chest();
+  }, [open]);
+
   if (!open) return null;
 
   return (

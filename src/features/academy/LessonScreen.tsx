@@ -16,6 +16,7 @@ import RewardPanel from "@/components/ui/RewardPanel";
 import TopProgress from "@/components/ui/TopProgress";
 import Skeleton from "@/components/ui/Skeleton";
 import ChessBuddy, { BUDDIES } from "@/components/characters/ChessBuddy";
+import { fx } from "@/lib/feedback";
 
 const LessonInteractiveBoard = dynamic(() => import("@/components/LessonInteractiveBoard"), {
   ssr: false,
@@ -155,14 +156,17 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
     if (correct) {
       setSolved(true);
       setStepWrong(false);
+      fx.correct();
     } else {
       setStepWrong(true);
       setAnyWrong(true);
+      fx.wrong();
     }
   }
 
   function pickChoice(i: number) {
     if (step.type !== "multiple-choice" || mcPicked === step.correctIndex) return;
+    fx[i === step.correctIndex ? "correct" : "wrong"]();
     setMcPicked(i);
     if (i !== step.correctIndex) setAnyWrong(true);
   }

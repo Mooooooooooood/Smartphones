@@ -1,5 +1,8 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { useEffect, type ReactNode } from "react";
 import ChessBuddy, { type BuddyPiece } from "@/components/characters/ChessBuddy";
+import { fx } from "@/lib/feedback";
 
 const CONFETTI = [
   { left: "12%", color: "#fbbf24", delay: "0s" },
@@ -20,6 +23,7 @@ export default function RewardPanel({
   subtitle,
   tone = "brass",
   piece,
+  sound = "correct",
   children,
 }: {
   title: string;
@@ -27,9 +31,15 @@ export default function RewardPanel({
   subtitle?: string;
   tone?: "brass" | "good";
   piece?: BuddyPiece;
+  sound?: "correct" | "win" | "none";
   children?: ReactNode;
 }) {
   const accent = tone === "good" ? "text-good" : "text-brass";
+
+  useEffect(() => {
+    if (sound === "win") fx.win();
+    else if (sound === "correct") fx.correct();
+  }, [sound]);
 
   return (
     <div className="px-card tab-animate-pop tab-glow-reward relative overflow-hidden p-4 text-center" style={{ "--hue": "var(--color-brass)", "--hue-deep": "var(--color-brassdeep)" } as React.CSSProperties}>

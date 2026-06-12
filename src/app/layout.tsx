@@ -5,6 +5,7 @@ import PixelBottomNav from "@/components/pixel/PixelBottomNav";
 import PixelShell from "@/components/pixel/PixelShell";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import PwaRegister from "@/components/PwaRegister";
+import Onboarding from "@/components/Onboarding";
 
 const display = Press_Start_2P({
   subsets: ["latin"],
@@ -62,6 +63,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <PixelBottomNav />
         </div>
         <PixelShell />
+        <Onboarding />
         <PwaRegister />
       </body>
     </html>

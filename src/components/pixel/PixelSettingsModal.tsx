@@ -8,8 +8,24 @@ import { GearGlyph } from "@/components/pixel/PixelIcon";
 import { exportAll, importAll, resetAll } from "@/data/backup";
 import { APP_VERSION } from "@/lib/version";
 import { PLAYER_COLORS, getPlayerColor, setPlayerColor, type PlayerColorId } from "@/lib/playerColor";
+import { useSoundOn, setSoundOn, playSfx } from "@/lib/sound";
+import { useHapticsOn, setHapticsOn, hapticsSupported, vibrate } from "@/lib/haptics";
 
 type Status = { kind: "ok" | "err"; msg: string } | null;
+
+function Toggle({ on, onChange, label, hint }: { on: boolean; onChange: (v: boolean) => void; label: string; hint?: string }) {
+  return (
+    <button type="button" onClick={() => onChange(!on)} className="px-inset flex w-full items-center justify-between px-2.5 py-2 active:translate-y-0.5">
+      <span className="px-label text-[0.56rem] text-cream">{label}</span>
+      <span className="flex items-center gap-1.5">
+        {hint ? <span className="text-[0.5rem] text-muted2">{hint}</span> : null}
+        <span className={`flex h-5 w-9 items-center rounded-[5px] border-2 border-[var(--px-edge)] px-0.5 ${on ? "bg-good justify-end" : "bg-[var(--color-ink)] justify-start"}`}>
+          <span className="h-3.5 w-3.5 rounded-[3px] bg-cream" />
+        </span>
+      </span>
+    </button>
+  );
+}
 const stamp = () => new Date().toISOString().slice(0, 10);
 
 /** Game-native settings panel opened from the top-right gear. */
@@ -18,6 +34,9 @@ export default function PixelSettingsModal({ open, onClose }: { open: boolean; o
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<Status>(null);
   const [color, setColorState] = useState<PlayerColorId>(getPlayerColor);
+  const soundOn = useSoundOn();
+  const hapticsOn = useHapticsOn();
+  const [resetArmed, setResetArmed] = useState(false);
 
   if (!open) return null;
 
@@ -53,7 +72,11 @@ export default function PixelSettingsModal({ open, onClose }: { open: boolean; o
   }
 
   async function handleReset() {
-    if (!window.confirm("Reset erases all local progress on this device. This can't be undone. Continue?")) return;
+    if (!resetArmed) {
+      setResetArmed(true);
+      return;
+    }
+    setResetArmed(false);
     setBusy(true); setStatus(null);
     try {
       await resetAll();
@@ -81,6 +104,18 @@ export default function PixelSettingsModal({ open, onClose }: { open: boolean; o
           <p className="px-label text-[0.5rem] text-brass">Appearance</p>
           <p className="text-[0.6rem] text-muted">Day arcade or night arcade.</p>
           <ThemeToggle />
+        </div>
+
+        {/* Sound & Haptics */}
+        <div className="px-panel space-y-2 px-3 py-3">
+          <p className="px-label text-[0.5rem] text-brass">Sound &amp; Haptics</p>
+          <Toggle on={soundOn} label="Sound FX" onChange={(v) => { setSoundOn(v); if (v) playSfx("correct"); }} />
+          <Toggle
+            on={hapticsOn}
+            label="Haptics"
+            hint={hapticsSupported() ? undefined : "n/a"}
+            onChange={(v) => { setHapticsOn(v); if (v) vibrate("correct"); }}
+          />
         </div>
 
         {/* Player colour */}
@@ -116,7 +151,8 @@ export default function PixelSettingsModal({ open, onClose }: { open: boolean; o
           </div>
           <input ref={fileRef} type="file" accept="application/json,.json" className="hidden"
             onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void handleImportFile(f); }} />
-          <PixelButton onClick={handleReset} disabled={busy} tone="red" size="sm">Reset all progress</PixelButton>
+          <PixelButton onClick={handleReset} disabled={busy} tone="red" size="sm">{resetArmed ? "⚠ Tap again to erase everything" : "Reset all progress"}</PixelButton>
+          {resetArmed ? <button type="button" onClick={() => setResetArmed(false)} className="px-label w-full text-center text-[0.5rem] text-muted2">cancel</button> : null}
           {status ? <p role="status" className={`text-center text-[0.6rem] ${status.kind === "ok" ? "text-good" : "text-bad"}`}>{status.msg}</p> : null}
         </div>
 

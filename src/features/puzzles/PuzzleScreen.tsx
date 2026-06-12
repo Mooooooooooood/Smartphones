@@ -14,6 +14,7 @@ import PixelPanel from "@/components/pixel/PixelPanel";
 import PixelButton from "@/components/pixel/PixelButton";
 import PixelStat from "@/components/pixel/PixelStat";
 import ChessBuddy from "@/components/characters/ChessBuddy";
+import { fx } from "@/lib/feedback";
 
 const PuzzleBoard = dynamic(() => import("@/components/PuzzleBoard"), { ssr: false, loading: () => <BoardSkeleton /> });
 
@@ -62,6 +63,10 @@ export default function PuzzleScreen() {
       appliedTheme.current = true;
     }
   }, [themeParam]);
+
+  useEffect(() => {
+    if (status === "wrong") fx.wrong();
+  }, [status]);
 
   const puzzle = currentPuzzle({ queue, index });
   const toMove = puzzle.sideToMove === "w" ? "White" : "Black";

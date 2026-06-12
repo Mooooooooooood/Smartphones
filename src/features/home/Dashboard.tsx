@@ -18,6 +18,7 @@ import PixelRewardChest from "@/components/pixel/PixelRewardChest";
 import { CoinIcon, GemIcon, FlameIcon } from "@/components/pixel/PixelIcon";
 import ChessBuddy from "@/components/characters/ChessBuddy";
 import CapedHero from "@/components/pixel/CapedHero";
+import { fx } from "@/lib/feedback";
 
 function QuestRow({ label, done, coin }: { label: string; done: boolean; coin: number }) {
   return (
@@ -93,6 +94,7 @@ export default function Dashboard() {
 
   const daily = dailyForToday(dailyRaw, todayKey());
   const claimable = dailyBonusClaimable(daily);
+  const questsDone = [daily.playTaskDone, daily.puzzleTaskDone, daily.academyTaskDone].filter(Boolean).length;
 
   const wins = matches.filter((m) => m.result === "win").length;
   const winRate = matches.length ? Math.round((wins / matches.length) * 100) : 0;
@@ -175,7 +177,7 @@ export default function Dashboard() {
             <QuestRow label="Solve 3 Puzzles" done={daily.puzzleTaskDone} coin={100} />
             <QuestRow label="Study 1 Lesson" done={daily.academyTaskDone} coin={50} />
           </div>
-          <button type="button" onClick={claimable ? claimDailyBonus : undefined} disabled={!claimable} className="shrink-0" aria-label="Daily reward chest">
+          <button type="button" onClick={claimable ? () => { fx.chest(); void claimDailyBonus(); } : undefined} disabled={!claimable} className="shrink-0" aria-label="Daily reward chest">
             <PixelRewardChest
               state={daily.bonusClaimed ? "open" : claimable ? "ready" : "locked"}
               size={56}
@@ -184,6 +186,13 @@ export default function Dashboard() {
             />
           </button>
         </div>
+        <p className="mt-2 text-center text-[0.5rem] text-muted2">
+          {daily.bonusClaimed
+            ? "✓ Reward claimed — fresh quests at midnight"
+            : claimable
+              ? "All quests done — tap the glowing chest!"
+              : `${questsDone}/3 quests done · resets daily`}
+        </p>
       </PixelPanel>
 
       {/* Mode cards */}

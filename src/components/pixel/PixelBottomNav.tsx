@@ -29,7 +29,7 @@ export default function PixelBottomNav() {
                 <span
                   className={`flex h-8 w-full items-center justify-center rounded-[5px] border-2 ${
                     active
-                      ? "border-[var(--px-edge)] bg-brass text-[color:var(--color-on-accent)] shadow-[0_2px_0_0_var(--color-brassdeep)]"
+                      ? "tab-navbounce border-[var(--px-edge)] bg-brass text-[color:var(--color-on-accent)] shadow-[0_2px_0_0_var(--color-brassdeep)]"
                       : "border-[var(--px-edge)] bg-[var(--color-ink)] text-muted2"
                   }`}
                 >

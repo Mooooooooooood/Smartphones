@@ -17,6 +17,7 @@ import PixelStat from "@/components/pixel/PixelStat";
 import PixelCharacterFrame from "@/components/pixel/PixelCharacterFrame";
 import PixelBoardFrame from "@/components/pixel/PixelBoardFrame";
 import { RIVAL_PALETTE } from "@/components/pixel/PixelSprite";
+import { fx } from "@/lib/feedback";
 import { BoardSkeleton } from "@/components/ui/Skeleton";
 import type { Color, GameStatus } from "@/domain/chess/types";
 import type { MatchResultState } from "@/state/gameStore";
@@ -182,6 +183,10 @@ function MatchRecap({ result, opponent, reviewHref, onRematch, onChange }: {
   const piece = opponent?.piece ?? "rook";
   const title = result.outcome === "win" ? "Victory!" : result.outcome === "draw" ? "It's a Draw!" : "Defeat";
 
+  useEffect(() => {
+    if (result.outcome !== "win") fx.lose();
+  }, [result.outcome]);
+
   const stats = (
     <>
       <div className="mt-3 grid grid-cols-3 gap-2">
@@ -202,7 +207,7 @@ function MatchRecap({ result, opponent, reviewHref, onRematch, onChange }: {
   );
 
   if (result.outcome === "win") {
-    return <RewardPanel title={title} xp={result.pending ? null : result.xpAwarded} tone="good" piece={piece} subtitle={reaction}>{stats}</RewardPanel>;
+    return <RewardPanel title={title} xp={result.pending ? null : result.xpAwarded} tone="good" piece={piece} subtitle={reaction} sound="win">{stats}</RewardPanel>;
   }
   const hue: PixelHue = result.outcome === "draw" ? "gold" : "red";
   return (

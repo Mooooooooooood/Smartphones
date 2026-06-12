@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
+import { fx } from "@/lib/feedback";
 
 export type PixelButtonTone = "gold" | "blue" | "green" | "red" | "purple";
 type Variant = "solid" | "secondary" | "ghost";
@@ -52,13 +53,19 @@ export default function PixelButton({
 
   if (href && !disabled) {
     return (
-      <Link href={href} className={classes} style={toneVars}>
+      <Link href={href} className={classes} style={toneVars} onClick={() => fx.tap()}>
         {children}
       </Link>
     );
   }
   return (
-    <button type={type} onClick={onClick} disabled={disabled} className={classes} style={toneVars}>
+    <button
+      type={type}
+      onClick={onClick ? () => { fx.tap(); onClick(); } : () => fx.tap()}
+      disabled={disabled}
+      className={classes}
+      style={toneVars}
+    >
       {children}
     </button>
   );

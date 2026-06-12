@@ -483,7 +483,20 @@ body::before {
   0% { transform: translateX(-6px); }
   100% { transform: translateX(8px); }
 }
+@keyframes tab-navbounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2.5px); }
+}
+@keyframes tab-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-3px); }
+  40% { transform: translateX(3px); }
+  60% { transform: translateX(-2px); }
+  80% { transform: translateX(2px); }
+}
 
+.tab-navbounce { animation: tab-navbounce 2.2s ease-in-out infinite; }
+.tab-shake { animation: tab-shake 0.4s ease-in-out both; }
 .tab-animate-pop { animation: tab-pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
 .tab-animate-rise { animation: tab-rise 0.4s ease-out both; }
 .tab-flame-icon { animation: tab-flame 1.8s ease-in-out infinite; transform-origin: 50% 80%; }
@@ -504,5 +517,7 @@ body::before {
   .tab-bob,
   .tab-burst,
   .tab-twinkle,
-  .tab-drift { animation: none; }
+  .tab-drift,
+  .tab-navbounce,
+  .tab-shake { animation: none; }
 }
