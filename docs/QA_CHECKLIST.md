@@ -90,3 +90,29 @@ Run through this on a real iPhone (Safari) and in desktop Chrome devtools at
 - [ ] `npm run build` then `npm run baseline` writes `visual-audit/baseline/*.png`.
 - [ ] The baseline command starts its own server on a fresh port and **kills it**;
       it never loops on a CSS/chunk error and hard-times-out cleanly.
+
+## Player identity & pieces (Sprint 17)
+- [ ] Fresh launch: onboarding "Create Your Hero" slide sets a name + white/black; you start as a Pawn.
+- [ ] Skip → defaults to "Player", white, pawn.
+- [ ] Profile shows your chosen piece as the avatar; tapping the name (✎) edits it.
+- [ ] Profile "Your Pieces": pawn equipped ("Wearing"); locked pieces show 🔒 and, on tap, the unlock condition.
+- [ ] Unlock a piece (e.g. solve 3 puzzles → Knight) then select it; the avatar updates on Home + Profile.
+- [ ] Name/piece/colour persist across reloads.
+
+## Sound (Sprint 17)
+- [ ] Sound is ON by default and **audible** after the first tap (volume defaults to 40, not 0).
+- [ ] Settings → Volume slider changes loudness live; 0 = silent.
+- [ ] iOS: first tap unlocks audio; later sounds play.
+
+## Readability (Sprint 17)
+- [ ] Bottom-nav labels, streak day labels, Academy tier labels are readable at 390/430.
+- [ ] No 0.36–0.46rem Press Start 2P text remains in core screens.
+
+## Academy map (Sprint 17)
+- [ ] Map has sky→grass gradient, a distant castle, clouds, bushes/rocks/flowers/mushrooms.
+- [ ] Map is taller (vertical scroll is fine); nodes 1–8, trial, treasure all reachable.
+
+## Pieces, retry, puzzle popup (Sprint 17)
+- [ ] Chessboards across the app show the detailed Staunton pieces (clear king cross, rook battlements, etc.).
+- [ ] Lesson wrong answer shows a **Retry** button; board Retry restores the start position.
+- [ ] Puzzle solve shows a **centered** popup; it auto-advances after ~5s, or tap "Next puzzle".

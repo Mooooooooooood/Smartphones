@@ -15,6 +15,8 @@ import PixelTopBar from "@/components/pixel/PixelTopBar";
 import PixelPanel from "@/components/pixel/PixelPanel";
 import PixelMapNode, { type MapNodeStatus } from "@/components/pixel/PixelMapNode";
 import PixelOrnateChest from "@/components/pixel/PixelOrnateChest";
+import { Bush, Rock, Flower, Mushroom, CastleFar } from "@/components/pixel/MapScenery";
+import { Cloud } from "@/components/world/Scenery";
 import { StarIcon } from "@/components/pixel/PixelIcon";
 import ChessBuddy from "@/components/characters/ChessBuddy";
 import { GUIDES } from "@/content/guides";
@@ -83,7 +85,7 @@ function TierWorld({
           <span aria-hidden>🛡️</span>
           <div>
             <div className="px-label text-[0.56rem] text-brass">Tier {tier}</div>
-            <div className="px-label text-[0.4rem] text-muted2">Class Lv. {prog.done + 1}</div>
+            <div className="px-label text-[0.5rem] text-muted2">Class Lv. {prog.done + 1}</div>
           </div>
         </div>
         <div className="min-w-0 flex-1 px-2">
@@ -99,12 +101,28 @@ function TierWorld({
 
       {/* Map */}
       <PixelPanel hue={unlocked ? "green" : "purple"} className="relative overflow-hidden p-0">
-        <div className={`relative h-[430px] w-full ${unlocked ? "" : "opacity-60 grayscale"}`} style={{ background: "linear-gradient(180deg, #3b7d46 0%, #2e6238 60%, #274f30 100%)" }}>
-          <PixelTree x={6} b={20} s={26} />
-          <PixelTree x={86} b={62} s={22} />
-          <PixelTree x={10} b={70} s={20} />
-          <PixelTree x={80} b={12} s={24} />
-          <div className="absolute" style={{ right: "6%", bottom: "30%", width: 48, height: 26, background: "radial-gradient(circle at 40% 35%, #6fc3e8, #2f7fb0)", borderRadius: "50%", border: "2px solid #1f5a82" }} aria-hidden />
+        <div className={`relative h-[560px] w-full ${unlocked ? "" : "opacity-60 grayscale"}`} style={{ background: "linear-gradient(180deg, #8ed0e8 0%, #6fb8d8 9%, #62c47e 20%, #4aa863 48%, #34904f 78%, #277a40 100%)" }}>
+          {/* distant sky decor */}
+          <CastleFar size={86} className="absolute left-1/2 top-2 -translate-x-1/2 opacity-90" />
+          <Cloud className="absolute left-3 top-4 tab-drift" scale={0.8} />
+          <Cloud className="absolute right-4 top-10 tab-drift" scale={1} />
+          {/* foliage */}
+          <PixelTree x={4} b={22} s={30} />
+          <PixelTree x={86} b={58} s={26} />
+          <PixelTree x={8} b={68} s={24} />
+          <PixelTree x={82} b={14} s={26} />
+          <Bush className="absolute" style={{ left: "16%", bottom: "8%" }} size={30} />
+          <Bush className="absolute" style={{ right: "14%", bottom: "20%" }} size={26} />
+          <Bush className="absolute" style={{ left: "70%", bottom: "76%" }} size={24} />
+          <Rock className="absolute" style={{ left: "8%", bottom: "44%" }} size={24} />
+          <Rock className="absolute" style={{ right: "9%", bottom: "70%" }} size={20} />
+          <Mushroom className="absolute" style={{ left: "24%", bottom: "30%" }} size={16} />
+          <Mushroom className="absolute" style={{ right: "26%", bottom: "52%" }} size={15} />
+          <Flower className="absolute" style={{ left: "12%", bottom: "16%" }} size={14} />
+          <Flower className="absolute" style={{ right: "20%", bottom: "12%" }} size={14} petal="#ffd24a" />
+          <Flower className="absolute" style={{ left: "60%", bottom: "8%" }} size={13} petal="#b48cff" />
+          {/* pond */}
+          <div className="absolute" style={{ right: "6%", bottom: "32%", width: 50, height: 26, background: "radial-gradient(circle at 40% 35%, #8fd6ef, #2f7fb0)", borderRadius: "50%", border: "2px solid #1f5a82" }} aria-hidden />
 
           <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
             <path d={pathD} fill="none" stroke="#c9a35f" strokeWidth={5} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
@@ -112,9 +130,9 @@ function TierWorld({
           </svg>
 
           {/* Final trial */}
-          <Link href={boss && bStatus !== "locked" ? `/academy/boss/${boss.id}` : "#"} className="absolute left-1/2 -translate-x-1/2" style={{ bottom: "84%" }}>
+          <Link href={boss && bStatus !== "locked" ? `/academy/boss/${boss.id}` : "#"} className="absolute left-1/2 -translate-x-1/2" style={{ bottom: "80%" }}>
             <div className="flex flex-col items-center">
-              <span className="px-label mb-0.5 rounded-[3px] border border-[var(--px-edge)] bg-[var(--color-panel)] px-1 text-[0.4rem] text-brass">Trial</span>
+              <span className="px-label mb-0.5 rounded-[3px] border border-[var(--px-edge)] bg-[var(--color-panel)] px-1 text-[0.5rem] text-brass">Trial</span>
               <div className={`flex h-12 w-12 items-center justify-center rounded-[7px] border-[3px] font-display text-xl ${
                 bStatus === "completed" ? "border-[var(--px-edge)] bg-brass text-[color:var(--color-on-accent)] tab-glow-reward"
                 : bStatus === "ready" ? "border-brass bg-[#243056] text-brass tab-pulse"
@@ -128,7 +146,7 @@ function TierWorld({
           <button type="button" onClick={midReady ? onClaimMid : undefined} className="absolute" style={{ right: "8%", bottom: "44%" }}>
             <div className="flex flex-col items-center">
               <PixelOrnateChest state={tier === 0 && midClaimed ? "open" : midReady ? "ready" : "locked"} size={44} />
-              <span className="px-label rounded-[3px] border border-[var(--px-edge)] bg-[#5a3a18] px-1 text-[0.4rem] text-[#ffe0a0]">Treasure</span>
+              <span className="px-label rounded-[3px] border border-[var(--px-edge)] bg-[#5a3a18] px-1 text-[0.5rem] text-[#ffe0a0]">Treasure</span>
             </div>
           </button>
 
@@ -147,7 +165,7 @@ function TierWorld({
           {current ? (
             <Link href={`/academy/${current.id}`} className="absolute left-1.5 top-1.5 w-[37%]">
               <PixelPanel hue="blue" className="px-1.5 py-1.5">
-                <p className="px-label text-[0.4rem] text-brass">Current ›</p>
+                <p className="px-label text-[0.5rem] text-brass">Current ›</p>
                 <p className="mt-0.5 truncate text-[0.52rem] font-bold text-cream">{current.title}</p>
                 <div className="px-track mt-1 h-1.5">
                   <div className="px-track-fill" style={{ width: `${Math.round(prog.pct * 100)}%`, "--fill": "var(--color-good)" } as React.CSSProperties} />
@@ -159,7 +177,7 @@ function TierWorld({
           {/* Stars overlay */}
           <div className="absolute right-1.5 top-1.5 w-[37%]">
             <PixelPanel hue="purple" className="px-1.5 py-1.5">
-              <p className="px-label text-[0.4rem] text-brass">Stars</p>
+              <p className="px-label text-[0.5rem] text-brass">Stars</p>
               <div className="mt-0.5 flex items-center gap-1">
                 <StarIcon size={12} />
                 <span className="font-display text-[0.6rem] text-cream">{starsEarned}/{starsTotal}</span>
@@ -227,7 +245,7 @@ export default function AcademyScreen() {
           <span className="text-brass" aria-hidden>🌿</span>
           <div>
             <h1 className="px-title text-[1.15rem] leading-none">Academy</h1>
-            <p className="px-label mt-0.5 text-[0.42rem] text-muted2">Learn · Practice · Master</p>
+            <p className="px-label mt-0.5 text-[0.52rem] text-muted2">Learn · Practice · Master</p>
           </div>
         </div>
         {/* tier pager arrows */}

@@ -21,7 +21,7 @@ export default function PixelRewardChest({
   return (
     <div className={`flex flex-col items-center gap-0.5 ${className}`}>
       <PixelOrnateChest state={state} size={size} />
-      {caption ? <span className="px-label text-[0.44rem] text-brass">{caption}</span> : null}
+      {caption ? <span className="px-label text-[0.54rem] text-brass">{caption}</span> : null}
       {rewards ? <div className="flex items-center gap-1.5">{rewards}</div> : null}
     </div>
   );

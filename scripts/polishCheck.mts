@@ -2,7 +2,7 @@
  * Sprint 15 polish checks — pure logic for the sound + haptics services.
  * Run: npx tsx scripts/polishCheck.mts
  */
-import { SFX_NOTES, isSoundOn, type Sfx } from "../src/lib/sound.ts";
+import { SFX_NOTES, isSoundOn, getVolume, type Sfx } from "../src/lib/sound.ts";
 import { HAPTIC_PATTERNS, isHapticsOn, hapticsSupported, type HapticEvent } from "../src/lib/haptics.ts";
 
 let pass = 0;
@@ -22,7 +22,8 @@ ok(
   "every SFX note has a positive freq + dur and an oscillator type",
   sfx.every((s) => SFX_NOTES[s].every((n) => n.freq > 0 && n.dur > 0 && typeof n.type === "string")),
 );
-ok("sound is OFF by default (no localStorage)", isSoundOn() === false);
+ok("sound is ON by default (no localStorage)", isSoundOn() === true);
+ok("default volume is audible (0.4, not 0)", getVolume() === 0.4);
 
 // ---- Haptics ----
 const hev: HapticEvent[] = ["tap", "correct", "wrong", "chest", "match"];

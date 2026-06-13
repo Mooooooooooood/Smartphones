@@ -25,16 +25,16 @@ export default function StreakCalendar({
         <span className="flex items-center gap-1">
           <FlameIcon size={13} />
           <span className="font-display text-[0.66rem] text-brass">{streak}</span>
-          <span className="px-label text-[0.46rem] text-muted2">day streak</span>
+          <span className="px-label text-[0.54rem] text-muted2">day streak</span>
         </span>
-        <span className="px-label text-[0.42rem] text-muted2">{todayDone ? "✓ today counted" : "play to keep it"}</span>
+        <span className="px-label text-[0.52rem] text-muted2">{todayDone ? "✓ today counted" : "play to keep it"}</span>
       </div>
       <div className="grid grid-cols-7 gap-1">
         {cal.map((d) => (
           <div key={d.date} className="flex flex-col items-center gap-0.5">
-            <span className="px-label text-[0.36rem] text-muted2">{d.dow}</span>
+            <span className="px-label text-[0.5rem] text-muted2">{d.dow}</span>
             <span
-              className={`flex h-5 w-5 items-center justify-center rounded-[4px] border-2 text-[0.42rem] ${
+              className={`flex h-5 w-5 items-center justify-center rounded-[4px] border-2 text-[0.54rem] ${
                 d.active
                   ? "border-[var(--px-edge)] bg-brass text-[color:var(--color-on-accent)]"
                   : "border-[var(--px-edge)] bg-[var(--color-ink)] text-muted2"
@@ -45,7 +45,7 @@ export default function StreakCalendar({
           </div>
         ))}
       </div>
-      <p className="mt-1.5 text-center text-[0.46rem] text-muted2">Do any lesson, puzzle or match each day to grow your streak.</p>
+      <p className="mt-1.5 text-center text-[0.56rem] text-muted2">Do any lesson, puzzle or match each day to grow your streak.</p>
     </div>
   );
 }

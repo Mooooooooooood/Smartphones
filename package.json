@@ -13,6 +13,7 @@
     "test:lessons": "npx --yes tsx scripts/lessonCheck.mts",
     "test:polish": "npx --yes tsx scripts/polishCheck.mts",
     "test:content": "npx --yes tsx scripts/contentCheck.mts",
+    "test:identity": "npx --yes tsx scripts/identityCheck.mts",
     "baseline": "node scripts/screenshotBaseline.mjs"
   },
   "dependencies": {

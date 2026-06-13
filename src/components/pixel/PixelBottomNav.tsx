@@ -35,7 +35,7 @@ export default function PixelBottomNav() {
                 >
                   <Icon size={19} />
                 </span>
-                <span className={`px-label text-[0.4rem] ${active ? "text-brass" : "text-muted2"}`}>{label}</span>
+                <span className={`px-label text-[0.52rem] ${active ? "text-brass" : "text-muted2"}`}>{label}</span>
               </Link>
             );
           })}

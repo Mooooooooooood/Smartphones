@@ -8,7 +8,7 @@ import { GearGlyph } from "@/components/pixel/PixelIcon";
 import { exportAll, importAll, resetAll } from "@/data/backup";
 import { APP_VERSION } from "@/lib/version";
 import { PLAYER_COLORS, getPlayerColor, setPlayerColor, type PlayerColorId } from "@/lib/playerColor";
-import { useSoundOn, setSoundOn, playSfx } from "@/lib/sound";
+import { useSoundOn, setSoundOn, playSfx, useVolume, setVolume } from "@/lib/sound";
 import { useHapticsOn, setHapticsOn, hapticsSupported, vibrate } from "@/lib/haptics";
 
 type Status = { kind: "ok" | "err"; msg: string } | null;
@@ -36,6 +36,7 @@ export default function PixelSettingsModal({ open, onClose }: { open: boolean; o
   const [color, setColorState] = useState<PlayerColorId>(getPlayerColor);
   const soundOn = useSoundOn();
   const hapticsOn = useHapticsOn();
+  const volume = useVolume();
   const [resetArmed, setResetArmed] = useState(false);
 
   if (!open) return null;
@@ -108,8 +109,22 @@ export default function PixelSettingsModal({ open, onClose }: { open: boolean; o
 
         {/* Sound & Haptics */}
         <div className="px-panel space-y-2 px-3 py-3">
-          <p className="px-label text-[0.5rem] text-brass">Sound &amp; Haptics</p>
+          <p className="px-label text-[0.56rem] text-brass">Sound &amp; Haptics</p>
           <Toggle on={soundOn} label="Sound FX" onChange={(v) => { setSoundOn(v); if (v) playSfx("correct"); }} />
+          {/* Volume slider */}
+          <div className="px-inset flex items-center gap-2 px-2.5 py-2">
+            <span className="px-label text-[0.56rem] text-cream">Volume</span>
+            <input
+              type="range" min={0} max={100} value={Math.round(volume * 100)}
+              onChange={(e) => { const v = Number(e.target.value) / 100; setVolume(v); }}
+              onMouseUp={() => playSfx("tap")} onTouchEnd={() => playSfx("tap")}
+              disabled={!soundOn}
+              className="h-2 flex-1 cursor-pointer appearance-none rounded-[3px] bg-[var(--color-ink)] disabled:opacity-40"
+              style={{ accentColor: "var(--color-brass)" }}
+              aria-label="Volume"
+            />
+            <span className="px-label w-7 text-right text-[0.5rem] text-muted2">{Math.round(volume * 100)}</span>
+          </div>
           <Toggle
             on={hapticsOn}
             label="Haptics"

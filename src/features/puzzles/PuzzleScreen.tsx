@@ -68,6 +68,13 @@ export default function PuzzleScreen() {
     if (status === "wrong") fx.wrong();
   }, [status]);
 
+  // Solved popup auto-advances to the next puzzle after 5s.
+  useEffect(() => {
+    if (status !== "correct") return;
+    const t = setTimeout(() => nextPuzzle(), 5000);
+    return () => clearTimeout(t);
+  }, [status, nextPuzzle]);
+
   const puzzle = currentPuzzle({ queue, index });
   const toMove = puzzle.sideToMove === "w" ? "White" : "Black";
   const ratingDelta = result ? result.ratingAfter - result.ratingBefore : 0;
@@ -133,14 +140,18 @@ export default function PuzzleScreen() {
         </div>
       </div>
 
+      {/* Centered solved popup — auto-advances after 5s, or tap Next now */}
       {status === "correct" ? (
-        <RewardPanel title={`Solved — ${puzzle.answerSan ?? "correct"}`} xp={result?.xpAwarded ?? 0} tone="good" piece="knight" subtitle={ratingText}>
-          <p className="text-left text-[0.66rem] text-muted">{puzzle.explanation}</p>
-        </RewardPanel>
-      ) : null}
-
-      {status === "correct" ? (
-        <PixelButton onClick={nextPuzzle} tone="green">NEXT PUZZLE →</PixelButton>
+        <div className="fixed inset-0 z-[90] grid place-items-center bg-[rgba(4,6,20,0.55)] p-4 backdrop-blur-sm" onClick={nextPuzzle}>
+          <div className="w-full max-w-[320px]" onClick={(e) => e.stopPropagation()}>
+            <RewardPanel title={`Solved — ${puzzle.answerSan ?? "correct"}`} xp={result?.xpAwarded ?? 0} tone="good" piece="knight" subtitle={ratingText}>
+              <p className="text-center text-[0.66rem] text-muted">{puzzle.explanation}</p>
+              <div className="mt-3">
+                <PixelButton onClick={nextPuzzle} tone="green">NEXT PUZZLE →</PixelButton>
+              </div>
+            </RewardPanel>
+          </div>
+        </div>
       ) : (
         <div className="grid grid-cols-3 gap-2">
           <PixelButton onClick={showHint} disabled={hintShown} variant="secondary" size="sm">{hintShown ? "Hint ✓" : "Hint"}</PixelButton>

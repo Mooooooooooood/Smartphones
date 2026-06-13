@@ -17,7 +17,8 @@ import PixelCard from "@/components/pixel/PixelCard";
 import PixelRewardChest from "@/components/pixel/PixelRewardChest";
 import { CoinIcon, GemIcon, FlameIcon } from "@/components/pixel/PixelIcon";
 import ChessBuddy from "@/components/characters/ChessBuddy";
-import CapedHero from "@/components/pixel/CapedHero";
+import PlayerAvatar from "@/components/pixel/PlayerAvatar";
+import { displayName, usePlayerName } from "@/lib/playerIdentity";
 import { fx } from "@/lib/feedback";
 
 function QuestRow({ label, done, coin }: { label: string; done: boolean; coin: number }) {
@@ -71,6 +72,7 @@ function MapDot({ n, state }: { n: number; state: "done" | "current" | "locked" 
 }
 
 export default function Dashboard() {
+  usePlayerName();
   const xp = useProfileStore((s) => s.xp);
   const streak = useProfileStore((s) => s.streak);
   const completed = useProfileStore((s) => s.completed);
@@ -138,12 +140,12 @@ export default function Dashboard() {
               <div className="absolute inset-x-0 bottom-0 h-3" style={{ background: "linear-gradient(#3f8a4a,#2c6837)" }} />
               <div className="absolute bottom-1.5 left-1/2 h-2 w-11 -translate-x-1/2 rounded-full" style={{ background: "linear-gradient(#9aa6c8,#5a648a)", boxShadow: "0 0 0 2px var(--px-edge)" }} />
               <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2">
-                <CapedHero size={42} />
+                <PlayerAvatar size={42} className="tab-bob" />
               </div>
             </div>
           </div>
           <div className="min-w-0 flex-1">
-            <span className="px-label text-[0.74rem] text-cream">TABIYA</span>
+            <span className="px-label text-[0.74rem] text-cream">{displayName()}</span>
             <div className="mt-0.5 flex items-center gap-1">
               <span className="text-[0.6rem]" aria-hidden>⚔️</span>
               <ChessBuddy piece="pawn" size={13} />

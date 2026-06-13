@@ -12,6 +12,7 @@ import { lessonSteps } from "@/domain/academy/lessonRun";
 import { isInteractive, hasBoard, type LessonStep } from "@/domain/academy/lessonSteps";
 import GameCard from "@/components/ui/GameCard";
 import ActionButton from "@/components/ui/ActionButton";
+import PixelButton from "@/components/pixel/PixelButton";
 import RewardPanel from "@/components/ui/RewardPanel";
 import TopProgress from "@/components/ui/TopProgress";
 import Skeleton from "@/components/ui/Skeleton";
@@ -63,6 +64,7 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
   const [tfPicked, setTfPicked] = useState<boolean | null>(null);
   const [stepWrong, setStepWrong] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [boardKey, setBoardKey] = useState(0);
   const [anyWrong, setAnyWrong] = useState(false);
   const [finished, setFinished] = useState(false);
   const [justEarned, setJustEarned] = useState<number | null>(null);
@@ -126,6 +128,18 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
     setTfPicked(null);
     setStepWrong(false);
     setShowHint(false);
+    setBoardKey(0);
+  }
+
+  /** Reset the current board step so the player can try again from scratch. */
+  function retryBoard() {
+    setStepWrong(false);
+    setShowHint(false);
+    setBoardKey((k) => k + 1);
+  }
+  /** Re-enable all answers on a multiple-choice step. */
+  function retryChoice() {
+    setMcPicked(null);
   }
 
   async function finish() {
@@ -303,7 +317,7 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
           <div className="space-y-2">
             <div className="px-board-frame mx-auto w-full max-w-[340px]">
               <div className="overflow-hidden rounded-[4px]">
-                <LessonInteractiveBoard key={idx} step={step} solved={solved} onResult={handleBoardResult} showHint={showHint} />
+                <LessonInteractiveBoard key={`${idx}-${boardKey}`} step={step} solved={solved} onResult={handleBoardResult} showHint={showHint} />
               </div>
             </div>
             {step.type === "board-demo" && step.caption ? (
@@ -316,19 +330,16 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
                   {"successText" in step ? step.successText : "Correct!"}
                 </p>
               ) : stepWrong ? (
-                <div className="flex items-center justify-between gap-2 rounded-xl border border-warn/40 bg-surf-sun px-3 py-2">
-                  <span className="text-xs font-medium text-warn">
+                <div className="rounded-xl border border-warn/40 bg-surf-sun px-3 py-2">
+                  <p className="text-center text-xs font-medium text-warn">
                     {("failureText" in step && step.failureText) || "Not quite — try again!"}
-                  </span>
-                  {"hint" in step && step.hint ? (
-                    <button
-                      type="button"
-                      onClick={() => setShowHint(true)}
-                      className="shrink-0 rounded-full border border-brass/40 bg-brass/10 px-2.5 py-1 text-[11px] font-bold text-brass"
-                    >
-                      Hint
-                    </button>
-                  ) : null}
+                  </p>
+                  <div className="mt-2 flex justify-center gap-2">
+                    <PixelButton onClick={retryBoard} tone="gold" size="sm" className="!w-auto">↺ Retry</PixelButton>
+                    {"hint" in step && step.hint ? (
+                      <PixelButton onClick={() => setShowHint(true)} variant="secondary" size="sm" className="!w-auto">Hint</PixelButton>
+                    ) : null}
+                  </div>
                 </div>
               ) : (
                 <p className="text-center text-xs text-muted2">👆 {step.type === "make-move" ? "Make your move on the board" : "Tap the board to answer"}</p>
@@ -377,7 +388,10 @@ export default function LessonScreen({ lessonId }: { lessonId: string }) {
             {canAdvance ? (
               <p className="text-center text-sm font-semibold text-gooddeep">{step.successText ?? "Correct!"}</p>
             ) : mcPicked !== null ? (
-              <p className="text-center text-xs text-warn">Not quite — try another answer.</p>
+              <div className="flex flex-col items-center gap-1.5">
+                <p className="text-center text-xs text-warn">Not quite — try another answer.</p>
+                <PixelButton onClick={retryChoice} tone="gold" size="sm" className="!w-auto">↺ Retry</PixelButton>
+              </div>
             ) : null}
           </div>
         ) : null}

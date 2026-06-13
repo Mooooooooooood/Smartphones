@@ -10,28 +10,28 @@ import PixelTopBar from "@/components/pixel/PixelTopBar";
 import PixelPanel from "@/components/pixel/PixelPanel";
 import PixelStatPill from "@/components/pixel/PixelStatPill";
 import PixelCharacterFrame from "@/components/pixel/PixelCharacterFrame";
-import AvatarPortrait from "@/components/pixel/AvatarPortrait";
+import PlayerAvatar from "@/components/pixel/PlayerAvatar";
 import PixelSettingsModal from "@/components/pixel/PixelSettingsModal";
+import NameEditModal from "@/components/pixel/NameEditModal";
 import BadgeEmblem from "@/components/ui/BadgeEmblem";
 import AchievementModal from "@/components/pixel/AchievementModal";
 import StreakCalendar from "@/components/pixel/StreakCalendar";
 import { achievementViews, type AchievementView } from "@/content/achievements";
+import { pieceViews } from "@/content/pieceUnlocks";
 import { fx } from "@/lib/feedback";
 import ChessBuddy, { type BuddyPiece } from "@/components/characters/ChessBuddy";
-import { PLAYER_PALETTES, type SpritePalette } from "@/components/pixel/PixelSprite";
+import { usePlayerName, displayName, usePlayerPiece, setPlayerPiece } from "@/lib/playerIdentity";
 import { CoinIcon, GearGlyph } from "@/components/pixel/PixelIcon";
 
-const STONE: SpritePalette = { body: "#8b97c4", hi: "#aab6e0", line: "#3a4a8c", accent: "#cfd8f0" };
-const TAN: SpritePalette = { body: "#e0b884", hi: "#f3d8aa", line: "#9a6f3c", accent: "#fff0d8" };
-
-const GUIDE_ROSTER: { name: string; piece: BuddyPiece; hue: "gold" | "purple" | "blue" | "red" | "orange" | "green"; palette?: SpritePalette }[] = [
-  { name: "King Arthur", piece: "king", hue: "gold", palette: PLAYER_PALETTES.gold },
-  { name: "Queen Luna", piece: "queen", hue: "purple", palette: PLAYER_PALETTES.purple },
-  { name: "Bishop Eli", piece: "bishop", hue: "blue", palette: PLAYER_PALETTES.blue },
-  { name: "Knight Rex", piece: "knight", hue: "red", palette: PLAYER_PALETTES.red },
-  { name: "Rooky", piece: "rook", hue: "gray" as "blue", palette: STONE },
-  { name: "Pawnie", piece: "pawn", hue: "orange", palette: TAN },
-];
+type Hue = "gold" | "purple" | "blue" | "red" | "orange" | "green";
+const PIECE_META: Record<BuddyPiece, { name: string; glyph: string; hue: Hue }> = {
+  pawn: { name: "Pawn", glyph: "♟", hue: "blue" },
+  knight: { name: "Knight", glyph: "♞", hue: "green" },
+  bishop: { name: "Bishop", glyph: "♝", hue: "purple" },
+  rook: { name: "Rook", glyph: "♜", hue: "orange" },
+  queen: { name: "Queen", glyph: "♛", hue: "red" },
+  king: { name: "King", glyph: "♚", hue: "gold" },
+};
 
 export default function ProfileScreen() {
   const xp = useProfileStore((s) => s.xp);
@@ -42,9 +42,13 @@ export default function ProfileScreen() {
   const solvedIds = useProfileStore((s) => s.solvedPuzzleIds);
   const matches = useProfileStore((s) => s.matches);
   const attempts = usePuzzleStore((s) => s.attempts);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [openAch, setOpenAch] = useState<AchievementView | null>(null);
   const lastActiveDate = useProfileStore((s) => s.lastActiveDate);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [nameOpen, setNameOpen] = useState(false);
+  const [openAch, setOpenAch] = useState<AchievementView | null>(null);
+
+  usePlayerName(); // re-render on name change
+  const myPiece = usePlayerPiece();
 
   useEffect(() => {
     void usePuzzleStore.getState().hydrate();
@@ -61,15 +65,11 @@ export default function ProfileScreen() {
   const winRate = matches.length ? Math.round((wins / matches.length) * 100) : 0;
   const recent = matches.slice(0, 4);
 
-  const achievements = achievementViews({
-    wins,
-    solved,
-    streak,
-    accGames: acc.total,
-    accPct: acc.pct,
-    academy: state,
-  });
+  const achievements = achievementViews({ wins, solved, streak, accGames: acc.total, accPct: acc.pct, academy: state });
   const unlockedCount = achievements.filter((a) => a.unlocked).length;
+
+  const pieces = pieceViews({ solved, wins, academy: state });
+  const pieceUnlockedCount = pieces.filter((p) => p.unlocked).length;
 
   return (
     <div className="space-y-2.5">
@@ -80,26 +80,26 @@ export default function ProfileScreen() {
       {/* Player card */}
       <PixelPanel hue="blue" label="Player Card" className="flex items-stretch gap-2.5 px-2.5 pb-2.5 pt-3">
         <div className="flex shrink-0 flex-col items-center gap-1">
-          <PixelCharacterFrame hue="gold" size={66}>
-            <AvatarPortrait size={56} />
+          <PixelCharacterFrame hue={PIECE_META[myPiece].hue} size={66}>
+            <PlayerAvatar size={52} />
           </PixelCharacterFrame>
-          <span className="px-label rounded-[4px] border-2 border-[var(--px-edge)] bg-brass px-1.5 py-0.5 text-[0.46rem] text-[color:var(--color-on-accent)]">Lv. {lvl.level}</span>
+          <span className="px-label rounded-[4px] border-2 border-[var(--px-edge)] bg-brass px-1.5 py-0.5 text-[0.54rem] text-[color:var(--color-on-accent)]">Lv. {lvl.level}</span>
         </div>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <span className="px-label text-[0.78rem] text-cream">TABIYA</span>
-            <span className="text-[0.6rem] text-muted2" aria-hidden>✎</span>
-          </div>
+          <button type="button" onClick={() => { fx.tap(); setNameOpen(true); }} className="flex items-center gap-1.5 active:translate-y-0.5">
+            <span className="px-label text-[0.82rem] text-cream">{displayName()}</span>
+            <span className="text-[0.72rem] text-brass" aria-hidden>✎</span>
+          </button>
           <div className="mt-1 flex items-center gap-1.5">
-            <ChessBuddy piece="pawn" size={18} />
-            <span className="px-label text-[0.56rem] text-good">{rank.title}</span>
+            <span className="text-[0.74rem]" aria-hidden>{PIECE_META[myPiece].glyph}</span>
+            <span className="px-label text-[0.6rem] text-good">{rank.title}</span>
           </div>
-          <p className="mt-0.5 text-[0.52rem] text-muted2">Keep learning, future master!</p>
+          <p className="mt-1 text-[0.62rem] text-muted2">Keep learning, future master!</p>
           <div className="mt-1.5 flex items-center gap-1.5">
             <div className="px-track h-3 flex-1">
               <div className="px-track-fill" style={{ width: `${Math.round(lvl.progress * 100)}%`, "--fill": "var(--color-good)" } as React.CSSProperties} />
             </div>
-            <span className="px-label text-[0.46rem] text-muted2">{lvl.intoLevel}/{lvl.span}</span>
+            <span className="px-label text-[0.52rem] text-muted2">{lvl.intoLevel}/{lvl.span}</span>
           </div>
         </div>
       </PixelPanel>
@@ -111,29 +111,50 @@ export default function ProfileScreen() {
         <PixelStatPill label="Academy" value={`${acad.done}/${acad.total}`} icon={<span aria-hidden>📖</span>} tone="blue" />
       </div>
 
+      {/* Your Pieces collection */}
+      <PixelPanel hue="purple" label="Your Pieces" labelHue="purple" className="px-2.5 pb-2.5 pt-3">
+        <div className="mb-1.5 flex items-center justify-between">
+          <span className="text-[0.56rem] text-muted2">Tap an unlocked piece to wear it.</span>
+          <span className="px-label text-[0.54rem] text-brass">{pieceUnlockedCount}/{pieces.length}</span>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {pieces.map((p) => {
+            const meta = PIECE_META[p.piece];
+            const isMe = myPiece === p.piece;
+            return (
+              <button
+                key={p.piece}
+                type="button"
+                onClick={() => {
+                  fx.tap();
+                  if (p.unlocked) setPlayerPiece(p.piece);
+                  else setOpenAch({ id: `piece-${p.piece}`, name: meta.name, glyph: meta.glyph, description: p.hint, reward: "Avatar piece", progress: () => ({ current: p.current, target: p.target }), current: p.current, target: p.target, unlocked: false, pct: p.pct });
+                }}
+                className="active:translate-y-0.5"
+              >
+                <div className={`flex flex-col items-center gap-1 rounded-[7px] border-[3px] px-1 py-2 ${isMe ? "border-brass bg-[var(--color-ink)]" : "border-[var(--px-edge)] bg-[var(--color-ink)]"}`} style={isMe ? { boxShadow: "0 0 0 2px var(--px-edge), 0 0 12px -2px var(--glow-reward)" } : { boxShadow: "0 0 0 2px var(--px-edge)" }}>
+                  <div className={p.unlocked ? "" : "opacity-30 grayscale"}>
+                    <ChessBuddy piece={p.piece} size={34} />
+                  </div>
+                  <span className={`px-label text-[0.5rem] ${p.unlocked ? "text-cream" : "text-muted2"}`}>
+                    {p.unlocked ? (isMe ? "Wearing" : meta.name) : "🔒"}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </PixelPanel>
+
       {/* Streak calendar */}
       <PixelPanel hue="orange" label="Daily Streak" labelHue="orange" className="px-2.5 pb-2.5 pt-3">
         <StreakCalendar streak={streak} lastActiveDate={lastActiveDate} />
       </PixelPanel>
 
-      {/* Guides */}
-      <PixelPanel hue="purple" label="Your Guides" labelHue="purple" className="px-2.5 pb-2.5 pt-3">
-        <div className="grid grid-cols-6 gap-1">
-          {GUIDE_ROSTER.map(({ name, piece, hue, palette }) => (
-            <div key={name} className="flex min-w-0 flex-col items-center gap-0.5">
-              <PixelCharacterFrame hue={hue} size={40}>
-                <ChessBuddy piece={piece} size={32} palette={palette} />
-              </PixelCharacterFrame>
-              <span className="px-label w-full truncate text-center text-[0.38rem] text-muted2">{name}</span>
-            </div>
-          ))}
-        </div>
-      </PixelPanel>
-
       {/* Achievements */}
       <PixelPanel hue="gold" label="Achievements" labelHue="gold" diamonds className="px-2.5 pb-2.5 pt-3">
         <div className="mb-1.5 flex justify-end">
-          <span className="px-label text-[0.46rem] text-brass">{unlockedCount}/{achievements.length}</span>
+          <span className="px-label text-[0.54rem] text-brass">{unlockedCount}/{achievements.length}</span>
         </div>
         <div className="grid grid-cols-4 gap-1.5">
           {achievements.map((a) => (
@@ -147,7 +168,7 @@ export default function ProfileScreen() {
       {/* Recent activity */}
       <PixelPanel hue="green" label="Recent Activity" labelHue="green" className="px-2.5 pb-2.5 pt-3">
         {recent.length === 0 ? (
-          <p className="py-2 text-center text-[0.6rem] text-muted2">Play a match to start your record.</p>
+          <p className="py-2 text-center text-[0.66rem] text-muted2">Play a match to start your record.</p>
         ) : (
           <ul className="space-y-1.5">
             {recent.map((m, i) => {
@@ -156,15 +177,15 @@ export default function ProfileScreen() {
               const win = m.result === "win";
               const row = (
                 <div className="px-inset flex items-center gap-2 px-2 py-1.5">
-                  <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-[4px] border-2 border-[var(--px-edge)] font-display text-[0.52rem] ${win ? "bg-good text-[color:#06220f]" : m.result === "draw" ? "bg-[var(--color-ink)] text-muted" : "bg-bad text-[color:#2a0709]"}`}>
+                  <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-[4px] border-2 border-[var(--px-edge)] font-display text-[0.54rem] ${win ? "bg-good text-[color:#06220f]" : m.result === "draw" ? "bg-[var(--color-ink)] text-muted" : "bg-bad text-[color:#2a0709]"}`}>
                     {win ? "W" : m.result === "draw" ? "D" : "L"}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-[0.58rem] text-cream">{m.opponentName}</div>
-                    <div className="px-label text-[0.4rem] text-muted2">Quick Match</div>
+                    <div className="truncate text-[0.64rem] text-cream">{m.opponentName}</div>
+                    <div className="px-label text-[0.46rem] text-muted2">Quick Match</div>
                   </div>
-                  <span className={`px-label text-[0.5rem] ${win ? "text-good" : "text-bad"}`}>{delta >= 0 ? "+" : ""}{delta}</span>
-                  <span className="flex items-center gap-0.5"><CoinIcon size={10} /><span className="font-display text-[0.48rem] text-brass">{m.xpAwarded}</span></span>
+                  <span className={`px-label text-[0.54rem] ${win ? "text-good" : "text-bad"}`}>{delta >= 0 ? "+" : ""}{delta}</span>
+                  <span className="flex items-center gap-0.5"><CoinIcon size={11} /><span className="font-display text-[0.52rem] text-brass">{m.xpAwarded}</span></span>
                   {replayable ? <span className="text-brass">▶</span> : <span className="w-2" />}
                 </div>
               );
@@ -175,11 +196,12 @@ export default function ProfileScreen() {
       </PixelPanel>
 
       {/* Settings button */}
-      <button type="button" onClick={() => setSettingsOpen(true)} className="px-btn px-btn-secondary mx-auto flex w-[70%] items-center justify-center gap-2 !text-[0.62rem]">
+      <button type="button" onClick={() => setSettingsOpen(true)} className="px-btn px-btn-secondary mx-auto flex w-[70%] items-center justify-center gap-2 !text-[0.66rem]">
         <GearGlyph size={14} /> SETTINGS ›
       </button>
 
       <PixelSettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <NameEditModal open={nameOpen} onClose={() => setNameOpen(false)} />
       <AchievementModal achievement={openAch} onClose={() => setOpenAch(null)} />
     </div>
   );
