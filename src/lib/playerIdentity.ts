@@ -17,7 +17,9 @@ const SIDE_KEY = "rang-player-side";
 const PIECES: BuddyPiece[] = ["pawn", "knight", "bishop", "rook", "queen", "king"];
 
 const listeners = new Set<() => void>();
+let version = 0;
 function emit() {
+  version++;
   listeners.forEach((l) => l());
 }
 function subscribe(cb: () => void) {
@@ -55,6 +57,44 @@ export function setPlayerPiece(piece: BuddyPiece): void {
 }
 export function usePlayerPiece(): BuddyPiece {
   return useSyncExternalStore(subscribe, getPlayerPiece, () => "pawn");
+}
+
+/* ---- celebration bookkeeping (which unlocks / levels we've already shown) ---- */
+const SEEN_PIECES_KEY = "rang-seen-pieces";
+const SEEN_LEVEL_KEY = "rang-seen-level";
+
+export function getSeenPieces(): Record<string, true> {
+  if (typeof localStorage === "undefined") return {};
+  try { return JSON.parse(localStorage.getItem(SEEN_PIECES_KEY) ?? "{}"); } catch { return {}; }
+}
+export function markPiecesSeen(pieces: string[]): void {
+  const seen = getSeenPieces();
+  for (const p of pieces) seen[p] = true;
+  try { localStorage.setItem(SEEN_PIECES_KEY, JSON.stringify(seen)); } catch { /* ignore */ }
+  emit();
+}
+export function getSeenLevel(): number {
+  if (typeof localStorage === "undefined") return 0;
+  const v = Number(localStorage.getItem(SEEN_LEVEL_KEY));
+  return Number.isFinite(v) ? v : 0;
+}
+export function setSeenLevel(n: number): void {
+  try { localStorage.setItem(SEEN_LEVEL_KEY, String(n)); } catch { /* ignore */ }
+  emit();
+}
+
+const CELEB_KEY = "rang-celeb-seeded";
+export function isCelebSeeded(): boolean {
+  return typeof localStorage !== "undefined" && localStorage.getItem(CELEB_KEY) === "1";
+}
+export function markCelebSeeded(): void {
+  try { localStorage.setItem(CELEB_KEY, "1"); } catch { /* ignore */ }
+  emit();
+}
+
+/** Subscribe to identity changes (name/piece/seen/level). Returns a version. */
+export function useIdentity(): number {
+  return useSyncExternalStore(subscribe, () => version, () => 0);
 }
 
 /* ---- side ---- */

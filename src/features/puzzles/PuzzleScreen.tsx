@@ -15,6 +15,7 @@ import PixelButton from "@/components/pixel/PixelButton";
 import PixelStat from "@/components/pixel/PixelStat";
 import ChessBuddy from "@/components/characters/ChessBuddy";
 import { fx } from "@/lib/feedback";
+import { dailyPuzzleId, isDailyPuzzleDone, markDailyPuzzleDone, DAILY_PUZZLE_BONUS } from "@/domain/training/dailyPuzzle";
 
 const PuzzleBoard = dynamic(() => import("@/components/PuzzleBoard"), { ssr: false, loading: () => <BoardSkeleton /> });
 
@@ -54,19 +55,31 @@ export default function PuzzleScreen() {
 
   const searchParams = useSearchParams();
   const themeParam = searchParams.get("theme");
-  const appliedTheme = useRef(false);
+  const daily = searchParams.get("daily") === "1";
+  const applied = useRef(false);
+  const dailyAwarded = useRef(false);
 
   useEffect(() => {
     void usePuzzleStore.getState().hydrate();
-    if (!appliedTheme.current && themeParam && (PUZZLE_THEMES as string[]).includes(themeParam)) {
+    if (applied.current) return;
+    if (daily) {
+      usePuzzleStore.getState().startPuzzleById(dailyPuzzleId());
+      applied.current = true;
+    } else if (themeParam && (PUZZLE_THEMES as string[]).includes(themeParam)) {
       usePuzzleStore.getState().setTheme(themeParam as PuzzleTheme);
-      appliedTheme.current = true;
+      applied.current = true;
     }
-  }, [themeParam]);
+  }, [themeParam, daily]);
 
   useEffect(() => {
     if (status === "wrong") fx.wrong();
-  }, [status]);
+    // Daily puzzle solved → bonus coins, once per day.
+    if (status === "correct" && daily && !dailyAwarded.current && !isDailyPuzzleDone()) {
+      dailyAwarded.current = true;
+      markDailyPuzzleDone();
+      void useProfileStore.getState().addCoins(DAILY_PUZZLE_BONUS);
+    }
+  }, [status, daily]);
 
   // Solved popup auto-advances to the next puzzle after 5s.
   useEffect(() => {
@@ -90,7 +103,7 @@ export default function PuzzleScreen() {
       {/* Header + stats */}
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
-          <p className="px-label text-[0.5rem] text-brass">Tactics Arena</p>
+          <p className="px-label text-[0.5rem] text-brass">{daily ? "★ Puzzle of the Day" : "Tactics Arena"}</p>
           <h1 className="px-title truncate text-[1rem] text-cream">{THEME_LABELS[puzzle.theme]}</h1>
         </div>
         <div className="flex shrink-0 gap-1.5">

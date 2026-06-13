@@ -8,7 +8,7 @@ import { GearGlyph } from "@/components/pixel/PixelIcon";
 import { exportAll, importAll, resetAll } from "@/data/backup";
 import { APP_VERSION } from "@/lib/version";
 import { PLAYER_COLORS, getPlayerColor, setPlayerColor, type PlayerColorId } from "@/lib/playerColor";
-import { useSoundOn, setSoundOn, playSfx, useVolume, setVolume } from "@/lib/sound";
+import { useSoundOn, setSoundOn, playSfx, useVolume, setVolume, prime } from "@/lib/sound";
 import { useHapticsOn, setHapticsOn, hapticsSupported, vibrate } from "@/lib/haptics";
 
 type Status = { kind: "ok" | "err"; msg: string } | null;
@@ -109,7 +109,10 @@ export default function PixelSettingsModal({ open, onClose }: { open: boolean; o
 
         {/* Sound & Haptics */}
         <div className="px-panel space-y-2 px-3 py-3">
-          <p className="px-label text-[0.56rem] text-brass">Sound &amp; Haptics</p>
+          <div className="flex items-center justify-between">
+            <p className="px-label text-[0.56rem] text-brass">Sound &amp; Haptics</p>
+            <button type="button" onClick={() => { prime(); setSoundOn(true); playSfx("chest"); }} className="px-label rounded-[5px] border-2 border-[var(--px-edge)] bg-brass px-2 py-1 text-[0.5rem] text-[color:var(--color-on-accent)] active:translate-y-0.5">🔊 Test</button>
+          </div>
           <Toggle on={soundOn} label="Sound FX" onChange={(v) => { setSoundOn(v); if (v) playSfx("correct"); }} />
           {/* Volume slider */}
           <div className="px-inset flex items-center gap-2 px-2.5 py-2">

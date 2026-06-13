@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useProfileStore, selectLevel, academyStateFrom } from "@/state/profileStore";
 import { usePuzzleStore } from "@/state/puzzleStore";
 import { useGameStore } from "@/state/gameStore";
-import { rankForLevel } from "@/domain/progression/rank";
 import { todayKey } from "@/domain/progression/leveling";
 import { nextRecommended, tierProgress } from "@/domain/academy/progression";
 import { dailyForToday, dailyBonusClaimable, DAILY_BONUS_XP } from "@/domain/training/daily";
@@ -18,7 +17,10 @@ import PixelRewardChest from "@/components/pixel/PixelRewardChest";
 import { CoinIcon, GemIcon, FlameIcon } from "@/components/pixel/PixelIcon";
 import ChessBuddy from "@/components/characters/ChessBuddy";
 import PlayerAvatar from "@/components/pixel/PlayerAvatar";
-import { displayName, usePlayerName } from "@/lib/playerIdentity";
+import HomeCelebrations from "@/components/pixel/HomeCelebrations";
+import { displayName, usePlayerName, usePlayerPiece } from "@/lib/playerIdentity";
+import { pieceTitle } from "@/content/pieceUnlocks";
+import { useDailyPuzzleDone } from "@/domain/training/dailyPuzzle";
 import { fx } from "@/lib/feedback";
 
 function QuestRow({ label, done, coin }: { label: string; done: boolean; coin: number }) {
@@ -73,6 +75,7 @@ function MapDot({ n, state }: { n: number; state: "done" | "current" | "locked" 
 
 export default function Dashboard() {
   usePlayerName();
+  const dailyPuzzleDone = useDailyPuzzleDone();
   const xp = useProfileStore((s) => s.xp);
   const streak = useProfileStore((s) => s.streak);
   const completed = useProfileStore((s) => s.completed);
@@ -88,7 +91,7 @@ export default function Dashboard() {
   }, []);
 
   const lvl = selectLevel(xp);
-  const rank = rankForLevel(lvl.level);
+  const myPiece = usePlayerPiece();
   const state = academyStateFrom(completed, bossClearedMap);
   const step = nextRecommended(state);
   const t0 = tierProgress(0, state);
@@ -112,6 +115,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-2">
+      <HomeCelebrations />
       <PixelTopBar />
 
       {/* Hero + player card */}
@@ -147,9 +151,8 @@ export default function Dashboard() {
           <div className="min-w-0 flex-1">
             <span className="px-label text-[0.74rem] text-cream">{displayName()}</span>
             <div className="mt-0.5 flex items-center gap-1">
-              <span className="text-[0.6rem]" aria-hidden>⚔️</span>
-              <ChessBuddy piece="pawn" size={13} />
-              <span className="px-label text-[0.5rem] text-good">{rank.title}</span>
+              <ChessBuddy piece={myPiece} size={14} />
+              <span className="px-label text-[0.5rem] text-good">{pieceTitle(myPiece)}</span>
             </div>
             <p className="text-[0.46rem] text-muted2">Keep learning, future master!</p>
             <div className="mt-1 grid grid-cols-2 gap-1">
@@ -196,6 +199,21 @@ export default function Dashboard() {
               : `${questsDone}/3 quests done · resets daily`}
         </p>
       </PixelPanel>
+
+      {/* Puzzle of the Day */}
+      <Link href="/puzzles?daily=1" className="block active:translate-y-0.5">
+        <PixelPanel hue={dailyPuzzleDone ? "green" : "gold"} className="flex items-center gap-2.5 px-2.5 py-2">
+          <span className="text-[1.1rem]" aria-hidden>📅</span>
+          <div className="min-w-0 flex-1">
+            <p className="px-label text-[0.52rem] text-brass">Puzzle of the Day</p>
+            <p className="text-[0.56rem] text-muted2">{dailyPuzzleDone ? "Solved today — nice!" : "Solve it for bonus coins"}</p>
+          </div>
+          <span className="px-label rounded-[5px] border-2 border-[var(--px-edge)] px-2 py-1 text-[0.52rem]"
+            style={dailyPuzzleDone ? { background: "var(--color-good)", color: "#06220f" } : { background: "var(--color-brass)", color: "var(--color-on-accent)" }}>
+            {dailyPuzzleDone ? "✓" : "PLAY ›"}
+          </span>
+        </PixelPanel>
+      </Link>
 
       {/* Mode cards */}
       <div className="grid grid-cols-3 gap-2">

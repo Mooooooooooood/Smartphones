@@ -26,6 +26,10 @@ export interface ProfileRow {
   puzzleRating?: number;
   /** Play (bot match) rating (Sprint 7). Optional for older rows. */
   playRating?: number;
+  /** Spendable coin balance (Sprint 18). Optional for older rows. */
+  coins?: number;
+  /** Owned cosmetic ids (Sprint 18). Optional for older rows. */
+  owned?: Record<string, true>;
   updatedAt: number;
 }
 

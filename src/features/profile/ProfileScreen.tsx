@@ -43,9 +43,13 @@ export default function ProfileScreen() {
   const matches = useProfileStore((s) => s.matches);
   const attempts = usePuzzleStore((s) => s.attempts);
   const lastActiveDate = useProfileStore((s) => s.lastActiveDate);
+  const claimedRewards = useProfileStore((s) => s.claimedRewards);
+  const claimReward = useProfileStore((s) => s.claimReward);
+  const addCoins = useProfileStore((s) => s.addCoins);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [nameOpen, setNameOpen] = useState(false);
   const [openAch, setOpenAch] = useState<AchievementView | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
 
   usePlayerName(); // re-render on name change
   const myPiece = usePlayerPiece();
@@ -126,9 +130,15 @@ export default function ProfileScreen() {
                 key={p.piece}
                 type="button"
                 onClick={() => {
-                  fx.tap();
-                  if (p.unlocked) setPlayerPiece(p.piece);
-                  else setOpenAch({ id: `piece-${p.piece}`, name: meta.name, glyph: meta.glyph, description: p.hint, reward: "Avatar piece", progress: () => ({ current: p.current, target: p.target }), current: p.current, target: p.target, unlocked: false, pct: p.pct });
+                  if (p.unlocked) {
+                    fx.correct();
+                    setPlayerPiece(p.piece);
+                    setToast(`Now wearing the ${meta.name}!`);
+                    setTimeout(() => setToast(null), 1800);
+                  } else {
+                    fx.tap();
+                    setOpenAch({ id: `piece-${p.piece}`, name: meta.name, glyph: meta.glyph, description: p.hint, reward: "Avatar piece", progress: () => ({ current: p.current, target: p.target }), current: p.current, target: p.target, unlocked: false, pct: p.pct, coins: 0 });
+                  }
                 }}
                 className="active:translate-y-0.5"
               >
@@ -157,11 +167,15 @@ export default function ProfileScreen() {
           <span className="px-label text-[0.54rem] text-brass">{unlockedCount}/{achievements.length}</span>
         </div>
         <div className="grid grid-cols-4 gap-1.5">
-          {achievements.map((a) => (
-            <button key={a.id} type="button" onClick={() => { fx.tap(); setOpenAch(a); }} className="active:translate-y-0.5">
-              <BadgeEmblem glyph={a.glyph} label={a.name} unlocked={a.unlocked} />
-            </button>
-          ))}
+          {achievements.map((a) => {
+            const claimable = a.unlocked && a.coins > 0 && !claimedRewards[`ach-${a.id}`];
+            return (
+              <button key={a.id} type="button" onClick={() => { fx.tap(); setOpenAch(a); }} className="relative active:translate-y-0.5">
+                {claimable ? <span className="tab-pulse absolute -right-0.5 -top-0.5 z-10 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-[var(--px-edge)] bg-bad text-[0.5rem] font-bold text-cream">!</span> : null}
+                <BadgeEmblem glyph={a.glyph} label={a.name} unlocked={a.unlocked} />
+              </button>
+            );
+          })}
         </div>
       </PixelPanel>
 
@@ -202,7 +216,27 @@ export default function ProfileScreen() {
 
       <PixelSettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <NameEditModal open={nameOpen} onClose={() => setNameOpen(false)} />
-      <AchievementModal achievement={openAch} onClose={() => setOpenAch(null)} />
+      <AchievementModal
+        achievement={openAch}
+        claimed={openAch ? Boolean(claimedRewards[`ach-${openAch.id}`]) : false}
+        onClaim={openAch && openAch.unlocked && openAch.coins > 0 ? () => {
+          const a = openAch;
+          fx.chest();
+          void claimReward(`ach-${a.id}`, 0);
+          void addCoins(a.coins);
+          setToast(`+${a.coins} coins claimed!`);
+          setTimeout(() => setToast(null), 1800);
+          setOpenAch(null);
+        } : undefined}
+        onClose={() => setOpenAch(null)}
+      />
+
+      {/* transient toast */}
+      {toast ? (
+        <div className="pointer-events-none fixed inset-x-0 bottom-24 z-[130] flex justify-center px-4">
+          <span className="px-panel tab-animate-pop px-3 py-2 text-[0.66rem] text-cream">{toast}</span>
+        </div>
+      ) : null}
     </div>
   );
 }

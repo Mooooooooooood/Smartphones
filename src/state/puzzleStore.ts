@@ -42,6 +42,8 @@ interface PuzzleState {
 
   hydrate: () => Promise<void>;
   setTheme: (theme: ThemeFilter) => void;
+  /** Start with a specific puzzle first (used by the Puzzle of the Day). */
+  startPuzzleById: (id: string) => void;
   /** Handle a board move. Returns true if the piece should stay (legal answer). */
   submitMove: (from: Square, to: Square, promotion?: PieceSymbol) => boolean;
   showHint: () => void;
@@ -95,6 +97,23 @@ export const usePuzzleStore = create<PuzzleState>((set, get) => ({
     const first = puzzleFromId(queue[0]);
     set({
       theme,
+      queue,
+      index: 0,
+      displayFen: first.fen,
+      status: "idle",
+      lastPlayedUci: null,
+      feedback: null,
+      hintShown: false,
+      result: null,
+    });
+  },
+
+  startPuzzleById: (id) => {
+    const rest = buildQueue("mixed").filter((q) => q !== id);
+    const queue = [id, ...rest];
+    const first = puzzleFromId(id);
+    set({
+      theme: "mixed",
       queue,
       index: 0,
       displayFen: first.fen,

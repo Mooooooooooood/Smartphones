@@ -100,6 +100,10 @@ interface ProfileState {
   playRating: number;
   matches: MatchRow[];
 
+  // Sprint 18 — spendable coin economy + owned cosmetics
+  coins: number;
+  owned: IdSet;
+
   hydrated: boolean;
 
   hydrate: () => Promise<void>;
@@ -115,6 +119,10 @@ interface ProfileState {
   claimDailyBonus: () => Promise<number>;
   /** Claim a one-time milestone reward chest. Returns XP awarded (0 if already claimed). */
   claimReward: (rewardId: string, xp: number) => Promise<number>;
+  /** Add coins to the balance and persist. */
+  addCoins: (n: number) => Promise<void>;
+  /** Buy a cosmetic by id+price. Returns true if purchased (enough coins & not owned). */
+  buyItem: (id: string, price: number) => Promise<boolean>;
 }
 
 export const useProfileStore = create<ProfileState>((set, get) => {
@@ -127,6 +135,8 @@ export const useProfileStore = create<ProfileState>((set, get) => {
       lastActiveDate: s.lastActiveDate,
       puzzleRating: s.puzzleRating,
       playRating: s.playRating,
+      coins: s.coins,
+      owned: s.owned,
       updatedAt: Date.now(),
     });
   }
@@ -156,6 +166,8 @@ export const useProfileStore = create<ProfileState>((set, get) => {
     claimedRewards: {},
     playRating: DEFAULT_PLAY_RATING,
     matches: [],
+    coins: 0,
+    owned: {},
     hydrated: false,
 
     hydrate: async () => {
@@ -204,6 +216,8 @@ export const useProfileStore = create<ProfileState>((set, get) => {
         claimedRewards,
         playRating: profile?.playRating ?? DEFAULT_PLAY_RATING,
         matches,
+        coins: profile?.coins ?? 0,
+        owned: profile?.owned ?? {},
         // Only keep the row if it belongs to today, otherwise start fresh on demand.
         daily: daily && daily.date === today ? daily : null,
         hydrated: true,
@@ -241,6 +255,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
 
       set({
         xp: s.xp + xpAwarded,
+        coins: s.coins + (m.outcome === "win" ? 15 : m.outcome === "draw" ? 5 : 0),
         streak: nextStreak(s.lastActiveDate, s.streak, today),
         lastActiveDate: today,
         playRating: ratingAfter,
@@ -254,7 +269,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
     },
 
     completeLesson: async (lessonId, xpReward, stars) => {
-      const { completed, xp, streak, lastActiveDate } = get();
+      const { completed, xp, streak, lastActiveDate, coins } = get();
       if (completed[lessonId]) return false; // already done — never award twice
 
       const today = todayKey();
@@ -262,7 +277,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
       const newXp = xp + xpReward;
       const newCompleted: CompletedMap = { ...completed, [lessonId]: { stars, score: stars } };
 
-      set({ xp: newXp, streak: newStreak, lastActiveDate: today, completed: newCompleted });
+      set({ xp: newXp, coins: coins + 10, streak: newStreak, lastActiveDate: today, completed: newCompleted });
 
       await Promise.all([
         persistProfile(),
@@ -290,6 +305,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
 
       set({
         xp: newXp,
+        coins: state.coins + (firstSolve ? 5 : 0),
         streak: newStreak,
         lastActiveDate: newLastActive,
         puzzleRating: ratingAfter,
@@ -342,6 +358,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
         const today = todayKey();
         set({
           xp: state.xp + xpAwarded,
+          coins: state.coins + 50,
           streak: nextStreak(state.lastActiveDate, state.streak, today),
           lastActiveDate: today,
           bossCleared: { ...state.bossCleared, [bossId]: true },
@@ -371,6 +388,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
       set({
         daily: updated,
         xp: s.xp + DAILY_BONUS_XP,
+        coins: s.coins + 25,
         streak: nextStreak(s.lastActiveDate, s.streak, today),
         lastActiveDate: today,
       });
@@ -393,6 +411,20 @@ export const useProfileStore = create<ProfileState>((set, get) => {
         saveRewardClaim({ id: rewardId, xpAwarded: xp, claimedAt: Date.now() }),
       ]);
       return xp;
+    },
+
+    addCoins: async (n) => {
+      if (!n) return;
+      set({ coins: Math.max(0, get().coins + n) });
+      await persistProfile();
+    },
+
+    buyItem: async (id, price) => {
+      const s = get();
+      if (s.owned[id] || s.coins < price) return false;
+      set({ coins: s.coins - price, owned: { ...s.owned, [id]: true } });
+      await persistProfile();
+      return true;
     },
   };
 });

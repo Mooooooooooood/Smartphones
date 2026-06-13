@@ -23,6 +23,8 @@ export interface AchievementDef {
   description: string;
   /** XP-flavoured reward note (cosmetic — badges are the reward). */
   reward?: string;
+  /** Coins granted when the achievement is claimed (default 30). */
+  coinReward?: number;
   progress: (s: AchievementStats) => { current: number; target: number };
 }
 
@@ -31,6 +33,7 @@ export interface AchievementView extends AchievementDef {
   target: number;
   unlocked: boolean;
   pct: number;
+  coins: number;
 }
 
 export const ACHIEVEMENTS: AchievementDef[] = [
@@ -104,6 +107,6 @@ export function achievementViews(stats: AchievementStats): AchievementView[] {
   return ACHIEVEMENTS.map((a) => {
     const { current, target } = a.progress(stats);
     const unlocked = current >= target;
-    return { ...a, current, target, unlocked, pct: target ? Math.min(1, current / target) : 0 };
+    return { ...a, current, target, unlocked, pct: target ? Math.min(1, current / target) : 0, coins: a.coinReward ?? 30 };
   });
 }

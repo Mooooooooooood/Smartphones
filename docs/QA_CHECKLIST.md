@@ -116,3 +116,16 @@ Run through this on a real iPhone (Safari) and in desktop Chrome devtools at
 - [ ] Chessboards across the app show the detailed Staunton pieces (clear king cross, rook battlements, etc.).
 - [ ] Lesson wrong answer shows a **Retry** button; board Retry restores the start position.
 - [ ] Puzzle solve shows a **centered** popup; it auto-advances after ~5s, or tap "Next puzzle".
+
+## Sound, identity, economy (Sprint 18)
+- [ ] Sound is audible after the first tap; **Settings → Volume defaults to 40** (not 0); the 🔊 Test button plays a chime.
+- [ ] Returning users muted by an old build are un-muted once (migration).
+- [ ] Top bar shows your avatar piece; Home/Profile show your **piece title** (Recruit … Grandmaster) as identity.
+- [ ] Onboarding "Create Your Hero" is **name only** (no white/black picker); start as a Pawn.
+- [ ] Equipping a piece in Profile plays a sound + "Now wearing the …" toast and updates the top-bar avatar.
+- [ ] Unlocking a new piece (e.g. solve 3 puzzles) pops a celebration with an Equip button; a level-up pops a Level Up modal.
+- [ ] Coins are earned from lessons/puzzles/wins/daily/boss; the top-bar coin shows the **real balance**.
+- [ ] Tap the coin (or +) to open the **Shop**; buy a board skin when affordable, then Equip — the board re-colours everywhere.
+- [ ] Achievements show a "!" when claimable; claiming grants coins with a celebration; can't double-claim.
+- [ ] **Puzzle of the Day** card on Home → solving gives bonus coins + marks done; same puzzle all day.
+- [ ] Coins + owned cosmetics survive Export → Import (they're in the profile backup).
