@@ -26,10 +26,16 @@ export function PixelArt({
   const rects: JSX.Element[] = [];
   for (let y = 0; y < h; y++) {
     const row = grid[y] ?? "";
-    for (let x = 0; x < w; x++) {
+    let x = 0;
+    while (x < w) {
       const ch = row[x] ?? " ";
       const c = colors[ch];
-      if (c) rects.push(<rect key={`${x}-${y}`} x={x} y={y} width={1.02} height={1.02} fill={c} />);
+      if (!c) { x++; continue; }
+      // merge consecutive same-colour cells into a single rect
+      let run = 1;
+      while (x + run < w && (row[x + run] ?? " ") === ch) run++;
+      rects.push(<rect key={`${x}-${y}`} x={x} y={y} width={run + 0.02} height={1.02} fill={c} />);
+      x += run;
     }
   }
   return (

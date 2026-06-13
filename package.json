@@ -11,7 +11,9 @@
     "test:bot": "npx --yes tsx scripts/botCheck.mts",
     "test:pwa": "npx --yes tsx scripts/pwaCheck.mts",
     "test:lessons": "npx --yes tsx scripts/lessonCheck.mts",
-    "test:polish": "npx --yes tsx scripts/polishCheck.mts"
+    "test:polish": "npx --yes tsx scripts/polishCheck.mts",
+    "test:content": "npx --yes tsx scripts/contentCheck.mts",
+    "baseline": "node scripts/screenshotBaseline.mjs"
   },
   "dependencies": {
     "chess.js": "^1.4.0",

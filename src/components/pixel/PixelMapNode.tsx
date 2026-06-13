@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import { memo, type CSSProperties } from "react";
 
 export type MapNodeStatus = "completed" | "current" | "locked";
 
@@ -18,7 +18,7 @@ function Star({ on }: { on: boolean }) {
  * metallic disc (blue when reachable, dark when locked), with a ★★★ rating row
  * beneath completed nodes and a flag/glow on the current one.
  */
-export default function PixelMapNode({
+function PixelMapNode({
   n,
   status,
   stars = 0,
@@ -66,3 +66,5 @@ export default function PixelMapNode({
     </div>
   );
 }
+
+export default memo(PixelMapNode);

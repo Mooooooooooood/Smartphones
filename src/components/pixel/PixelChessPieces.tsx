@@ -108,16 +108,20 @@ const GRIDS: Record<string, string[]> = { p: PAWN, n: KNIGHT, b: BISHOP, r: ROOK
 const W = 12;
 
 function render(grid: string[], fill: string, outline: string, hi: string): JSX.Element {
+  // Merge horizontal runs of same-colour cells into one <rect> to keep the
+  // board's DOM-node count low (perf on iPhone).
   const rects: JSX.Element[] = [];
   for (let y = 0; y < grid.length; y++) {
-    for (let x = 0; x < W; x++) {
+    const shade = y < grid.length * 0.45 ? hi : fill;
+    let x = 0;
+    while (x < W) {
       const ch = grid[y][x];
-      if (ch === "O") rects.push(<rect key={`${x}-${y}`} x={x} y={y} width={1.02} height={1.02} fill={outline} />);
-      else if (ch === "X") {
-        // top third gets a lighter highlight for a touch of pixel shading
-        const c = y < grid.length * 0.45 ? hi : fill;
-        rects.push(<rect key={`${x}-${y}`} x={x} y={y} width={1.02} height={1.02} fill={c} />);
-      }
+      const c = ch === "O" ? outline : ch === "X" ? shade : null;
+      if (c === null) { x++; continue; }
+      let run = 1;
+      while (x + run < W && grid[y][x + run] === ch) run++;
+      rects.push(<rect key={`${x}-${y}`} x={x} y={y} width={run + 0.02} height={1.02} fill={c} />);
+      x += run;
     }
   }
   return (

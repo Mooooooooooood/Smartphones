@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useProfileStore, academyStateFrom } from "@/state/profileStore";
-import { lessonsForTier, tierMeta, TIER0_BOSS } from "@/content/academy";
+import { lessonsForTier, tierMeta } from "@/content/academy";
 import {
   lessonStatus,
   bossStatus,
@@ -56,8 +56,9 @@ function TierWorld({
   const unlocked = isTierUnlocked(tier, state);
   const lessons = lessonsForTier(tier).slice(0, ANCHORS.length);
   const prog = tierProgress(tier, state);
-  const bStatus = tier === 0 ? bossStatus(TIER0_BOSS.id, state) : "locked";
   const meta = tierMeta(tier);
+  const boss = meta?.boss;
+  const bStatus = boss ? bossStatus(boss.id, state) : "locked";
   const tierName = (meta?.title ?? `Tier ${tier}`).replace(/^Tier \d+ · /, "");
 
   const starsEarned = lessons.reduce((sum, l) => sum + (completed[l.id]?.stars ?? 0), 0);
@@ -111,7 +112,7 @@ function TierWorld({
           </svg>
 
           {/* Final trial */}
-          <Link href={bStatus !== "locked" ? `/academy/boss/${TIER0_BOSS.id}` : "#"} className="absolute left-1/2 -translate-x-1/2" style={{ bottom: "84%" }}>
+          <Link href={boss && bStatus !== "locked" ? `/academy/boss/${boss.id}` : "#"} className="absolute left-1/2 -translate-x-1/2" style={{ bottom: "84%" }}>
             <div className="flex flex-col items-center">
               <span className="px-label mb-0.5 rounded-[3px] border border-[var(--px-edge)] bg-[var(--color-panel)] px-1 text-[0.4rem] text-brass">Trial</span>
               <div className={`flex h-12 w-12 items-center justify-center rounded-[7px] border-[3px] font-display text-xl ${

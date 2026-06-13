@@ -55,3 +55,38 @@ Run through this on a real iPhone (Safari) and in desktop Chrome devtools at
 ## Motion / accessibility
 - [ ] `prefers-reduced-motion` disables looping animations.
 - [ ] Buttons have a press animation and are easy to tap (≥44px targets).
+
+## Tier 1 content (Sprint 16)
+- [ ] Academy → swipe to Tier 1; **Hanging Pieces** and **Forks** run as
+      interactive mini-games (intro → demo → make-move → checkpoint → reward).
+- [ ] The make-move steps accept only the correct capture/fork.
+- [ ] Other Tier 1 lessons still work (legacy read + quiz).
+
+## Tier 1 Boss Trial (Sprint 16)
+- [ ] Final Trial on the Tier 1 map links to `/academy/boss/tier-1`.
+- [ ] Trial unlocks only after the Tier 1 lessons are complete.
+- [ ] 5 questions, pass threshold 4/5.
+- [ ] Passing awards XP **once** (re-entering shows "cleared", no extra XP).
+- [ ] Pass screen says "Next world coming soon" (no fake Tier 2 link).
+- [ ] Strong chest/reward feedback on pass.
+
+## Achievements (Sprint 16)
+- [ ] Tapping a badge opens the detail modal.
+- [ ] Modal shows art, name, locked/unlocked, description, and a progress bar.
+- [ ] Locked copy is specific ("Solve 10 puzzles", "Pass your first Boss Trial").
+- [ ] Unlocked badges show a celebratory state.
+
+## Daily streak calendar (Sprint 16)
+- [ ] Profile shows a 14-day pixel calendar.
+- [ ] Active days are lit; today is ringed.
+- [ ] Streak count matches the lit run; "play to keep it" copy when today isn't done.
+
+## Performance (Sprint 16)
+- [ ] Board scrolls/drag stays smooth on iPhone (pixel pieces use merged rects).
+- [ ] Academy map paging is smooth; no jank tapping nodes.
+- [ ] No console errors; bundle still builds.
+
+## Visual regression baseline (Sprint 16)
+- [ ] `npm run build` then `npm run baseline` writes `visual-audit/baseline/*.png`.
+- [ ] The baseline command starts its own server on a fresh port and **kills it**;
+      it never loops on a CSS/chunk error and hard-times-out cleanly.

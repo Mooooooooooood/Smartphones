@@ -140,13 +140,16 @@ export default function BossScreen({ bossId }: { bossId: string }) {
     setRetaking(true);
   }
 
+  const unlocksLabel = boss.tier === 0 ? "Tier 1 is unlocked." : "Next world coming soon!";
+  const nextCta = boss.tier === 0 ? "Start Tier 1 ›" : "Keep training ›";
+
   // Already-cleared landing (before any retake run)
   if (clearedAlready && !retaking && !finished) {
     const step = nextRecommended(state);
     return (
       <div className="space-y-4">
         <TopProgress value={1} exitHref="/academy" trailing="Cleared" />
-        <RewardPanel title={`${boss.title} cleared!`} tone="brass" piece="queen" subtitle="Tier 1 is unlocked.">
+        <RewardPanel title={`${boss.title} cleared!`} tone="brass" piece="queen" subtitle={unlocksLabel} sound="win">
           <div className="flex gap-2">
             <ActionButton onClick={retry} variant="secondary">
               Retake
@@ -171,13 +174,14 @@ export default function BossScreen({ bossId }: { bossId: string }) {
             xp={outcome.xpAwarded || null}
             tone="brass"
             piece="queen"
-            subtitle={`Score ${score}/${total} · Tier 1 unlocked`}
+            subtitle={`Score ${score}/${total} · ${unlocksLabel}`}
+            sound="win"
           >
             <div className="flex gap-2">
               <ActionButton href="/academy" variant="secondary">
                 Path
               </ActionButton>
-              <ActionButton href={step.href}>Start Tier 1 ›</ActionButton>
+              <ActionButton href={step.href}>{nextCta}</ActionButton>
             </div>
           </RewardPanel>
         </div>

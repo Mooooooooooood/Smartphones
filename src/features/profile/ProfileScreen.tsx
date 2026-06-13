@@ -5,8 +5,7 @@ import Link from "next/link";
 import { useProfileStore, selectLevel, puzzlesSolvedCount, academyStateFrom } from "@/state/profileStore";
 import { usePuzzleStore, overallAccuracy } from "@/state/puzzleStore";
 import { rankForLevel } from "@/domain/progression/rank";
-import { academyProgress, tierProgress, bossStatus } from "@/domain/academy/progression";
-import { TIER0_BOSS } from "@/content/academy";
+import { academyProgress } from "@/domain/academy/progression";
 import PixelTopBar from "@/components/pixel/PixelTopBar";
 import PixelPanel from "@/components/pixel/PixelPanel";
 import PixelStatPill from "@/components/pixel/PixelStatPill";
@@ -14,6 +13,10 @@ import PixelCharacterFrame from "@/components/pixel/PixelCharacterFrame";
 import AvatarPortrait from "@/components/pixel/AvatarPortrait";
 import PixelSettingsModal from "@/components/pixel/PixelSettingsModal";
 import BadgeEmblem from "@/components/ui/BadgeEmblem";
+import AchievementModal from "@/components/pixel/AchievementModal";
+import StreakCalendar from "@/components/pixel/StreakCalendar";
+import { achievementViews, type AchievementView } from "@/content/achievements";
+import { fx } from "@/lib/feedback";
 import ChessBuddy, { type BuddyPiece } from "@/components/characters/ChessBuddy";
 import { PLAYER_PALETTES, type SpritePalette } from "@/components/pixel/PixelSprite";
 import { CoinIcon, GearGlyph } from "@/components/pixel/PixelIcon";
@@ -40,6 +43,8 @@ export default function ProfileScreen() {
   const matches = useProfileStore((s) => s.matches);
   const attempts = usePuzzleStore((s) => s.attempts);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [openAch, setOpenAch] = useState<AchievementView | null>(null);
+  const lastActiveDate = useProfileStore((s) => s.lastActiveDate);
 
   useEffect(() => {
     void usePuzzleStore.getState().hydrate();
@@ -49,8 +54,6 @@ export default function ProfileScreen() {
   const rank = rankForLevel(lvl.level);
   const state = academyStateFrom(completed, bossClearedMap);
   const acad = academyProgress(state);
-  const t1 = tierProgress(1, state);
-  const bStatus = bossStatus(TIER0_BOSS.id, state);
   const solved = puzzlesSolvedCount(solvedIds);
   const acc = overallAccuracy(attempts);
 
@@ -58,14 +61,15 @@ export default function ProfileScreen() {
   const winRate = matches.length ? Math.round((wins / matches.length) * 100) : 0;
   const recent = matches.slice(0, 4);
 
-  const badges = [
-    { glyph: "♟", label: "First Win", unlocked: wins >= 1 },
-    { glyph: "✦", label: "Puzzle Master", unlocked: solved >= 10 },
-    { glyph: "♞", label: "Tactics Fan", unlocked: acc.total >= 5 && acc.pct >= 0.8 },
-    { glyph: "★", label: "Weekly Warrior", unlocked: streak >= 7 },
-    { glyph: "♚", label: "Endgame", unlocked: t1.done === t1.total && t1.total > 0 },
-    { glyph: "♛", label: "Legend", unlocked: bStatus === "completed" },
-  ];
+  const achievements = achievementViews({
+    wins,
+    solved,
+    streak,
+    accGames: acc.total,
+    accPct: acc.pct,
+    academy: state,
+  });
+  const unlockedCount = achievements.filter((a) => a.unlocked).length;
 
   return (
     <div className="space-y-2.5">
@@ -107,6 +111,11 @@ export default function ProfileScreen() {
         <PixelStatPill label="Academy" value={`${acad.done}/${acad.total}`} icon={<span aria-hidden>📖</span>} tone="blue" />
       </div>
 
+      {/* Streak calendar */}
+      <PixelPanel hue="orange" label="Daily Streak" labelHue="orange" className="px-2.5 pb-2.5 pt-3">
+        <StreakCalendar streak={streak} lastActiveDate={lastActiveDate} />
+      </PixelPanel>
+
       {/* Guides */}
       <PixelPanel hue="purple" label="Your Guides" labelHue="purple" className="px-2.5 pb-2.5 pt-3">
         <div className="grid grid-cols-6 gap-1">
@@ -122,10 +131,15 @@ export default function ProfileScreen() {
       </PixelPanel>
 
       {/* Achievements */}
-      <PixelPanel hue="gold" label="Achievements" labelHue="gold" className="px-2.5 pb-2.5 pt-3">
-        <div className="grid grid-cols-6 gap-1">
-          {badges.map((b) => (
-            <BadgeEmblem key={b.label} glyph={b.glyph} label={b.label} unlocked={b.unlocked} />
+      <PixelPanel hue="gold" label="Achievements" labelHue="gold" diamonds className="px-2.5 pb-2.5 pt-3">
+        <div className="mb-1.5 flex justify-end">
+          <span className="px-label text-[0.46rem] text-brass">{unlockedCount}/{achievements.length}</span>
+        </div>
+        <div className="grid grid-cols-4 gap-1.5">
+          {achievements.map((a) => (
+            <button key={a.id} type="button" onClick={() => { fx.tap(); setOpenAch(a); }} className="active:translate-y-0.5">
+              <BadgeEmblem glyph={a.glyph} label={a.name} unlocked={a.unlocked} />
+            </button>
           ))}
         </div>
       </PixelPanel>
@@ -166,6 +180,7 @@ export default function ProfileScreen() {
       </button>
 
       <PixelSettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <AchievementModal achievement={openAch} onClose={() => setOpenAch(null)} />
     </div>
   );
 }

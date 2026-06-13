@@ -66,7 +66,50 @@ export const TIER0_BOSS: BossChallenge = {
   ],
 };
 
-export const BOSSES: BossChallenge[] = [TIER0_BOSS];
+/** Tier 1 Trial — five tactical questions, one per core pattern. Pass 4/5. */
+export const TIER1_BOSS: BossChallenge = {
+  id: "tier-1",
+  tier: 1,
+  title: "Tier 1 Trial",
+  subtitle: "Prove your Tactics",
+  passScore: 4,
+  xpReward: 200,
+  concepts: ["Hanging Piece", "Fork", "Pin", "Skewer / Discovered", "Mate in One"],
+  questions: [
+    {
+      question: "An enemy bishop sits on a square no piece defends. What is it?",
+      choices: ["Pinned", "Hanging — take it for free", "Skewered", "Protected"],
+      correctIndex: 1,
+    },
+    {
+      question: "A knight attacks the king and queen at once. This tactic is a…",
+      choices: ["Pin", "Skewer", "Fork", "Zwischenzug"],
+      correctIndex: 2,
+    },
+    {
+      question: "A knight can't move because its king would be exposed. It is…",
+      choices: ["Forked", "Absolutely pinned", "Hanging", "Skewered"],
+      correctIndex: 1,
+    },
+    {
+      question: "You check the king along a file; it steps aside and you grab the rook behind it. That's a…",
+      choices: ["Fork", "Skewer", "Hanging piece", "Stalemate"],
+      correctIndex: 1,
+    },
+    {
+      question: "Checkmate in one means…",
+      choices: [
+        "a check the king cannot escape, block, or capture",
+        "winning the queen",
+        "any check",
+        "promoting a pawn",
+      ],
+      correctIndex: 0,
+    },
+  ],
+};
+
+export const BOSSES: BossChallenge[] = [TIER0_BOSS, TIER1_BOSS];
 
 export function bossById(id: string): BossChallenge | undefined {
   return BOSSES.find((b) => b.id === id);
