@@ -214,6 +214,8 @@ export default function ProfileScreen() {
         <GearGlyph size={14} /> SETTINGS ›
       </button>
 
+      <Link href="/about" className="px-label mx-auto block w-fit pt-1 text-[0.5rem] text-muted2">About The Rang ›</Link>
+
       <PixelSettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <NameEditModal open={nameOpen} onClose={() => setNameOpen(false)} />
       <AchievementModal

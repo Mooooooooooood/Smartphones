@@ -16,7 +16,8 @@
     "test:identity": "npx --yes tsx scripts/identityCheck.mts",
     "test:economy": "npx --yes tsx scripts/economyCheck.mts",
     "test:review": "npx --yes tsx scripts/reviewCheck.mts",
-    "baseline": "node scripts/screenshotBaseline.mjs"
+    "baseline": "node scripts/screenshotBaseline.mjs",
+    "shots": "node scripts/storeShots.mjs"
   },
   "dependencies": {
     "chess.js": "^1.4.0",

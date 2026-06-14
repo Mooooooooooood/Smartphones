@@ -53,6 +53,16 @@ check(
   false,
 );
 
+// ---- Store screenshots (App-Store / installable PWA listing) ----
+const shots: { src: string; sizes: string; form_factor?: string }[] = manifest.screenshots ?? [];
+check("manifest has a non-empty screenshots array", Array.isArray(shots) && shots.length > 0, true);
+check("every screenshot is form_factor narrow", shots.length > 0 && shots.every((s) => s.form_factor === "narrow"), true);
+for (const s of shots) {
+  const rel = "public" + s.src;
+  const abs = join(root, rel);
+  check(`screenshot file exists & non-empty: ${s.src}`, existsSync(abs) && statSync(abs).size > 0, true);
+}
+
 // ---- Icon files ----
 const ICON_FILES = [
   "public/icon-192.png",

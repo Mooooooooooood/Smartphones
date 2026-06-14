@@ -14,5 +14,11 @@
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "/maskable-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
     { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "screenshots": [
+    { "src": "/screenshots/home.png", "sizes": "1179x2556", "type": "image/png", "form_factor": "narrow", "label": "Your home base — quests, daily puzzle, and journey map" },
+    { "src": "/screenshots/puzzles.png", "sizes": "1179x2556", "type": "image/png", "form_factor": "narrow", "label": "Solve tactics puzzles with a combo streak" },
+    { "src": "/screenshots/academy.png", "sizes": "1179x2556", "type": "image/png", "form_factor": "narrow", "label": "Learn chess through the Academy" },
+    { "src": "/screenshots/play.png", "sizes": "1179x2556", "type": "image/png", "form_factor": "narrow", "label": "Battle the guide characters" }
   ]
 }
