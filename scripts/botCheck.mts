@@ -7,7 +7,7 @@
 import { Chess } from "chess.js";
 import { chooseBotMove, type BotPersonality } from "../src/domain/chess/bot.ts";
 import { resolveSide } from "../src/domain/chess/side.ts";
-import { buildReplay, coachComment } from "../src/domain/chess/replay.ts";
+import { buildReplay, coachComment, matchStats, moveKind } from "../src/domain/chess/replay.ts";
 
 let pass = 0;
 let fail = 0;
@@ -131,6 +131,20 @@ ok("resolveSide random → black (rng>=0.5)", resolveSide("random", () => 0.8) =
   // Coach comment for a capture/check exists and is non-empty (no engine claims).
   const checkmate = buildReplay({ sans: ["f3", "e5", "g4", "Qh4#"] });
   ok("mate frame gets a finishing comment", Boolean(checkmate && coachComment(checkmate[checkmate.length - 1]).text.length > 0));
+
+  // Move-kind tags are honest descriptions of what happened (no engine verdicts).
+  ok("mate move is tagged 'mate'", Boolean(checkmate && moveKind(checkmate[checkmate.length - 1]) === "mate"));
+  const tactical = buildReplay({ sans: ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Bxc6", "dxc6", "O-O"] });
+  ok("a capture is tagged 'capture'", Boolean(tactical && moveKind(tactical[7]) === "capture")); // Bxc6
+  ok("castling is tagged 'castle'", Boolean(tactical && moveKind(tactical[9]) === "castle")); // O-O
+  ok("an early developing move is tagged 'develop'", Boolean(tactical && moveKind(tactical[3]) === "develop")); // Nf3
+
+  // matchStats tallies only the player's own moves, never an "accuracy" score.
+  const stats = matchStats(tactical!, "w");
+  ok("matchStats counts the player's moves", stats.moves === 5); // e4, Nf3, Bb5, Bxc6, O-O
+  ok("matchStats counts the player's captures", stats.captures === 1); // Bxc6
+  ok("matchStats detects castling", stats.castled === true);
+  ok("matchStats ignores the opponent's moves", matchStats(tactical!, "b").captures === 1); // dxc6
 }
 
 // Old/empty matches are handled safely (no crash, returns null).

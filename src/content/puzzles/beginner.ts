@@ -54,6 +54,20 @@ export const THEME_LABELS: Record<PuzzleTheme, string> = {
   "discovered-attack": "Discovered Attack",
 };
 
+/** One-line teaching intro per theme — narrative framing for the puzzle screen. */
+export const THEME_INTROS: Record<PuzzleTheme, string> = {
+  "mate-in-1": "One move ends it. Spot the checkmate.",
+  "hanging-piece": "A piece is undefended — go win it.",
+  fork: "Attack two things at once with a single piece.",
+  pin: "Freeze a piece against something it must protect.",
+  skewer: "Force a valuable piece to move and grab what's behind it.",
+  "back-rank": "The king is boxed in by its own pawns — strike the back rank.",
+  "undefended-capture": "Find the capture that simply wins material.",
+  "checkmate-pattern": "Recognise the mating net and finish the king.",
+  "remove-defender": "Take out the defender, then take the prize.",
+  "discovered-attack": "Move one piece to unleash an attack from another.",
+};
+
 export const PUZZLE_THEMES: PuzzleTheme[] = [
   "mate-in-1",
   "hanging-piece",

@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { usePuzzleStore, currentPuzzle, type ThemeFilter } from "@/state/puzzleStore";
 import { useProfileStore } from "@/state/profileStore";
-import { PUZZLE_THEMES, THEME_LABELS, type PuzzleTheme } from "@/content/puzzles/beginner";
+import { PUZZLE_THEMES, THEME_LABELS, THEME_INTROS, type PuzzleTheme } from "@/content/puzzles/beginner";
 import RewardPanel from "@/components/ui/RewardPanel";
 import TopProgress from "@/components/ui/TopProgress";
 import Skeleton, { BoardSkeleton } from "@/components/ui/Skeleton";
@@ -24,6 +24,32 @@ const THEME_OPTIONS: { value: ThemeFilter; label: string }[] = [
   { value: "mixed", label: "Mixed" },
   ...PUZZLE_THEMES.map((t) => ({ value: t as ThemeFilter, label: THEME_LABELS[t] })),
 ];
+
+/** Visible combo meter — pips light up as the session streak grows. */
+function ComboMeter({ streak, best }: { streak: number; best: number }) {
+  const pips = 5;
+  const lit = Math.min(streak, pips);
+  const hot = streak >= pips;
+  return (
+    <div className="px-inset flex items-center gap-2 px-2.5 py-1.5">
+      <span className="px-label text-[0.46rem] text-muted2">Combo</span>
+      <div className="flex flex-1 items-center gap-1">
+        {Array.from({ length: pips }).map((_, i) => (
+          <span
+            key={i}
+            className={`h-2 flex-1 rounded-[2px] border border-[var(--px-edge)] ${i < lit ? (hot ? "tab-pulse" : "") : ""}`}
+            style={{ background: i < lit ? (hot ? "var(--color-brass)" : "var(--color-good)") : "var(--color-ink)" }}
+            aria-hidden
+          />
+        ))}
+      </div>
+      <span className="font-display text-[0.56rem] text-brass">
+        {streak > 0 ? `×${streak}` : "—"}
+      </span>
+      <span className="px-label text-[0.42rem] text-muted2">best {best}</span>
+    </div>
+  );
+}
 
 function PuzzleLoading() {
   return (
@@ -124,6 +150,9 @@ export default function PuzzleScreen() {
         </div>
       </div>
 
+      {/* Combo meter */}
+      <ComboMeter streak={session.streak} best={session.best} />
+
       {/* Theme filters */}
       <div className="-mx-3 overflow-x-auto px-3">
         <div className="flex w-max gap-1.5">
@@ -150,6 +179,7 @@ export default function PuzzleScreen() {
               feedback ?? "So close! That's legal, but not the winning move. Try again."
             ) : (
               <>
+                <span className="block text-[0.56rem] text-good">{THEME_INTROS[puzzle.theme]}</span>
                 <span className="font-bold text-brass">{toMove} to move.</span> Find the best move · difficulty {puzzle.rating}.
                 {hintShown && puzzle.hint ? <span className="mt-0.5 block font-bold text-brass">Hint: {puzzle.hint}</span> : null}
               </>

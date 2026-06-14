@@ -86,3 +86,61 @@ export function coachComment(frame: ReplayFrame): Coach {
   if (frame.index <= 4) return { text: "Developing pieces and grabbing space.", piece: "pawn" };
   return { text: "A calm, positional move.", piece: "pawn" };
 }
+
+/**
+ * A short, honest tag for what visibly happened on a move — derived purely from
+ * SAN + flags, never an engine verdict. Used for the move-quality chips.
+ */
+export type MoveKind = "mate" | "promo" | "castle" | "capture" | "check" | "develop" | "quiet";
+
+const MOVE_KIND_LABEL: Record<MoveKind, string> = {
+  mate: "Checkmate",
+  promo: "Promotion",
+  castle: "Castle",
+  capture: "Capture",
+  check: "Check",
+  develop: "Develop",
+  quiet: "Quiet",
+};
+
+export function moveKind(frame: ReplayFrame): MoveKind {
+  const san = frame.san ?? "";
+  const flags = frame.flags ?? "";
+  if (san.includes("#")) return "mate";
+  if (frame.promotion) return "promo";
+  if (flags.includes("k") || flags.includes("q")) return "castle";
+  if (frame.captured) return "capture";
+  if (san.includes("+")) return "check";
+  if (frame.index <= 4) return "develop";
+  return "quiet";
+}
+
+export function moveKindLabel(kind: MoveKind): string {
+  return MOVE_KIND_LABEL[kind];
+}
+
+export interface MatchStats {
+  moves: number; // moves the user played
+  captures: number; // captures the user made
+  checks: number; // checks the user gave
+  castled: boolean; // did the user castle
+}
+
+/**
+ * Tally honest, engine-free stats for the player's own moves. We never compute
+ * "accuracy" or "best move" because there's no evaluation — only what happened.
+ */
+export function matchStats(frames: ReplayFrame[], userColor: "w" | "b"): MatchStats {
+  let moves = 0;
+  let captures = 0;
+  let checks = 0;
+  let castled = false;
+  for (const f of frames) {
+    if (f.index === 0 || f.color !== userColor) continue;
+    moves++;
+    if (f.captured) captures++;
+    if ((f.san ?? "").includes("+") || (f.san ?? "").includes("#")) checks++;
+    if ((f.flags ?? "").includes("k") || (f.flags ?? "").includes("q")) castled = true;
+  }
+  return { moves, captures, checks, castled };
+}

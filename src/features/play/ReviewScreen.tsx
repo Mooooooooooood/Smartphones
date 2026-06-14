@@ -4,11 +4,20 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { loadMatch } from "@/data/matchRepository";
-import { buildReplay, coachComment, type ReplayFrame } from "@/domain/chess/replay";
+import {
+  buildReplay,
+  coachComment,
+  matchStats,
+  moveKind,
+  moveKindLabel,
+  type MoveKind,
+  type ReplayFrame,
+} from "@/domain/chess/replay";
 import type { MatchRow } from "@/data/db";
-import GameCard from "@/components/ui/GameCard";
-import ActionButton from "@/components/ui/ActionButton";
-import CoachBubble from "@/components/ui/CoachBubble";
+import PixelTopBar from "@/components/pixel/PixelTopBar";
+import PixelPanel from "@/components/pixel/PixelPanel";
+import PixelButton from "@/components/pixel/PixelButton";
+import PixelStat from "@/components/pixel/PixelStat";
 import ChessBuddy from "@/components/characters/ChessBuddy";
 import { BoardSkeleton } from "@/components/ui/Skeleton";
 
@@ -17,13 +26,37 @@ const LessonBoard = dynamic(() => import("@/components/LessonBoard"), {
   loading: () => <BoardSkeleton />,
 });
 
-function NavBtn({ children, onClick, disabled }: { children: React.ReactNode; onClick: () => void; disabled: boolean }) {
+/** Pixel-framed colour token for each move-quality chip. */
+const KIND_STYLE: Record<MoveKind, { bg: string; fg: string }> = {
+  mate: { bg: "var(--color-brass)", fg: "var(--color-on-accent)" },
+  promo: { bg: "var(--color-lav)", fg: "#190a2e" },
+  castle: { bg: "var(--color-sky)", fg: "#06122e" },
+  capture: { bg: "var(--color-bad)", fg: "#2a0709" },
+  check: { bg: "var(--color-good)", fg: "#06220f" },
+  develop: { bg: "var(--color-frame)", fg: "var(--color-cream)" },
+  quiet: { bg: "var(--color-frame)", fg: "var(--color-muted2)" },
+};
+
+function MoveChip({ kind }: { kind: MoveKind }) {
+  const s = KIND_STYLE[kind];
+  return (
+    <span
+      className="px-label rounded-[4px] border-2 border-[var(--px-edge)] px-1.5 py-0.5 text-[0.46rem]"
+      style={{ background: s.bg, color: s.fg }}
+    >
+      {moveKindLabel(kind)}
+    </span>
+  );
+}
+
+function NavBtn({ children, onClick, disabled, label }: { children: React.ReactNode; onClick: () => void; disabled: boolean; label: string }) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="flex min-h-[48px] flex-1 items-center justify-center rounded-2xl border border-line bg-panel text-lg font-bold text-cream shadow-[0_3px_0_0_var(--color-line)] transition-transform active:translate-y-0.5 disabled:opacity-35"
+      aria-label={label}
+      className="px-inset flex min-h-[44px] flex-1 items-center justify-center rounded-[6px] text-[0.8rem] text-cream transition-transform active:translate-y-0.5 disabled:opacity-35"
     >
       {children}
     </button>
@@ -57,22 +90,34 @@ export default function ReviewScreen() {
   const total = frames ? frames.length - 1 : 0;
   const frame = frames ? frames[Math.min(ply, total)] : null;
   const coach = useMemo(() => (frame ? coachComment(frame) : null), [frame]);
+  const stats = useMemo(
+    () => (frames && match ? matchStats(frames, match.userColor) : null),
+    [frames, match],
+  );
 
   // ----- loading / unavailable states -----
   if (!validId || match === null) {
     return (
-      <div className="py-12 text-center">
-        <h1 className="px-title text-[1rem] text-cream">Match not found</h1>
-        <button onClick={() => router.back()} className="mt-3 text-brass">
-          Go back
-        </button>
+      <div className="space-y-2.5">
+        <PixelTopBar />
+        <PixelPanel hue="red" className="p-5 text-center">
+          <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-[8px] border-2 border-[var(--px-edge)] bg-[var(--color-ink)]">
+            <ChessBuddy piece="rook" size={48} />
+          </div>
+          <h1 className="px-title text-[0.95rem] text-cream">Match not found</h1>
+          <p className="mt-1 text-[0.6rem] text-muted2">That game isn&apos;t in your history any more.</p>
+          <div className="mt-3">
+            <PixelButton onClick={() => router.push("/play")} tone="gold">BACK TO PLAY</PixelButton>
+          </div>
+        </PixelPanel>
       </div>
     );
   }
 
   if (match === undefined) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-3">
+        <PixelTopBar />
         <div className="tab-skeleton h-9 w-2/3" />
         <BoardSkeleton />
         <div className="tab-skeleton h-12 w-full" />
@@ -83,132 +128,127 @@ export default function ReviewScreen() {
   const orientation: "white" | "black" = match.userColor === "w" ? "white" : "black";
   const delta = match.ratingAfter - match.ratingBefore;
   const resultLabel = match.result === "win" ? "You won" : match.result === "draw" ? "Draw" : "You lost";
+  const resultHue = match.result === "win" ? "green" : match.result === "draw" ? "gold" : "red";
 
   if (!frames) {
     return (
-      <div className="space-y-4">
-        <button onClick={() => router.back()} className="text-sm text-muted">
-          ‹ Back
-        </button>
-        <GameCard className="p-6 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-line bg-surf-blue">
-            <ChessBuddy piece="rook" size={52} />
+      <div className="space-y-2.5">
+        <PixelTopBar />
+        <PixelPanel hue="gray" className="p-5 text-center">
+          <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-[8px] border-2 border-[var(--px-edge)] bg-[var(--color-ink)]">
+            <ChessBuddy piece="rook" size={48} />
           </div>
-          <h1 className="mt-3 px-title text-[0.95rem] text-cream">Replay unavailable</h1>
-          <p className="mt-1 text-sm text-muted">
+          <h1 className="px-title text-[0.95rem] text-cream">Replay unavailable</h1>
+          <p className="mt-1 text-[0.6rem] text-muted2">
             This older match doesn&apos;t have replay data saved. New matches can be reviewed move by move.
           </p>
-        </GameCard>
+          <div className="mt-3">
+            <PixelButton onClick={() => router.push("/play")} tone="gold">BACK TO PLAY</PixelButton>
+          </div>
+        </PixelPanel>
       </div>
     );
   }
 
   const lastMove = frame?.from && frame?.to ? { from: frame.from, to: frame.to } : null;
+  const kind = frame && frame.index > 0 ? moveKind(frame) : null;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
+      <PixelTopBar />
+
       {/* Header */}
-      <GameCard className="flex items-center gap-3 p-3">
-        <button onClick={() => router.back()} className="shrink-0 text-muted" aria-label="Back">
-          ‹
-        </button>
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-line bg-surf-blue">
-          <ChessBuddy piece="rook" size={40} />
+      <PixelPanel hue={resultHue} className="flex items-center gap-2.5 px-2.5 py-2">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[8px] border-2 border-[var(--px-edge)] bg-[var(--color-ink)]">
+          <ChessBuddy piece="rook" size={38} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] uppercase tracking-[0.14em] text-brass">Game review</p>
-          <h1 className="truncate font-display text-base text-cream">{resultLabel} vs {match.opponentName}</h1>
+          <p className="px-label text-[0.5rem] text-brass">Game Review</p>
+          <h1 className="truncate px-title text-[0.9rem] text-cream">{resultLabel} vs {match.opponentName}</h1>
         </div>
-        <div className="shrink-0 text-right text-[11px]">
-          <span className={`block font-semibold ${delta >= 0 ? "text-gooddeep" : "text-bad"}`}>
-            {delta >= 0 ? "+" : ""}
-            {delta}
+        <div className="shrink-0 text-right">
+          <span className={`block font-display text-[0.7rem] ${delta >= 0 ? "text-good" : "text-bad"}`}>
+            {delta >= 0 ? "+" : ""}{delta}
           </span>
-          <span className="text-brass">+{match.xpAwarded} XP</span>
+          <span className="px-label text-[0.46rem] text-brass">+{match.xpAwarded} XP</span>
         </div>
-      </GameCard>
+      </PixelPanel>
 
-      {/* Coach */}
+      {/* Honest, engine-free match stats */}
+      {stats ? (
+        <div className="grid grid-cols-4 gap-1.5">
+          <PixelStat label="Moves" value={stats.moves} tone="blue" />
+          <PixelStat label="Captures" value={stats.captures} tone="gold" />
+          <PixelStat label="Checks" value={stats.checks} tone="good" />
+          <PixelStat label="Castled" value={stats.castled ? "✓" : "—"} tone={stats.castled ? "good" : "default"} />
+        </div>
+      ) : null}
+
+      {/* Coach commentary for the current move */}
       {coach ? (
-        <CoachBubble piece={coach.piece}>{coach.text}</CoachBubble>
+        <PixelPanel hue="green" className="flex items-center gap-2 px-2.5 py-2">
+          <ChessBuddy piece={coach.piece} size={30} className="shrink-0" />
+          <p className="flex-1 text-[0.62rem] leading-tight text-cream">{coach.text}</p>
+          {kind ? <MoveChip kind={kind} /> : null}
+        </PixelPanel>
       ) : null}
 
       {/* Board */}
-      <GameCard className="p-2.5">
-        <div className="tabiya-board-wrap overflow-hidden rounded-lg ring-1 ring-frame">
+      <div className="px-board-frame">
+        <div className="tabiya-board-wrap overflow-hidden rounded-[4px]">
           <LessonBoard fen={frame!.fen} orientation={orientation} lastMove={lastMove} />
         </div>
-      </GameCard>
+      </div>
 
       {/* Move counter */}
-      <div className="flex items-center justify-between rounded-xl border border-line bg-panel/60 px-3 py-2 text-sm">
-        <span className="text-muted2">
-          You played {match.userColor === "w" ? "White" : "Black"}
-        </span>
-        <span className="font-semibold text-cream">
-          {ply === 0 ? "Starting position" : `Move ${ply} / ${total} · ${frame?.san}`}
+      <div className="px-inset flex items-center justify-between px-2.5 py-1.5 text-[0.56rem]">
+        <span className="text-muted2">You played {match.userColor === "w" ? "White" : "Black"}</span>
+        <span className="font-display text-[0.56rem] text-cream">
+          {ply === 0 ? "Start" : `${ply}/${total} · ${frame?.san}`}
         </span>
       </div>
 
       {/* Navigation */}
-      <div className="flex gap-2">
-        <NavBtn onClick={() => setPly(0)} disabled={ply === 0}>
-          ⏮
-        </NavBtn>
-        <NavBtn onClick={() => setPly((p) => Math.max(0, p - 1))} disabled={ply === 0}>
-          ◀
-        </NavBtn>
-        <NavBtn onClick={() => setPly((p) => Math.min(total, p + 1))} disabled={ply >= total}>
-          ▶
-        </NavBtn>
-        <NavBtn onClick={() => setPly(total)} disabled={ply >= total}>
-          ⏭
-        </NavBtn>
+      <div className="flex gap-1.5">
+        <NavBtn onClick={() => setPly(0)} disabled={ply === 0} label="First move">⏮</NavBtn>
+        <NavBtn onClick={() => setPly((p) => Math.max(0, p - 1))} disabled={ply === 0} label="Previous move">◀</NavBtn>
+        <NavBtn onClick={() => setPly((p) => Math.min(total, p + 1))} disabled={ply >= total} label="Next move">▶</NavBtn>
+        <NavBtn onClick={() => setPly(total)} disabled={ply >= total} label="Last move">⏭</NavBtn>
       </div>
 
-      {/* Move list */}
-      <div className="tab-card p-3">
-        <p className="mb-1.5 text-[11px] uppercase tracking-wider text-muted2">Moves</p>
+      {/* Move list with quality chips */}
+      <PixelPanel hue="purple" label="Moves" labelHue="purple" className="px-2.5 pb-2.5 pt-3">
         <div className="max-h-40 overflow-y-auto">
-          <table className="w-full text-sm tabular-nums">
+          <table className="w-full text-[0.6rem] tabular-nums">
             <tbody>
               {Array.from({ length: Math.ceil(total / 2) }).map((_, r) => {
                 const wi = r * 2 + 1;
                 const bi = r * 2 + 2;
                 return (
                   <tr key={r} className="text-cream">
-                    <td className="w-8 py-0.5 pr-2 text-right text-muted2">{r + 1}.</td>
-                    <td className="py-0.5 pr-2">
-                      {frames[wi] ? (
-                        <button
-                          onClick={() => setPly(wi)}
-                          className={`rounded px-1 ${ply === wi ? "bg-brass/20 font-bold text-brass" : "text-cream"}`}
-                        >
-                          {frames[wi].san}
-                        </button>
-                      ) : null}
-                    </td>
-                    <td className="py-0.5">
-                      {frames[bi] ? (
-                        <button
-                          onClick={() => setPly(bi)}
-                          className={`rounded px-1 ${ply === bi ? "bg-brass/20 font-bold text-brass" : "text-cream"}`}
-                        >
-                          {frames[bi].san}
-                        </button>
-                      ) : null}
-                    </td>
+                    <td className="w-7 py-0.5 pr-1.5 text-right text-muted2">{r + 1}.</td>
+                    {[wi, bi].map((mi) => (
+                      <td key={mi} className="py-0.5 pr-1.5">
+                        {frames[mi] ? (
+                          <button
+                            onClick={() => setPly(mi)}
+                            className={`flex items-center gap-1 rounded-[4px] px-1 py-0.5 ${ply === mi ? "bg-[var(--color-ink)] font-bold text-brass" : "text-cream"}`}
+                          >
+                            <span>{frames[mi].san}</span>
+                            <span className="h-1.5 w-1.5 rounded-[2px]" style={{ background: KIND_STYLE[moveKind(frames[mi])].bg }} aria-hidden />
+                          </button>
+                        ) : null}
+                      </td>
+                    ))}
                   </tr>
                 );
               })}
             </tbody>
           </table>
         </div>
-      </div>
+      </PixelPanel>
 
-      <ActionButton onClick={() => router.back()} variant="secondary">
-        Done
-      </ActionButton>
+      <PixelButton onClick={() => router.push("/play")} variant="secondary">DONE</PixelButton>
     </div>
   );
 }
