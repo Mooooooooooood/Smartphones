@@ -44,6 +44,8 @@ interface PuzzleState {
   setTheme: (theme: ThemeFilter) => void;
   /** Start with a specific puzzle first (used by the Puzzle of the Day). */
   startPuzzleById: (id: string) => void;
+  /** Start a Smart Review session over the given (due/missed) puzzle ids. */
+  startReview: (ids: string[]) => void;
   /** Handle a board move. Returns true if the piece should stay (legal answer). */
   submitMove: (from: Square, to: Square, promotion?: PieceSymbol) => boolean;
   showHint: () => void;
@@ -112,6 +114,22 @@ export const usePuzzleStore = create<PuzzleState>((set, get) => ({
     const rest = buildQueue("mixed").filter((q) => q !== id);
     const queue = [id, ...rest];
     const first = puzzleFromId(id);
+    set({
+      theme: "mixed",
+      queue,
+      index: 0,
+      displayFen: first.fen,
+      status: "idle",
+      lastPlayedUci: null,
+      feedback: null,
+      hintShown: false,
+      result: null,
+    });
+  },
+
+  startReview: (ids) => {
+    const queue = ids.length ? ids : buildQueue("mixed");
+    const first = puzzleFromId(queue[0]);
     set({
       theme: "mixed",
       queue,

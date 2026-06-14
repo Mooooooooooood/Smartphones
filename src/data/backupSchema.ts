@@ -12,6 +12,7 @@ export const BACKUP_TABLES = [
   "dailyTraining",
   "rewardClaims",
   "matches",
+  "reviewState",
 ] as const;
 
 export type BackupTable = (typeof BACKUP_TABLES)[number];

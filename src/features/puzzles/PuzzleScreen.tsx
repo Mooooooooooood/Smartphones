@@ -16,6 +16,7 @@ import PixelStat from "@/components/pixel/PixelStat";
 import ChessBuddy from "@/components/characters/ChessBuddy";
 import { fx } from "@/lib/feedback";
 import { dailyPuzzleId, isDailyPuzzleDone, markDailyPuzzleDone, DAILY_PUZZLE_BONUS } from "@/domain/training/dailyPuzzle";
+import { loadDueReviewIds, recordReviewResult } from "@/domain/training/reviewSession";
 
 const PuzzleBoard = dynamic(() => import("@/components/PuzzleBoard"), { ssr: false, loading: () => <BoardSkeleton /> });
 
@@ -56,30 +57,46 @@ export default function PuzzleScreen() {
   const searchParams = useSearchParams();
   const themeParam = searchParams.get("theme");
   const daily = searchParams.get("daily") === "1";
+  const review = searchParams.get("review") === "1";
   const applied = useRef(false);
   const dailyAwarded = useRef(false);
 
-  useEffect(() => {
-    void usePuzzleStore.getState().hydrate();
-    if (applied.current) return;
-    if (daily) {
-      usePuzzleStore.getState().startPuzzleById(dailyPuzzleId());
-      applied.current = true;
-    } else if (themeParam && (PUZZLE_THEMES as string[]).includes(themeParam)) {
-      usePuzzleStore.getState().setTheme(themeParam as PuzzleTheme);
-      applied.current = true;
-    }
-  }, [themeParam, daily]);
+  const puzzle = currentPuzzle({ queue, index });
+  const toMove = puzzle.sideToMove === "w" ? "White" : "Black";
+  const ratingDelta = result ? result.ratingAfter - result.ratingBefore : 0;
+  const ratingText = ratingDelta !== 0 ? `${ratingDelta > 0 ? "+" : ""}${ratingDelta} rating` : "rating unchanged";
 
   useEffect(() => {
-    if (status === "wrong") fx.wrong();
+    let cancelled = false;
+    (async () => {
+      await usePuzzleStore.getState().hydrate();
+      if (cancelled || applied.current) return;
+      applied.current = true;
+      if (review) {
+        const ids = await loadDueReviewIds();
+        if (!cancelled) usePuzzleStore.getState().startReview(ids);
+      } else if (daily) {
+        usePuzzleStore.getState().startPuzzleById(dailyPuzzleId());
+      } else if (themeParam && (PUZZLE_THEMES as string[]).includes(themeParam)) {
+        usePuzzleStore.getState().setTheme(themeParam as PuzzleTheme);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [themeParam, daily, review]);
+
+  useEffect(() => {
+    if (status === "wrong") {
+      fx.wrong();
+      if (review) void recordReviewResult(puzzle.id, false);
+    }
     // Daily puzzle solved → bonus coins, once per day.
     if (status === "correct" && daily && !dailyAwarded.current && !isDailyPuzzleDone()) {
       dailyAwarded.current = true;
       markDailyPuzzleDone();
       void useProfileStore.getState().addCoins(DAILY_PUZZLE_BONUS);
     }
-  }, [status, daily]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, daily, review]);
 
   // Solved popup auto-advances to the next puzzle after 5s.
   useEffect(() => {
@@ -87,11 +104,6 @@ export default function PuzzleScreen() {
     const t = setTimeout(() => nextPuzzle(), 5000);
     return () => clearTimeout(t);
   }, [status, nextPuzzle]);
-
-  const puzzle = currentPuzzle({ queue, index });
-  const toMove = puzzle.sideToMove === "w" ? "White" : "Black";
-  const ratingDelta = result ? result.ratingAfter - result.ratingBefore : 0;
-  const ratingText = ratingDelta !== 0 ? `${ratingDelta > 0 ? "+" : ""}${ratingDelta} rating` : "rating unchanged";
 
   if (!hydrated) return <PuzzleLoading />;
 
@@ -103,7 +115,7 @@ export default function PuzzleScreen() {
       {/* Header + stats */}
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
-          <p className="px-label text-[0.5rem] text-brass">{daily ? "★ Puzzle of the Day" : "Tactics Arena"}</p>
+          <p className="px-label text-[0.5rem] text-brass">{review ? "↻ Review Mistakes" : daily ? "★ Puzzle of the Day" : "Tactics Arena"}</p>
           <h1 className="px-title truncate text-[1rem] text-cream">{THEME_LABELS[puzzle.theme]}</h1>
         </div>
         <div className="flex shrink-0 gap-1.5">

@@ -100,6 +100,13 @@ export interface RewardClaimRow {
   claimedAt: number;
 }
 
+/** Spaced-repetition card for the Smart Review queue (Sprint 19). */
+export interface ReviewCardRow {
+  id: string; // the reviewed item id (puzzle id)
+  box: number; // Leitner box (0 = just missed / relearning)
+  dueAt: number; // epoch ms when it should resurface
+}
+
 class TabiyaDB extends Dexie {
   kv!: Table<KVRow, string>;
   profile!: Table<ProfileRow, string>;
@@ -109,6 +116,7 @@ class TabiyaDB extends Dexie {
   dailyTraining!: Table<DailyTrainingRow, string>;
   rewardClaims!: Table<RewardClaimRow, string>;
   matches!: Table<MatchRow, number>;
+  reviewState!: Table<ReviewCardRow, string>;
 
   constructor() {
     super("tabiya");
@@ -146,6 +154,17 @@ class TabiyaDB extends Dexie {
       dailyTraining: "date",
       rewardClaims: "id",
       matches: "++id, finishedAt",
+    });
+    this.version(7).stores({
+      kv: "key",
+      profile: "id",
+      lessonProgress: "lessonId",
+      puzzleAttempts: "++id, puzzleId, attemptedAt",
+      bossResults: "bossId, tier",
+      dailyTraining: "date",
+      rewardClaims: "id",
+      matches: "++id, finishedAt",
+      reviewState: "id, dueAt",
     });
   }
 }

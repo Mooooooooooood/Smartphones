@@ -21,6 +21,7 @@ import HomeCelebrations from "@/components/pixel/HomeCelebrations";
 import { displayName, usePlayerName, usePlayerPiece } from "@/lib/playerIdentity";
 import { pieceTitle } from "@/content/pieceUnlocks";
 import { useDailyPuzzleDone } from "@/domain/training/dailyPuzzle";
+import { missedPuzzleIds } from "@/domain/training/srs";
 import { fx } from "@/lib/feedback";
 
 function QuestRow({ label, done, coin }: { label: string; done: boolean; coin: number }) {
@@ -77,6 +78,9 @@ export default function Dashboard() {
   usePlayerName();
   const dailyPuzzleDone = useDailyPuzzleDone();
   const xp = useProfileStore((s) => s.xp);
+  const attemptedIds = useProfileStore((s) => s.attemptedPuzzleIds);
+  const solvedPuzzleIds = useProfileStore((s) => s.solvedPuzzleIds);
+  const missed = missedPuzzleIds(attemptedIds, solvedPuzzleIds).length;
   const streak = useProfileStore((s) => s.streak);
   const completed = useProfileStore((s) => s.completed);
   const bossClearedMap = useProfileStore((s) => s.bossCleared);
@@ -214,6 +218,20 @@ export default function Dashboard() {
           </span>
         </PixelPanel>
       </Link>
+
+      {/* Smart Review — resurface puzzles you got wrong */}
+      {missed > 0 ? (
+        <Link href="/puzzles?review=1" className="block active:translate-y-0.5">
+          <PixelPanel hue="red" className="flex items-center gap-2.5 px-2.5 py-2">
+            <span className="text-[1.1rem]" aria-hidden>↻</span>
+            <div className="min-w-0 flex-1">
+              <p className="px-label text-[0.52rem] text-brass">Review Mistakes</p>
+              <p className="text-[0.56rem] text-muted2">{missed} puzzle{missed === 1 ? "" : "s"} to master</p>
+            </div>
+            <span className="px-label rounded-[5px] border-2 border-[var(--px-edge)] bg-bad px-2 py-1 text-[0.52rem] text-[color:#2a0709]">REVIEW ›</span>
+          </PixelPanel>
+        </Link>
+      ) : null}
 
       {/* Mode cards */}
       <div className="grid grid-cols-3 gap-2">
