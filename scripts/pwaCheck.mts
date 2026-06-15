@@ -63,6 +63,13 @@ for (const s of shots) {
   check(`screenshot file exists & non-empty: ${s.src}`, existsSync(abs) && statSync(abs).size > 0, true);
 }
 
+// ---- Social / Open Graph card ----
+const ogAbs = join(root, "public/og-image.png");
+check("og-image.png exists & non-empty", existsSync(ogAbs) && statSync(ogAbs).size > 0, true);
+const layout = readFileSync(join(root, "src/app/layout.tsx"), "utf8");
+check("layout sets metadataBase", layout.includes("metadataBase"), true);
+check("layout references /og-image.png", layout.includes("/og-image.png"), true);
+
 // ---- Icon files ----
 const ICON_FILES = [
   "public/icon-192.png",

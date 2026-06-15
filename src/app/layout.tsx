@@ -20,6 +20,7 @@ const body = Pixelify_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   applicationName: "The Rang",
   title: { default: "The Rang — Retro Chess Quest", template: "%s · The Rang" },
   description: "A retro pixel-art chess adventure — lessons, puzzles, and battles.",
@@ -35,8 +36,16 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "The Rang — Retro Chess Quest",
-    description: "A retro pixel-art chess adventure.",
+    description: "Learn chess as a pixel quest — an Academy, daily puzzles, and battles. Fully offline.",
     type: "website",
+    siteName: "The Rang",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "The Rang — Learn chess as a pixel quest" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "The Rang — Retro Chess Quest",
+    description: "Learn chess as a pixel quest — an Academy, daily puzzles, and battles. Fully offline.",
+    images: ["/og-image.png"],
   },
 };
 

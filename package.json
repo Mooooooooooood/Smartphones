@@ -17,7 +17,8 @@
     "test:economy": "npx --yes tsx scripts/economyCheck.mts",
     "test:review": "npx --yes tsx scripts/reviewCheck.mts",
     "baseline": "node scripts/screenshotBaseline.mjs",
-    "shots": "node scripts/storeShots.mjs"
+    "shots": "node scripts/storeShots.mjs",
+    "og": "node scripts/ogImage.mjs"
   },
   "dependencies": {
     "chess.js": "^1.4.0",

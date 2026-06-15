@@ -36,9 +36,12 @@ competitive engine arena.
 
 ## Assets
 - App icon: `public/icon-512.png`, `public/maskable-icon-512.png`, `public/icon.svg`
+- Social / Open Graph card (1200×630): `public/og-image.png` (regen: `npm run og`)
 - App-Store screenshots (6.7", 1290×2796): `marketing/store/*.png`
 - Installable-PWA screenshots (6.1", 1179×2556): `public/screenshots/*.png`
 - In-app About / landing page: `/about`
+
+Regenerate all store art from the live app with `npm run shots` then `npm run og`.
 
 ## Tech
 Next.js (App Router) · React · TypeScript · Tailwind · Zustand · IndexedDB
