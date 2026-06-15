@@ -1,5 +1,5 @@
 import { useProfileStore } from "@/state/profileStore";
-import { loadReviewCards, saveReviewCard } from "@/data/reviewRepository";
+import { loadReviewCard, loadReviewCards, saveReviewCard } from "@/data/reviewRepository";
 import { dueReviewIds, missedPuzzleIds, newCard, review, type ReviewCard } from "@/domain/training/srs";
 
 /** Count of puzzles attempted but never solved — drives the Home badge. */
@@ -24,6 +24,6 @@ export async function loadDueReviewIds(now: number = Date.now()): Promise<string
  * so we mainly schedule misses to resurface later — preventing same-session loops.
  */
 export async function recordReviewResult(id: string, correct: boolean, now: number = Date.now()): Promise<void> {
-  const existing = (await loadReviewCards()).find((c) => c.id === id) ?? newCard(id, now);
+  const existing = (await loadReviewCard(id)) ?? newCard(id, now);
   await saveReviewCard(review(existing, correct, now));
 }

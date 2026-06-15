@@ -72,6 +72,21 @@ function puzzleFromId(id: string | undefined): Puzzle {
   return BEGINNER_PUZZLES.find((p) => p.id === id) ?? BEGINNER_PUZZLES[0];
 }
 
+/** The fresh-session state shared by every "start" entrypoint (theme / daily / review). */
+function sessionStart(theme: ThemeFilter, queue: string[]) {
+  return {
+    theme,
+    queue,
+    index: 0,
+    displayFen: puzzleFromId(queue[0]).fen,
+    status: "idle" as const,
+    lastPlayedUci: null,
+    feedback: null,
+    hintShown: false,
+    result: null,
+  };
+}
+
 const INITIAL_QUEUE = buildQueue("mixed");
 
 export const usePuzzleStore = create<PuzzleState>((set, get) => ({
@@ -94,54 +109,14 @@ export const usePuzzleStore = create<PuzzleState>((set, get) => ({
     set({ attempts, hydrated: true });
   },
 
-  setTheme: (theme) => {
-    const queue = buildQueue(theme);
-    const first = puzzleFromId(queue[0]);
-    set({
-      theme,
-      queue,
-      index: 0,
-      displayFen: first.fen,
-      status: "idle",
-      lastPlayedUci: null,
-      feedback: null,
-      hintShown: false,
-      result: null,
-    });
-  },
+  setTheme: (theme) => set(sessionStart(theme, buildQueue(theme))),
 
   startPuzzleById: (id) => {
-    const rest = buildQueue("mixed").filter((q) => q !== id);
-    const queue = [id, ...rest];
-    const first = puzzleFromId(id);
-    set({
-      theme: "mixed",
-      queue,
-      index: 0,
-      displayFen: first.fen,
-      status: "idle",
-      lastPlayedUci: null,
-      feedback: null,
-      hintShown: false,
-      result: null,
-    });
+    const queue = [id, ...buildQueue("mixed").filter((q) => q !== id)];
+    set(sessionStart("mixed", queue));
   },
 
-  startReview: (ids) => {
-    const queue = ids.length ? ids : buildQueue("mixed");
-    const first = puzzleFromId(queue[0]);
-    set({
-      theme: "mixed",
-      queue,
-      index: 0,
-      displayFen: first.fen,
-      status: "idle",
-      lastPlayedUci: null,
-      feedback: null,
-      hintShown: false,
-      result: null,
-    });
-  },
+  startReview: (ids) => set(sessionStart("mixed", ids.length ? ids : buildQueue("mixed"))),
 
   submitMove: (from, to, promotion = "q") => {
     const { queue, index, status } = get();

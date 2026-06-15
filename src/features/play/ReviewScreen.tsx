@@ -107,7 +107,7 @@ export default function ReviewScreen() {
           <h1 className="px-title text-[0.95rem] text-cream">Match not found</h1>
           <p className="mt-1 text-[0.6rem] text-muted2">That game isn&apos;t in your history any more.</p>
           <div className="mt-3">
-            <PixelButton onClick={() => router.push("/play")} tone="gold">BACK TO PLAY</PixelButton>
+            <PixelButton onClick={() => router.back()} tone="gold">BACK TO PLAY</PixelButton>
           </div>
         </PixelPanel>
       </div>
@@ -143,7 +143,7 @@ export default function ReviewScreen() {
             This older match doesn&apos;t have replay data saved. New matches can be reviewed move by move.
           </p>
           <div className="mt-3">
-            <PixelButton onClick={() => router.push("/play")} tone="gold">BACK TO PLAY</PixelButton>
+            <PixelButton onClick={() => router.back()} tone="gold">BACK TO PLAY</PixelButton>
           </div>
         </PixelPanel>
       </div>
@@ -248,7 +248,7 @@ export default function ReviewScreen() {
         </div>
       </PixelPanel>
 
-      <PixelButton onClick={() => router.push("/play")} variant="secondary">DONE</PixelButton>
+      <PixelButton onClick={() => router.back()} variant="secondary">DONE</PixelButton>
     </div>
   );
 }

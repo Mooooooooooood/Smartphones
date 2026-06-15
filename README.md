@@ -1,4 +1,10 @@
-# Tabiya — Premium Chess Trainer
+# The Rang — Retro Chess Quest
+
+**Learn chess as a pixel quest.** A cozy retro pixel-art chess adventure for
+mobile — an Academy, daily puzzles with Smart Review, and replayable battles
+against guide bots. Fully offline, no accounts, no ads. See
+[`docs/PRESS.md`](docs/PRESS.md) for the press kit, the in-app `/about` page for
+the landing screen, and `marketing/store/` + `public/screenshots/` for store art.
 
 A mobile-first chess learning PWA. Original branding and UI. Built in controlled sprints.
 
