@@ -6,6 +6,8 @@ import { CoinIcon, GemIcon, StarIcon, GearGlyph } from "@/components/pixel/Pixel
 import PixelSettingsModal from "@/components/pixel/PixelSettingsModal";
 import PixelShopModal from "@/components/pixel/PixelShopModal";
 import PlayerAvatar from "@/components/pixel/PlayerAvatar";
+import { usePlayerPiece } from "@/lib/playerIdentity";
+import { pieceTitle } from "@/content/pieceUnlocks";
 
 /**
  * The arcade status strip. Left: the player's avatar piece + level badge + XP
@@ -16,6 +18,7 @@ export default function PixelTopBar({ star = false }: { star?: boolean }) {
   const xp = useProfileStore((s) => s.xp);
   const coins = useProfileStore((s) => s.coins);
   const solvedIds = useProfileStore((s) => s.solvedPuzzleIds);
+  const piece = usePlayerPiece();
   const lvl = selectLevel(xp);
   const gems = puzzlesSolvedCount(solvedIds);
   const stars = Math.round(xp / 32);
@@ -30,10 +33,13 @@ export default function PixelTopBar({ star = false }: { star?: boolean }) {
       <span className="px-inset flex h-8 w-8 shrink-0 items-center justify-center">
         <PlayerAvatar size={24} />
       </span>
-      {/* level badge */}
-      <div className="px-inset flex shrink-0 items-center gap-1 px-1.5 py-1">
-        <span className="px-label text-[0.5rem] text-brass">Lv</span>
-        <span className="font-display text-[0.66rem] leading-none text-cream">{lvl.level}</span>
+      {/* level badge + worn character */}
+      <div className="px-inset flex shrink-0 flex-col justify-center gap-0.5 px-1.5 py-0.5 leading-none">
+        <div className="flex items-center gap-1">
+          <span className="px-label text-[0.5rem] text-brass">Lv</span>
+          <span className="font-display text-[0.62rem] leading-none text-cream">{lvl.level}</span>
+        </div>
+        <span className="px-label text-[0.4rem] text-good" title={pieceTitle(piece)}>{piece[0].toUpperCase() + piece.slice(1)}</span>
       </div>
       {/* xp track */}
       <div className="px-track h-3 min-w-0 flex-1">

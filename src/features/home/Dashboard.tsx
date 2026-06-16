@@ -164,6 +164,7 @@ export default function Dashboard() {
             <div className="mt-0.5 flex items-center gap-1">
               <ChessBuddy piece={myPiece} size={14} />
               <span className="px-label text-[0.5rem] text-good">{pieceTitle(myPiece)}</span>
+              <span className="px-label text-[0.4rem] text-muted2">· your hero</span>
             </div>
             <p className="text-[0.46rem] text-muted2">Keep learning, future master!</p>
             <div className="mt-1 grid grid-cols-2 gap-1">
