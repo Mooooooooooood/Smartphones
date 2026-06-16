@@ -33,19 +33,27 @@ function ComboMeter({ streak, best }: { streak: number; best: number }) {
   const lit = Math.min(streak, pips);
   const hot = streak >= pips;
   return (
-    <div className="px-inset flex items-center gap-2 px-2.5 py-1.5">
-      <span className="px-label text-[0.46rem] text-muted2">Combo</span>
+    <div className={`px-inset flex items-center gap-2 px-2.5 py-2 ${hot ? "tab-pulse" : ""}`}>
+      <span className="px-label flex items-center gap-1 text-[0.46rem] text-muted2">
+        {hot ? <span className="tab-flame-icon text-[0.7rem]" aria-hidden>🔥</span> : null}
+        Combo
+      </span>
       <div className="flex flex-1 items-center gap-1">
         {Array.from({ length: pips }).map((_, i) => (
           <span
             key={i}
-            className={`h-2 flex-1 rounded-[2px] border border-[var(--px-edge)] ${i < lit ? (hot ? "tab-pulse" : "") : ""}`}
-            style={{ background: i < lit ? (hot ? "var(--color-brass)" : "var(--color-good)") : "var(--color-ink)" }}
+            className="h-2.5 flex-1 rounded-[3px] border border-[var(--px-edge)]"
+            style={{
+              background: i < lit
+                ? (hot ? "linear-gradient(180deg, var(--color-sun), var(--color-brass))" : "linear-gradient(180deg, var(--color-mint), var(--color-good))")
+                : "var(--color-ink)",
+              boxShadow: i < lit ? "inset 0 1px 0 rgba(255,255,255,0.4)" : undefined,
+            }}
             aria-hidden
           />
         ))}
       </div>
-      <span className="font-display text-[0.56rem] text-brass">
+      <span className={`font-display text-[0.74rem] ${hot ? "text-sun" : "text-brass"}`}>
         {streak > 0 ? `×${streak}` : "—"}
       </span>
       <span className="px-label text-[0.42rem] text-muted2">best {best}</span>

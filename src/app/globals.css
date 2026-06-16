@@ -91,6 +91,14 @@
   /* Section-tab default hue */
   --tab-bg: #2f64c4;
 
+  /* Avatar "diorama" scene (Home hero + Profile player card) */
+  --scene-sky-1: #3a78c4;
+  --scene-sky-2: #74b0e0;
+  --scene-ground-1: #3f8a4a;
+  --scene-ground-2: #2c6837;
+  --pedestal-1: #9aa6c8;
+  --pedestal-2: #5a648a;
+
   /* Chessboard squares (theme-aware via inline var()) */
   --board-light: #dfe7fb;
   --board-dark: #7e9ee6;

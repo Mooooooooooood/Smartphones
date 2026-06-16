@@ -13,7 +13,6 @@ import PixelStatPill from "@/components/pixel/PixelStatPill";
 import ResultBadge from "@/components/pixel/ResultBadge";
 import PieceSelectCard from "@/components/pixel/PieceSelectCard";
 import Toast, { useToast } from "@/components/ui/Toast";
-import PixelCharacterFrame from "@/components/pixel/PixelCharacterFrame";
 import PlayerAvatar from "@/components/pixel/PlayerAvatar";
 import PixelSettingsModal from "@/components/pixel/PixelSettingsModal";
 import NameEditModal from "@/components/pixel/NameEditModal";
@@ -87,15 +86,20 @@ export default function ProfileScreen() {
 
       {/* Player card */}
       <PixelPanel hue="blue" label="Player Card" className="flex items-stretch gap-2.5 px-2.5 pb-2.5 pt-3">
-        <div className="flex shrink-0 flex-col items-center gap-1">
-          <PixelCharacterFrame hue={PIECE_META[myPiece].hue} size={66}>
-            <PlayerAvatar size={52} />
-          </PixelCharacterFrame>
+        <div className="flex w-[94px] shrink-0 flex-col items-center gap-1">
+          {/* avatar diorama */}
+          <div className="relative h-[72px] w-full overflow-hidden rounded-[6px] border-2 border-[var(--px-edge)]" style={{ background: "linear-gradient(180deg, var(--scene-sky-1), var(--scene-sky-2) 72%)" }}>
+            <span className="tab-twinkle absolute right-1.5 top-1 text-[0.5rem] text-sun" aria-hidden>✦</span>
+            <span className="tab-twinkle absolute left-2 top-2 text-[0.4rem] text-cream" style={{ animationDelay: "0.8s" }} aria-hidden>✦</span>
+            <div className="absolute inset-x-0 bottom-0 h-3.5" style={{ background: "linear-gradient(var(--scene-ground-1), var(--scene-ground-2))" }} aria-hidden />
+            <div className="absolute bottom-2 left-1/2 h-2 w-12 -translate-x-1/2 rounded-full" style={{ background: "linear-gradient(var(--pedestal-1), var(--pedestal-2))", boxShadow: "0 0 0 2px var(--px-edge)" }} aria-hidden />
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2"><PlayerAvatar size={52} className="tab-bob" /></div>
+          </div>
           <span className="px-label rounded-[4px] border-2 border-[var(--px-edge)] bg-brass px-1.5 py-0.5 text-[0.54rem] text-[color:var(--color-on-accent)]">Lv. {lvl.level}</span>
         </div>
         <div className="min-w-0 flex-1">
           <button type="button" onClick={() => { fx.tap(); setNameOpen(true); }} className="flex items-center gap-1.5 active:translate-y-0.5">
-            <span className="px-label text-[0.82rem] text-cream">{displayName()}</span>
+            <span className="px-label text-[0.9rem] text-cream">{displayName()}</span>
             <span className="text-[0.72rem] text-brass" aria-hidden>✎</span>
           </button>
           <div className="mt-1 flex items-center gap-1.5">

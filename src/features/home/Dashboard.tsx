@@ -124,15 +124,22 @@ export default function Dashboard() {
 
       {/* Hero + player card */}
       <PixelPanel hue="blue" rivets className="px-2.5 pb-2.5 pt-2">
-        {/* title */}
-        <div className="relative flex items-center justify-center gap-2 overflow-hidden rounded-[5px] border-2 border-[var(--px-edge)] py-2"
-          style={{ background: "linear-gradient(180deg, var(--sky-1), var(--sky-2))" }}>
-          <ChessBuddy piece="rook" size={34} className="absolute left-2 bottom-0" />
-          <span className="tab-twinkle absolute right-3 top-1 text-[0.6rem] text-sun" aria-hidden>✦</span>
-          <span className="tab-twinkle absolute left-10 top-1 text-[0.5rem] text-sun" aria-hidden>✦</span>
-          <h1 className="px-title flex items-baseline gap-1 leading-none">
-            <span className="text-[0.85rem]">The</span>
-            <span className="text-[1.9rem]">Rang</span>
+        {/* title — cinematic hero banner */}
+        <div className="relative flex items-center justify-center overflow-hidden rounded-[6px] border-2 border-[var(--px-edge)] py-3.5"
+          style={{ background: "linear-gradient(180deg, var(--sky-1) 0%, #34509f 55%, var(--sky-2) 100%)" }}>
+          {/* horizon glow + ground */}
+          <div className="absolute inset-x-0 bottom-0 h-7" style={{ background: "radial-gradient(82% 150% at 50% 102%, var(--horizon), transparent 72%)" }} aria-hidden />
+          <div className="absolute inset-x-0 bottom-0 h-1.5" style={{ background: "linear-gradient(var(--island-grass), var(--island-grass2))" }} aria-hidden />
+          {/* twinkling stars */}
+          <span className="tab-twinkle absolute right-3 top-1.5 text-[0.6rem] text-sun" aria-hidden>✦</span>
+          <span className="tab-twinkle absolute left-9 top-2 text-[0.5rem] text-sun" style={{ animationDelay: "1.1s" }} aria-hidden>✦</span>
+          <span className="tab-twinkle absolute right-14 top-3 text-[0.42rem] text-cream" style={{ animationDelay: "0.6s" }} aria-hidden>✦</span>
+          {/* guide characters flanking the wordmark */}
+          <ChessBuddy piece="rook" size={40} className="tab-bob absolute bottom-0 left-1.5" />
+          <ChessBuddy piece="knight" size={32} className="absolute bottom-0 right-2" />
+          <h1 className="px-title relative flex items-baseline gap-1 leading-none">
+            <span className="text-[0.95rem]">The</span>
+            <span className="text-[2.3rem]">Rang</span>
           </h1>
         </div>
 
@@ -144,9 +151,9 @@ export default function Dashboard() {
               <span className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-b-2 border-r-2 border-[var(--px-edge)] bg-[var(--color-ink)]" />
             </div>
             {/* character scene vignette */}
-            <div className="relative h-[58px] w-full overflow-hidden rounded-[5px] border-2 border-[var(--px-edge)]" style={{ background: "linear-gradient(180deg,#3a78c4,#74b0e0 70%)" }}>
-              <div className="absolute inset-x-0 bottom-0 h-3" style={{ background: "linear-gradient(#3f8a4a,#2c6837)" }} />
-              <div className="absolute bottom-1.5 left-1/2 h-2 w-11 -translate-x-1/2 rounded-full" style={{ background: "linear-gradient(#9aa6c8,#5a648a)", boxShadow: "0 0 0 2px var(--px-edge)" }} />
+            <div className="relative h-[58px] w-full overflow-hidden rounded-[5px] border-2 border-[var(--px-edge)]" style={{ background: "linear-gradient(180deg,var(--scene-sky-1),var(--scene-sky-2) 70%)" }}>
+              <div className="absolute inset-x-0 bottom-0 h-3" style={{ background: "linear-gradient(var(--scene-ground-1),var(--scene-ground-2))" }} />
+              <div className="absolute bottom-1.5 left-1/2 h-2 w-11 -translate-x-1/2 rounded-full" style={{ background: "linear-gradient(var(--pedestal-1),var(--pedestal-2))", boxShadow: "0 0 0 2px var(--px-edge)" }} />
               <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2">
                 <PlayerAvatar size={42} className="tab-bob" />
               </div>
