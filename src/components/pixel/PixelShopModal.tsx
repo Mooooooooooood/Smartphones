@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useProfileStore } from "@/state/profileStore";
 import { SHOP_ITEMS, COLOR_ITEMS, CONSUMABLE_ITEMS, type ShopKind } from "@/content/shop";
+import { TITLE_ITEMS } from "@/content/titles";
 import { BOARD_SKINS, useBoardSkinId, setBoardSkinId } from "@/lib/boardSkin";
 import { PLAYER_COLORS, usePlayerColor, setPlayerColor, type PlayerColorId } from "@/lib/playerColor";
+import { usePlayerTitle, setPlayerTitle } from "@/lib/playerTitle";
 import { CoinIcon } from "@/components/pixel/PixelIcon";
 import { fx } from "@/lib/feedback";
 
@@ -12,6 +14,7 @@ const TABS: { kind: ShopKind; label: string }[] = [
   { kind: "board", label: "Boards" },
   { kind: "color", label: "Colors" },
   { kind: "consumable", label: "Items" },
+  { kind: "title", label: "Titles" },
 ];
 
 /** Mini board-skin swatch preview. */
@@ -33,6 +36,7 @@ export default function PixelShopModal({ open, onClose }: { open: boolean; onClo
   const consumables = useProfileStore((s) => s.consumables);
   const equippedSkin = useBoardSkinId();
   const equippedColor = usePlayerColor();
+  const equippedTitle = usePlayerTitle();
   const [tab, setTab] = useState<ShopKind>("board");
 
   if (!open) return null;
@@ -124,6 +128,29 @@ export default function PixelShopModal({ open, onClose }: { open: boolean; onClo
                     className={`px-label flex shrink-0 items-center gap-1 rounded-[5px] border-2 border-[var(--px-edge)] px-2 py-1 text-[0.52rem] active:translate-y-0.5 ${coins >= item.price ? "bg-brass text-[color:var(--color-on-accent)]" : "bg-[var(--color-ink)] text-muted2 opacity-60"}`}>
                     <CoinIcon size={11} />{item.price}
                   </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {tab === "title" ? (
+          <div className="px-panel px-3 py-3">
+            <p className="px-label text-[0.56rem] text-brass">Titles</p>
+            <p className="mt-0.5 text-[0.6rem] text-muted2">Flair shown on your profile card.</p>
+            <ul className="mt-2 space-y-1.5">
+              {TITLE_ITEMS.map((item) => (
+                <li key={item.id} className="px-inset flex items-center gap-2.5 px-2.5 py-2">
+                  <span className="text-[0.8rem]" aria-hidden>🎖</span>
+                  <span className="min-w-0 flex-1 px-label truncate text-[0.6rem] text-cream">“{item.label}”</span>
+                  <BuyState
+                    price={item.price}
+                    owned={Boolean(owned[item.id])}
+                    equipped={equippedTitle === item.refId}
+                    afford={coins >= item.price}
+                    onBuy={async () => { const ok = await buyItem(item.id, item.price); if (ok) { fx.chest(); setPlayerTitle(item.refId); } }}
+                    onEquip={() => { fx.tap(); setPlayerTitle(item.refId); }}
+                  />
                 </li>
               ))}
             </ul>

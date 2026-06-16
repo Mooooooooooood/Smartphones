@@ -13,6 +13,8 @@ import PixelStatPill from "@/components/pixel/PixelStatPill";
 import ResultBadge from "@/components/pixel/ResultBadge";
 import PieceSelectCard from "@/components/pixel/PieceSelectCard";
 import Toast, { useToast } from "@/components/ui/Toast";
+import { usePlayerTitle } from "@/lib/playerTitle";
+import { titleLabel } from "@/content/titles";
 import PlayerAvatar from "@/components/pixel/PlayerAvatar";
 import PixelSettingsModal from "@/components/pixel/PixelSettingsModal";
 import NameEditModal from "@/components/pixel/NameEditModal";
@@ -56,6 +58,7 @@ export default function ProfileScreen() {
 
   usePlayerName(); // re-render on name change
   const myPiece = usePlayerPiece();
+  const equippedTitle = usePlayerTitle();
 
   useEffect(() => {
     void usePuzzleStore.getState().hydrate();
@@ -104,7 +107,7 @@ export default function ProfileScreen() {
           </button>
           <div className="mt-1 flex items-center gap-1.5">
             <span className="text-[0.74rem]" aria-hidden>{PIECE_META[myPiece].glyph}</span>
-            <span className="px-label text-[0.6rem] text-good">{rank.title}</span>
+            <span className="px-label text-[0.6rem] text-good">{equippedTitle !== "none" ? `“${titleLabel(equippedTitle)}”` : rank.title}</span>
           </div>
           <p className="mt-1 text-[0.62rem] text-muted2">Keep learning, future master!</p>
           <div className="mt-1.5 flex items-center gap-1.5">
