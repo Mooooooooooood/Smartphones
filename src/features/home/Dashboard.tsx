@@ -7,7 +7,7 @@ import { usePuzzleStore } from "@/state/puzzleStore";
 import { useGameStore } from "@/state/gameStore";
 import { todayKey } from "@/domain/progression/leveling";
 import { nextRecommended, tierProgress } from "@/domain/academy/progression";
-import { dailyForToday, dailyBonusClaimable, DAILY_BONUS_XP } from "@/domain/training/daily";
+import { dailyForToday, dailyBonusClaimable, DAILY_BONUS_COINS, DAILY_TASK_COINS } from "@/domain/training/daily";
 import PixelTopBar from "@/components/pixel/PixelTopBar";
 import PixelPanel from "@/components/pixel/PixelPanel";
 import PixelButton from "@/components/pixel/PixelButton";
@@ -190,16 +190,16 @@ export default function Dashboard() {
       <PixelPanel hue="purple" label="Daily Quest" labelHue="purple" className="px-2.5 pb-2.5 pt-3">
         <div className="flex items-center gap-2.5">
           <div className="min-w-0 flex-1 space-y-1">
-            <QuestRow label="Win 2 Matches" done={daily.playTaskDone} coin={150} />
-            <QuestRow label="Solve 3 Puzzles" done={daily.puzzleTaskDone} coin={100} />
-            <QuestRow label="Study 1 Lesson" done={daily.academyTaskDone} coin={50} />
+            <QuestRow label="Play a Match" done={daily.playTaskDone} coin={DAILY_TASK_COINS.play} />
+            <QuestRow label="Solve a Puzzle" done={daily.puzzleTaskDone} coin={DAILY_TASK_COINS.puzzle} />
+            <QuestRow label="Study a Lesson" done={daily.academyTaskDone} coin={DAILY_TASK_COINS.academy} />
           </div>
           <button type="button" onClick={claimable ? () => { fx.chest(); void claimDailyBonus(); } : undefined} disabled={!claimable} className="shrink-0" aria-label="Daily reward chest">
             <PixelRewardChest
               state={daily.bonusClaimed ? "open" : claimable ? "ready" : "locked"}
               size={56}
               caption="REWARD"
-              rewards={<><span className="flex items-center gap-0.5"><CoinIcon size={10} /><span className="font-display text-[0.5rem] text-brass">{DAILY_BONUS_XP}</span></span><span className="flex items-center gap-0.5"><GemIcon size={10} /><span className="font-display text-[0.5rem] text-sky">5</span></span></>}
+              rewards={<><span className="flex items-center gap-0.5"><CoinIcon size={10} /><span className="font-display text-[0.5rem] text-brass">{DAILY_BONUS_COINS}</span></span><span className="flex items-center gap-0.5"><GemIcon size={10} /><span className="font-display text-[0.5rem] text-sky">5</span></span></>}
             />
           </button>
         </div>

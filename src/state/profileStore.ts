@@ -9,6 +9,8 @@ import {
   withBonusClaimed,
   withTaskDone,
   DAILY_BONUS_XP,
+  DAILY_BONUS_COINS,
+  DAILY_TASK_COINS,
   type DailyTask,
   type DailyTraining,
 } from "@/domain/training/daily";
@@ -173,8 +175,14 @@ export const useProfileStore = create<ProfileState>((set, get) => {
     const today = todayKey();
     const base = dailyForToday(s.daily, today);
     const updated = withTaskDone(base, task);
+    const newlyDone = updated !== base; // withTaskDone returns the same ref if already done
     const newStreak = bumpStreak(s.lastActiveDate, s.streak, today);
-    set({ daily: updated, streak: newStreak, lastActiveDate: today });
+    set({
+      daily: updated,
+      streak: newStreak,
+      lastActiveDate: today,
+      coins: s.coins + (newlyDone ? DAILY_TASK_COINS[task] : 0),
+    });
     await Promise.all([persistProfile(), saveDailyTraining(updated)]);
   }
 
@@ -417,7 +425,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
       set({
         daily: updated,
         xp: s.xp + DAILY_BONUS_XP,
-        coins: s.coins + 25,
+        coins: s.coins + DAILY_BONUS_COINS,
         streak: bumpStreak(s.lastActiveDate, s.streak, today),
         lastActiveDate: today,
       });

@@ -17,6 +17,14 @@ export interface DailyTraining {
 
 /** XP awarded once for finishing all three daily tasks. */
 export const DAILY_BONUS_XP = 40;
+/** Coins awarded by the daily completion chest (all three tasks done). */
+export const DAILY_BONUS_COINS = 25;
+/** Coins granted the first time each daily task is completed today. */
+export const DAILY_TASK_COINS: Record<DailyTask, number> = {
+  play: 20,
+  puzzle: 15,
+  academy: 10,
+};
 
 const TASK_FIELD: Record<DailyTask, keyof DailyTraining> = {
   academy: "academyTaskDone",
