@@ -216,11 +216,14 @@ body::before {
 /* Chunky framed panel (the workhorse surface). */
 .px-panel {
   position: relative;
-  background-image: linear-gradient(180deg, var(--panel-bg-1), var(--panel-bg-2));
+  background-image:
+    radial-gradient(130% 80% at 50% -12%, rgba(255, 255, 255, 0.07), transparent 62%),
+    linear-gradient(180deg, var(--panel-bg-1), var(--panel-bg-2));
   border: 3px solid var(--panel-border);
   border-radius: 7px;
   box-shadow:
     0 0 0 3px var(--px-edge),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10),
     inset 0 3px 0 var(--px-bevel-hi),
     inset 0 -3px 0 var(--px-bevel-lo),
     0 5px 0 0 var(--panel-shadow),
@@ -239,15 +242,18 @@ body::before {
 /* Coloured arcade card — pass --hue / --hue-deep inline. */
 .px-card {
   position: relative;
-  background-image: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--hue, var(--color-sky)) 30%, var(--panel-bg-1)),
-    color-mix(in oklab, var(--hue, var(--color-sky)) 14%, var(--panel-bg-2))
-  );
+  background-image:
+    radial-gradient(130% 82% at 50% -12%, rgba(255, 255, 255, 0.10), transparent 60%),
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--hue, var(--color-sky)) 30%, var(--panel-bg-1)),
+      color-mix(in oklab, var(--hue, var(--color-sky)) 14%, var(--panel-bg-2))
+    );
   border: 3px solid var(--hue, var(--color-sky));
   border-radius: 7px;
   box-shadow:
     0 0 0 3px var(--px-edge),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
     inset 0 3px 0 var(--px-bevel-hi),
     inset 0 -3px 0 var(--px-bevel-lo),
     0 5px 0 0 var(--hue-deep, var(--px-edge)),
