@@ -1,10 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import { useProfileStore } from "@/state/profileStore";
-import { SHOP_ITEMS } from "@/content/shop";
+import { SHOP_ITEMS, COLOR_ITEMS, type ShopKind } from "@/content/shop";
 import { BOARD_SKINS, useBoardSkinId, setBoardSkinId } from "@/lib/boardSkin";
+import { PLAYER_COLORS, usePlayerColor, setPlayerColor, type PlayerColorId } from "@/lib/playerColor";
 import { CoinIcon } from "@/components/pixel/PixelIcon";
 import { fx } from "@/lib/feedback";
+
+const TABS: { kind: ShopKind; label: string }[] = [
+  { kind: "board", label: "Boards" },
+  { kind: "color", label: "Colors" },
+];
 
 /** Mini board-skin swatch preview. */
 function Swatch({ light, dark }: { light: string; dark: string }) {
@@ -16,12 +23,14 @@ function Swatch({ light, dark }: { light: string; dark: string }) {
   );
 }
 
-/** The coin shop — buy + equip cosmetic board skins. */
+/** The coin shop — buy + equip cosmetics across categories. */
 export default function PixelShopModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const coins = useProfileStore((s) => s.coins);
   const owned = useProfileStore((s) => s.owned);
   const buyItem = useProfileStore((s) => s.buyItem);
   const equippedSkin = useBoardSkinId();
+  const equippedColor = usePlayerColor();
+  const [tab, setTab] = useState<ShopKind>("board");
 
   if (!open) return null;
 
@@ -36,62 +45,107 @@ export default function PixelShopModal({ open, onClose }: { open: boolean; onClo
           </span>
         </div>
 
-        <div className="px-panel px-3 py-3">
-          <p className="px-label text-[0.56rem] text-brass">Board Skins</p>
-          <p className="mt-0.5 text-[0.6rem] text-muted2">Earn coins by playing. Tap to buy, then equip.</p>
-          <ul className="mt-2 space-y-1.5">
-            {/* Free default first */}
-            <SkinRow refId="classic" label="Classic Board" price={0} owned equipped={equippedSkin === "classic"} onEquip={() => { fx.tap(); setBoardSkinId("classic"); }} />
-            {SHOP_ITEMS.map((item) => {
-              const isOwned = Boolean(owned[item.id]);
-              const isEquipped = equippedSkin === item.refId;
-              const afford = coins >= item.price;
-              return (
+        {/* category tabs */}
+        <div className="flex gap-1.5">
+          {TABS.map((t) => (
+            <button key={t.kind} type="button" onClick={() => { fx.tap(); setTab(t.kind); }}
+              className={`px-label flex-1 rounded-[5px] border-2 px-2 py-1.5 text-[0.5rem] ${tab === t.kind ? "border-brass bg-[var(--color-ink)] text-brass" : "border-[var(--px-edge)] bg-panel text-muted2"}`}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {tab === "board" ? (
+          <div className="px-panel px-3 py-3">
+            <p className="px-label text-[0.56rem] text-brass">Board Skins</p>
+            <p className="mt-0.5 text-[0.6rem] text-muted2">Earn coins by playing. Tap to buy, then equip.</p>
+            <ul className="mt-2 space-y-1.5">
+              <SkinRow refId="classic" label="Classic Board" price={0} owned equipped={equippedSkin === "classic"} onEquip={() => { fx.tap(); setBoardSkinId("classic"); }} />
+              {SHOP_ITEMS.map((item) => (
                 <SkinRow
                   key={item.id}
                   refId={item.refId}
                   label={item.label}
                   price={item.price}
-                  owned={isOwned}
-                  equipped={isEquipped}
-                  afford={afford}
-                  onBuy={async () => {
-                    const ok = await buyItem(item.id, item.price);
-                    if (ok) { fx.chest(); setBoardSkinId(item.refId); }
-                  }}
+                  owned={Boolean(owned[item.id])}
+                  equipped={equippedSkin === item.refId}
+                  afford={coins >= item.price}
+                  onBuy={async () => { const ok = await buyItem(item.id, item.price); if (ok) { fx.chest(); setBoardSkinId(item.refId); } }}
                   onEquip={() => { fx.tap(); setBoardSkinId(item.refId); }}
                 />
-              );
-            })}
-          </ul>
-        </div>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {tab === "color" ? (
+          <div className="px-panel px-3 py-3">
+            <p className="px-label text-[0.56rem] text-brass">Avatar Tints</p>
+            <p className="mt-0.5 text-[0.6rem] text-muted2">Premium colours for your hero. Free colours live in Settings.</p>
+            <ul className="mt-2 space-y-1.5">
+              {COLOR_ITEMS.map((item) => {
+                const swatch = PLAYER_COLORS.find((c) => c.id === item.refId)?.swatch ?? "#fff";
+                return (
+                  <ColorRow
+                    key={item.id}
+                    label={item.label}
+                    price={item.price}
+                    swatch={swatch}
+                    owned={Boolean(owned[item.id])}
+                    equipped={equippedColor === item.refId}
+                    afford={coins >= item.price}
+                    onBuy={async () => { const ok = await buyItem(item.id, item.price); if (ok) { fx.chest(); setPlayerColor(item.refId as PlayerColorId); } }}
+                    onEquip={() => { fx.tap(); setPlayerColor(item.refId as PlayerColorId); }}
+                  />
+                );
+              })}
+            </ul>
+          </div>
+        ) : null}
       </div>
     </div>
   );
 }
 
-function SkinRow({
-  refId, label, price, owned, equipped, afford = true, onBuy, onEquip,
-}: {
-  refId: string; label: string; price: number; owned: boolean; equipped: boolean; afford?: boolean;
-  onBuy?: () => void; onEquip?: () => void;
+/** Owned/equip/buy action cluster shared by the cosmetic rows. */
+function BuyState({ price, owned, equipped, afford = true, onBuy, onEquip }: {
+  price: number; owned: boolean; equipped: boolean; afford?: boolean; onBuy?: () => void; onEquip?: () => void;
+}) {
+  if (owned) {
+    return equipped ? (
+      <span className="px-label rounded-[5px] border-2 border-[var(--px-edge)] bg-good px-2 py-1 text-[0.52rem] text-[color:var(--color-on-good)]">Equipped</span>
+    ) : (
+      <button type="button" onClick={onEquip} className="px-label rounded-[5px] border-2 border-[var(--px-edge)] bg-[var(--color-sky)] px-2 py-1 text-[0.52rem] text-[color:var(--color-on-blue)] active:translate-y-0.5">Equip</button>
+    );
+  }
+  return (
+    <button type="button" onClick={onBuy} disabled={!afford} className={`px-label flex items-center gap-1 rounded-[5px] border-2 border-[var(--px-edge)] px-2 py-1 text-[0.52rem] active:translate-y-0.5 ${afford ? "bg-brass text-[color:var(--color-on-accent)]" : "bg-[var(--color-ink)] text-muted2 opacity-60"}`}>
+      <CoinIcon size={11} />{price}
+    </button>
+  );
+}
+
+function SkinRow({ refId, label, price, owned, equipped, afford = true, onBuy, onEquip }: {
+  refId: string; label: string; price: number; owned: boolean; equipped: boolean; afford?: boolean; onBuy?: () => void; onEquip?: () => void;
 }) {
   const skin = BOARD_SKINS.find((s) => s.id === refId);
   return (
     <li className="px-inset flex items-center gap-2.5 px-2.5 py-2">
       {skin ? <Swatch light={skin.light} dark={skin.dark} /> : null}
       <span className="min-w-0 flex-1 px-label truncate text-[0.6rem] text-cream">{label}</span>
-      {owned ? (
-        equipped ? (
-          <span className="px-label rounded-[5px] border-2 border-[var(--px-edge)] bg-good px-2 py-1 text-[0.52rem] text-[color:var(--color-on-good)]">Equipped</span>
-        ) : (
-          <button type="button" onClick={onEquip} className="px-label rounded-[5px] border-2 border-[var(--px-edge)] bg-[var(--color-sky)] px-2 py-1 text-[0.52rem] text-[color:var(--color-on-blue)] active:translate-y-0.5">Equip</button>
-        )
-      ) : (
-        <button type="button" onClick={onBuy} disabled={!afford} className={`px-label flex items-center gap-1 rounded-[5px] border-2 border-[var(--px-edge)] px-2 py-1 text-[0.52rem] active:translate-y-0.5 ${afford ? "bg-brass text-[color:var(--color-on-accent)]" : "bg-[var(--color-ink)] text-muted2 opacity-60"}`}>
-          <CoinIcon size={11} />{price}
-        </button>
-      )}
+      <BuyState price={price} owned={owned} equipped={equipped} afford={afford} onBuy={onBuy} onEquip={onEquip} />
+    </li>
+  );
+}
+
+function ColorRow({ label, price, swatch, owned, equipped, afford = true, onBuy, onEquip }: {
+  label: string; price: number; swatch: string; owned: boolean; equipped: boolean; afford?: boolean; onBuy?: () => void; onEquip?: () => void;
+}) {
+  return (
+    <li className="px-inset flex items-center gap-2.5 px-2.5 py-2">
+      <span className="h-7 w-7 shrink-0 rounded-[5px] border-2 border-[var(--px-edge)]" style={{ background: swatch, boxShadow: "0 0 0 2px var(--px-edge)" }} />
+      <span className="min-w-0 flex-1 px-label truncate text-[0.6rem] text-cream">{label}</span>
+      <BuyState price={price} owned={owned} equipped={equipped} afford={afford} onBuy={onBuy} onEquip={onEquip} />
     </li>
   );
 }

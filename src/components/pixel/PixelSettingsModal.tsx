@@ -7,7 +7,8 @@ import PixelButton from "@/components/pixel/PixelButton";
 import { GearGlyph } from "@/components/pixel/PixelIcon";
 import { exportAll, importAll, resetAll } from "@/data/backup";
 import { APP_VERSION } from "@/lib/version";
-import { PLAYER_COLORS, getPlayerColor, setPlayerColor, type PlayerColorId } from "@/lib/playerColor";
+import { PLAYER_COLORS, getPlayerColor, setPlayerColor, isColorOwned, type PlayerColorId } from "@/lib/playerColor";
+import { useProfileStore } from "@/state/profileStore";
 import { useSoundOn, setSoundOn, playSfx, useVolume, setVolume, prime } from "@/lib/sound";
 import { useMusicOn, setMusicOn, useMusicVolume, setMusicVolume } from "@/lib/music";
 import { useHapticsOn, setHapticsOn, hapticsSupported, vibrate } from "@/lib/haptics";
@@ -35,6 +36,7 @@ export default function PixelSettingsModal({ open, onClose }: { open: boolean; o
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<Status>(null);
   const [color, setColorState] = useState<PlayerColorId>(getPlayerColor);
+  const owned = useProfileStore((s) => s.owned);
   const soundOn = useSoundOn();
   const hapticsOn = useHapticsOn();
   const volume = useVolume();
@@ -157,8 +159,8 @@ export default function PixelSettingsModal({ open, onClose }: { open: boolean; o
         <div className="px-panel px-3 py-3">
           <p className="px-label text-[0.5rem] text-brass">Your Colour</p>
           <p className="mt-0.5 text-[0.6rem] text-muted2">Tint your hero avatar.</p>
-          <div className="mt-2 flex gap-2">
-            {PLAYER_COLORS.map((c) => (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {PLAYER_COLORS.filter((c) => isColorOwned(c.id, owned)).map((c) => (
               <button key={c.id} type="button" onClick={() => pickColor(c.id)} aria-label={c.label}
                 className={`h-8 w-8 rounded-[6px] border-[3px] ${color === c.id ? "border-cream" : "border-[var(--px-edge)]"}`}
                 style={{ background: c.swatch, boxShadow: "0 0 0 2px var(--px-edge)" }} />

@@ -95,6 +95,11 @@ export const PLAYER_PALETTES: Record<string, SpritePalette> = {
   blue: { body: "#4d8dff", hi: "#9cc3ff", line: "#1d3f8a", accent: "#dbe9ff" },
   green: { body: "#45d36c", hi: "#8ef0a8", line: "#1d7344", accent: "#d6ffe4" },
   purple: { body: "#8a6fe0", hi: "#cdb8ff", line: "#4a2fa0", accent: "#efe6ff" },
+  // Premium tints (bought in the Shop).
+  ember: { body: "#ff7a2f", hi: "#ffb066", line: "#a8400c", accent: "#ffe0a0" },
+  frost: { body: "#5fd6e8", hi: "#b6f0fa", line: "#1d7a8a", accent: "#e0fbff" },
+  mint: { body: "#3fd6a0", hi: "#8ff0cf", line: "#1a8a64", accent: "#d8fff0" },
+  void: { body: "#6a4fa0", hi: "#a98fe0", line: "#1a1030", accent: "#d8c8ff" },
 };
 
 /** The striking elite-rival palette (intense crimson with a hot rim). */
