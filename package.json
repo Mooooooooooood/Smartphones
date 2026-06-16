@@ -18,7 +18,8 @@
     "test:review": "npx --yes tsx scripts/reviewCheck.mts",
     "baseline": "node scripts/screenshotBaseline.mjs",
     "shots": "node scripts/storeShots.mjs",
-    "og": "node scripts/ogImage.mjs"
+    "og": "node scripts/ogImage.mjs",
+    "genmusic": "node scripts/genMusic.mjs"
   },
   "dependencies": {
     "chess.js": "^1.4.0",

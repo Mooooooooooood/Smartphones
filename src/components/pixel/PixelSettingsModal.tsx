@@ -9,6 +9,7 @@ import { exportAll, importAll, resetAll } from "@/data/backup";
 import { APP_VERSION } from "@/lib/version";
 import { PLAYER_COLORS, getPlayerColor, setPlayerColor, type PlayerColorId } from "@/lib/playerColor";
 import { useSoundOn, setSoundOn, playSfx, useVolume, setVolume, prime } from "@/lib/sound";
+import { useMusicOn, setMusicOn, useMusicVolume, setMusicVolume } from "@/lib/music";
 import { useHapticsOn, setHapticsOn, hapticsSupported, vibrate } from "@/lib/haptics";
 
 type Status = { kind: "ok" | "err"; msg: string } | null;
@@ -37,6 +38,8 @@ export default function PixelSettingsModal({ open, onClose }: { open: boolean; o
   const soundOn = useSoundOn();
   const hapticsOn = useHapticsOn();
   const volume = useVolume();
+  const musicOn = useMusicOn();
+  const musicVolume = useMusicVolume();
   const [resetArmed, setResetArmed] = useState(false);
 
   if (!open) return null;
@@ -134,6 +137,20 @@ export default function PixelSettingsModal({ open, onClose }: { open: boolean; o
             hint={hapticsSupported() ? undefined : "n/a"}
             onChange={(v) => { setHapticsOn(v); if (v) vibrate("correct"); }}
           />
+          {/* Ambient music */}
+          <Toggle on={musicOn} label="Music" onChange={(v) => setMusicOn(v)} />
+          <div className="px-inset flex items-center gap-2 px-2.5 py-2">
+            <span className="px-label text-[0.56rem] text-cream">Music Vol</span>
+            <input
+              type="range" min={0} max={100} value={Math.round(musicVolume * 100)}
+              onChange={(e) => setMusicVolume(Number(e.target.value) / 100)}
+              disabled={!musicOn}
+              className="h-2 flex-1 cursor-pointer appearance-none rounded-[3px] bg-[var(--color-ink)] disabled:opacity-40"
+              style={{ accentColor: "var(--color-brass)" }}
+              aria-label="Music volume"
+            />
+            <span className="px-label w-7 text-right text-[0.5rem] text-muted2">{Math.round(musicVolume * 100)}</span>
+          </div>
         </div>
 
         {/* Player colour */}

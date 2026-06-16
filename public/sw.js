@@ -1,5 +1,5 @@
 /* Tabiya service worker — offline app shell. Bump CACHE on shell changes. */
-const CACHE = "tabiya-shell-v1";
+const CACHE = "tabiya-shell-v2";
 
 const APP_SHELL = [
   "/",
@@ -9,6 +9,7 @@ const APP_SHELL = [
   "/profile",
   "/offline",
   "/manifest.webmanifest",
+  "/audio/ambient.wav",
   "/icon-192.png",
   "/icon-512.png",
   "/maskable-icon-512.png",
