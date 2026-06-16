@@ -58,7 +58,7 @@ const ARROW_BG: Record<PixelHue, string> = {
 function RoundArrow({ hue }: { hue: PixelHue }) {
   return (
     <span
-      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-[3px] border-[var(--px-edge)] font-display text-[0.8rem] text-[color:#06122e] shadow-[0_3px_0_0_var(--px-edge)]"
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-[3px] border-[var(--px-edge)] font-display text-[0.8rem] text-[color:var(--color-on-blue)] shadow-[0_3px_0_0_var(--px-edge)]"
       style={{ background: `radial-gradient(circle at 38% 32%, #ffffff55, ${ARROW_BG[hue]})` }}
       aria-hidden
     >
@@ -90,10 +90,10 @@ function OpponentSelect({ onChoose, onPractice }: { onChoose: (id: string) => vo
                   <span className="px-label text-[0.46rem] text-brass">{o.level}</span>
                   <span className="px-label text-[0.46rem] text-good">+{o.xpReward} XP</span>
                   {o.recommended ? (
-                    <span className="px-label rounded-[4px] border-2 border-[var(--px-edge)] bg-good px-1 py-0.5 text-[0.42rem] text-[color:#06220f]">Start Here</span>
+                    <span className="px-label rounded-[4px] border-2 border-[var(--px-edge)] bg-good px-1 py-0.5 text-[0.42rem] text-[color:var(--color-on-good)]">Start Here</span>
                   ) : null}
                   {o.rival ? (
-                    <span className="px-label rounded-[4px] border-2 border-[var(--px-edge)] bg-bad px-1 py-0.5 text-[0.42rem] text-[color:#2a0709]">Rival</span>
+                    <span className="px-label rounded-[4px] border-2 border-[var(--px-edge)] bg-bad px-1 py-0.5 text-[0.42rem] text-[color:var(--color-on-bad)]">Rival</span>
                   ) : null}
                 </div>
                 <p className="mt-0.5 truncate text-[0.6rem] text-muted2">{o.line}</p>

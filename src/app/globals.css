@@ -26,6 +26,12 @@
   --color-bad: #ff5468;
   --color-warn: #f7bd3f;
   --color-on-accent: #2a1c02;
+  /* Ink-on-bright-accent text (near-black, theme-invariant) — used by buttons,
+     result badges, move chips, and any text sitting on a saturated hue. */
+  --color-on-blue: #06122e;
+  --color-on-good: #06220f;
+  --color-on-bad: #2a0709;
+  --color-on-purple: #190a2e;
   /* Card accent hues (used as surf-* surfaces + glyph tints) */
   --color-mint: #57e08a;
   --color-sun: #ffd76b;

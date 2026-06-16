@@ -213,7 +213,7 @@ export default function Dashboard() {
             <p className="text-[0.56rem] text-muted2">{dailyPuzzleDone ? "Solved today — nice!" : "Solve it for bonus coins"}</p>
           </div>
           <span className="px-label rounded-[5px] border-2 border-[var(--px-edge)] px-2 py-1 text-[0.52rem]"
-            style={dailyPuzzleDone ? { background: "var(--color-good)", color: "#06220f" } : { background: "var(--color-brass)", color: "var(--color-on-accent)" }}>
+            style={dailyPuzzleDone ? { background: "var(--color-good)", color: "var(--color-on-good)" } : { background: "var(--color-brass)", color: "var(--color-on-accent)" }}>
             {dailyPuzzleDone ? "✓" : "PLAY ›"}
           </span>
         </PixelPanel>
@@ -228,7 +228,7 @@ export default function Dashboard() {
               <p className="px-label text-[0.52rem] text-brass">Review Mistakes</p>
               <p className="text-[0.56rem] text-muted2">{missed} puzzle{missed === 1 ? "" : "s"} to master</p>
             </div>
-            <span className="px-label rounded-[5px] border-2 border-[var(--px-edge)] bg-bad px-2 py-1 text-[0.52rem] text-[color:#2a0709]">REVIEW ›</span>
+            <span className="px-label rounded-[5px] border-2 border-[var(--px-edge)] bg-bad px-2 py-1 text-[0.52rem] text-[color:var(--color-on-bad)]">REVIEW ›</span>
           </PixelPanel>
         </Link>
       ) : null}

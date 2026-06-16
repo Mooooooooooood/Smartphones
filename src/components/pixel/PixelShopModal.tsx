@@ -83,9 +83,9 @@ function SkinRow({
       <span className="min-w-0 flex-1 px-label truncate text-[0.6rem] text-cream">{label}</span>
       {owned ? (
         equipped ? (
-          <span className="px-label rounded-[5px] border-2 border-[var(--px-edge)] bg-good px-2 py-1 text-[0.52rem] text-[color:#06220f]">Equipped</span>
+          <span className="px-label rounded-[5px] border-2 border-[var(--px-edge)] bg-good px-2 py-1 text-[0.52rem] text-[color:var(--color-on-good)]">Equipped</span>
         ) : (
-          <button type="button" onClick={onEquip} className="px-label rounded-[5px] border-2 border-[var(--px-edge)] bg-[var(--color-sky)] px-2 py-1 text-[0.52rem] text-[color:#06122e] active:translate-y-0.5">Equip</button>
+          <button type="button" onClick={onEquip} className="px-label rounded-[5px] border-2 border-[var(--px-edge)] bg-[var(--color-sky)] px-2 py-1 text-[0.52rem] text-[color:var(--color-on-blue)] active:translate-y-0.5">Equip</button>
         )
       ) : (
         <button type="button" onClick={onBuy} disabled={!afford} className={`px-label flex items-center gap-1 rounded-[5px] border-2 border-[var(--px-edge)] px-2 py-1 text-[0.52rem] active:translate-y-0.5 ${afford ? "bg-brass text-[color:var(--color-on-accent)]" : "bg-[var(--color-ink)] text-muted2 opacity-60"}`}>

@@ -191,7 +191,7 @@ export default function ProfileScreen() {
               const win = m.result === "win";
               const row = (
                 <div className="px-inset flex items-center gap-2 px-2 py-1.5">
-                  <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-[4px] border-2 border-[var(--px-edge)] font-display text-[0.54rem] ${win ? "bg-good text-[color:#06220f]" : m.result === "draw" ? "bg-[var(--color-ink)] text-muted" : "bg-bad text-[color:#2a0709]"}`}>
+                  <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-[4px] border-2 border-[var(--px-edge)] font-display text-[0.54rem] ${win ? "bg-good text-[color:var(--color-on-good)]" : m.result === "draw" ? "bg-[var(--color-ink)] text-muted" : "bg-bad text-[color:var(--color-on-bad)]"}`}>
                     {win ? "W" : m.result === "draw" ? "D" : "L"}
                   </span>
                   <div className="min-w-0 flex-1">

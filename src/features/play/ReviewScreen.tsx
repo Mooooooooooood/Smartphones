@@ -29,10 +29,10 @@ const LessonBoard = dynamic(() => import("@/components/LessonBoard"), {
 /** Pixel-framed colour token for each move-quality chip. */
 const KIND_STYLE: Record<MoveKind, { bg: string; fg: string }> = {
   mate: { bg: "var(--color-brass)", fg: "var(--color-on-accent)" },
-  promo: { bg: "var(--color-lav)", fg: "#190a2e" },
-  castle: { bg: "var(--color-sky)", fg: "#06122e" },
-  capture: { bg: "var(--color-bad)", fg: "#2a0709" },
-  check: { bg: "var(--color-good)", fg: "#06220f" },
+  promo: { bg: "var(--color-lav)", fg: "var(--color-on-purple)" },
+  castle: { bg: "var(--color-sky)", fg: "var(--color-on-blue)" },
+  capture: { bg: "var(--color-bad)", fg: "var(--color-on-bad)" },
+  check: { bg: "var(--color-good)", fg: "var(--color-on-good)" },
   develop: { bg: "var(--color-frame)", fg: "var(--color-cream)" },
   quiet: { bg: "var(--color-frame)", fg: "var(--color-muted2)" },
 };

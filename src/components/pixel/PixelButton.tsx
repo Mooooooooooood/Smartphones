@@ -9,10 +9,10 @@ type Variant = "solid" | "secondary" | "ghost";
 
 const TONES: Record<PixelButtonTone, { bg: string; hi: string; deep: string; on: string }> = {
   gold: { bg: "var(--color-brass)", hi: "#ffd76b", deep: "var(--color-brassdeep)", on: "var(--color-on-accent)" },
-  blue: { bg: "var(--color-sky)", hi: "#8fb6ff", deep: "#1c50b0", on: "#06122e" },
-  green: { bg: "var(--color-good)", hi: "#86f0a6", deep: "var(--color-gooddeep)", on: "#06220f" },
-  red: { bg: "var(--color-bad)", hi: "#ff8f9e", deep: "#b32436", on: "#2a0709" },
-  purple: { bg: "var(--color-lav)", hi: "#cdb8ff", deep: "#5a3fc0", on: "#190a2e" },
+  blue: { bg: "var(--color-sky)", hi: "#8fb6ff", deep: "#1c50b0", on: "var(--color-on-blue)" },
+  green: { bg: "var(--color-good)", hi: "#86f0a6", deep: "var(--color-gooddeep)", on: "var(--color-on-good)" },
+  red: { bg: "var(--color-bad)", hi: "#ff8f9e", deep: "#b32436", on: "var(--color-on-bad)" },
+  purple: { bg: "var(--color-lav)", hi: "#cdb8ff", deep: "#5a3fc0", on: "var(--color-on-purple)" },
 };
 
 /**

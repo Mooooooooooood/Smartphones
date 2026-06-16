@@ -30,7 +30,7 @@ export default function AchievementModal({
             {a.unlocked ? a.glyph : "🔒"}
           </div>
           <h3 className="px-title mt-3 text-[1rem] text-cream">{a.name}</h3>
-          <span className={`px-label mt-1 inline-block rounded-[4px] border-2 border-[var(--px-edge)] px-2 py-0.5 text-[0.46rem] ${a.unlocked ? "bg-good text-[color:#06220f]" : "bg-[var(--color-ink)] text-muted2"}`}>
+          <span className={`px-label mt-1 inline-block rounded-[4px] border-2 border-[var(--px-edge)] px-2 py-0.5 text-[0.46rem] ${a.unlocked ? "bg-good text-[color:var(--color-on-good)]" : "bg-[var(--color-ink)] text-muted2"}`}>
             {a.unlocked ? (claimed ? "Claimed" : "Unlocked") : "Locked"}
           </span>
           <p className="mx-auto mt-2.5 max-w-[230px] text-[0.66rem] leading-relaxed text-muted">{a.description}</p>

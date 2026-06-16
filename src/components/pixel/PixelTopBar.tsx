@@ -43,7 +43,7 @@ export default function PixelTopBar({ star = false }: { star?: boolean }) {
       <button type="button" onClick={() => setShopOpen(true)} aria-label="Open shop" className="px-inset flex shrink-0 items-center gap-1 py-1 pl-1.5 pr-1 active:translate-y-0.5">
         <CoinIcon size={13} />
         <span className="font-display text-[0.56rem] leading-none text-cream">{fmt(coins)}</span>
-        <span className="flex h-3.5 w-3.5 items-center justify-center rounded-[3px] border border-[var(--px-edge)] bg-bad text-[0.5rem] font-bold leading-none text-[color:#2a0709]" aria-hidden>+</span>
+        <span className="flex h-3.5 w-3.5 items-center justify-center rounded-[3px] border border-[var(--px-edge)] bg-bad text-[0.5rem] font-bold leading-none text-[color:var(--color-on-bad)]" aria-hidden>+</span>
       </button>
       <Capsule icon={<GemIcon size={13} />} value={fmt(gems)} />
       {star ? <Capsule icon={<StarIcon size={13} />} value={fmt(stars)} /> : null}
