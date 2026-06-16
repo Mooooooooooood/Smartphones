@@ -2,8 +2,9 @@ import type { CSSProperties, ReactNode } from "react";
 
 export type PixelHue = "blue" | "orange" | "green" | "red" | "purple" | "gold" | "gray" | "none";
 
-/** Maps a named hue to its border colour + hard drop-shadow colour. */
-const HUES: Record<Exclude<PixelHue, "none">, { hue: string; deep: string; tab: string }> = {
+/** Maps a named hue to its border colour + hard drop-shadow colour.
+ *  Exported so other pixel primitives (badges, segments) share one source. */
+export const PIXEL_HUES: Record<Exclude<PixelHue, "none">, { hue: string; deep: string; tab: string }> = {
   blue: { hue: "var(--color-sky)", deep: "#1c50b0", tab: "#2f64c4" },
   orange: { hue: "var(--color-peach)", deep: "#b86a1e", tab: "#c47a26" },
   green: { hue: "var(--color-mint)", deep: "#1f8f4d", tab: "#2a9456" },
@@ -43,9 +44,9 @@ export default function PixelPanel({
   const glowCls = glow === "accent" ? "px-glow" : glow === "reward" ? "px-glow-reward" : "";
   const hueVars: CSSProperties =
     hue !== "none"
-      ? ({ "--hue": HUES[hue].hue, "--hue-deep": HUES[hue].deep } as CSSProperties)
+      ? ({ "--hue": PIXEL_HUES[hue].hue, "--hue-deep": PIXEL_HUES[hue].deep } as CSSProperties)
       : {};
-  const tabBg = HUES[labelHue ?? (hue === "none" ? "blue" : hue)].tab;
+  const tabBg = PIXEL_HUES[labelHue ?? (hue === "none" ? "blue" : hue)].tab;
 
   return (
     <div className={`${base} ${glowCls} ${label ? "mt-2" : ""} ${className}`} style={{ ...hueVars, ...style }}>

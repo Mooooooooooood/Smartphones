@@ -8,7 +8,11 @@ import { rankForLevel } from "@/domain/progression/rank";
 import { academyProgress } from "@/domain/academy/progression";
 import PixelTopBar from "@/components/pixel/PixelTopBar";
 import PixelPanel from "@/components/pixel/PixelPanel";
+import PixelButton from "@/components/pixel/PixelButton";
 import PixelStatPill from "@/components/pixel/PixelStatPill";
+import ResultBadge from "@/components/pixel/ResultBadge";
+import PieceSelectCard from "@/components/pixel/PieceSelectCard";
+import Toast, { useToast } from "@/components/ui/Toast";
 import PixelCharacterFrame from "@/components/pixel/PixelCharacterFrame";
 import PlayerAvatar from "@/components/pixel/PlayerAvatar";
 import PixelSettingsModal from "@/components/pixel/PixelSettingsModal";
@@ -19,7 +23,7 @@ import StreakCalendar from "@/components/pixel/StreakCalendar";
 import { achievementViews, type AchievementView } from "@/content/achievements";
 import { pieceViews } from "@/content/pieceUnlocks";
 import { fx } from "@/lib/feedback";
-import ChessBuddy, { type BuddyPiece } from "@/components/characters/ChessBuddy";
+import { type BuddyPiece } from "@/components/characters/ChessBuddy";
 import { usePlayerName, displayName, usePlayerPiece, setPlayerPiece } from "@/lib/playerIdentity";
 import { CoinIcon, GearGlyph } from "@/components/pixel/PixelIcon";
 
@@ -49,7 +53,7 @@ export default function ProfileScreen() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [nameOpen, setNameOpen] = useState(false);
   const [openAch, setOpenAch] = useState<AchievementView | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
+  const { message: toast, show: showToast } = useToast();
 
   usePlayerName(); // re-render on name change
   const myPiece = usePlayerPiece();
@@ -124,33 +128,24 @@ export default function ProfileScreen() {
         <div className="grid grid-cols-3 gap-2">
           {pieces.map((p) => {
             const meta = PIECE_META[p.piece];
-            const isMe = myPiece === p.piece;
             return (
-              <button
+              <PieceSelectCard
                 key={p.piece}
-                type="button"
+                piece={p.piece}
+                label={meta.name}
+                unlocked={p.unlocked}
+                selected={myPiece === p.piece}
                 onClick={() => {
                   if (p.unlocked) {
                     fx.correct();
                     setPlayerPiece(p.piece);
-                    setToast(`Now wearing the ${meta.name}!`);
-                    setTimeout(() => setToast(null), 1800);
+                    showToast(`Now wearing the ${meta.name}!`);
                   } else {
                     fx.tap();
                     setOpenAch({ id: `piece-${p.piece}`, name: meta.name, glyph: meta.glyph, description: p.hint, reward: "Avatar piece", progress: () => ({ current: p.current, target: p.target }), current: p.current, target: p.target, unlocked: false, pct: p.pct, coins: 0 });
                   }
                 }}
-                className="active:translate-y-0.5"
-              >
-                <div className={`flex flex-col items-center gap-1 rounded-[7px] border-[3px] px-1 py-2 ${isMe ? "border-brass bg-[var(--color-ink)]" : "border-[var(--px-edge)] bg-[var(--color-ink)]"}`} style={isMe ? { boxShadow: "0 0 0 2px var(--px-edge), 0 0 12px -2px var(--glow-reward)" } : { boxShadow: "0 0 0 2px var(--px-edge)" }}>
-                  <div className={p.unlocked ? "" : "opacity-30 grayscale"}>
-                    <ChessBuddy piece={p.piece} size={34} />
-                  </div>
-                  <span className={`px-label text-[0.5rem] ${p.unlocked ? "text-cream" : "text-muted2"}`}>
-                    {p.unlocked ? (isMe ? "Wearing" : meta.name) : "🔒"}
-                  </span>
-                </div>
-              </button>
+              />
             );
           })}
         </div>
@@ -191,9 +186,7 @@ export default function ProfileScreen() {
               const win = m.result === "win";
               const row = (
                 <div className="px-inset flex items-center gap-2 px-2 py-1.5">
-                  <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-[4px] border-2 border-[var(--px-edge)] font-display text-[0.54rem] ${win ? "bg-good text-[color:var(--color-on-good)]" : m.result === "draw" ? "bg-[var(--color-ink)] text-muted" : "bg-bad text-[color:var(--color-on-bad)]"}`}>
-                    {win ? "W" : m.result === "draw" ? "D" : "L"}
-                  </span>
+                  <ResultBadge result={win ? "win" : m.result === "draw" ? "draw" : "loss"} />
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-[0.64rem] text-cream">{m.opponentName}</div>
                     <div className="px-label text-[0.46rem] text-muted2">Quick Match</div>
@@ -210,9 +203,9 @@ export default function ProfileScreen() {
       </PixelPanel>
 
       {/* Settings button */}
-      <button type="button" onClick={() => setSettingsOpen(true)} className="px-btn px-btn-secondary mx-auto flex w-[70%] items-center justify-center gap-2 !text-[0.66rem]">
-        <GearGlyph size={14} /> SETTINGS ›
-      </button>
+      <PixelButton onClick={() => setSettingsOpen(true)} variant="secondary" className="mx-auto !w-[70%] !text-[0.66rem]">
+        <span className="flex items-center justify-center gap-2"><GearGlyph size={14} /> SETTINGS ›</span>
+      </PixelButton>
 
       <Link href="/about" className="px-label mx-auto block w-fit pt-1 text-[0.5rem] text-muted2">About The Rang ›</Link>
 
@@ -226,19 +219,13 @@ export default function ProfileScreen() {
           fx.chest();
           void claimReward(`ach-${a.id}`, 0);
           void addCoins(a.coins);
-          setToast(`+${a.coins} coins claimed!`);
-          setTimeout(() => setToast(null), 1800);
+          showToast(`+${a.coins} coins claimed!`);
           setOpenAch(null);
         } : undefined}
         onClose={() => setOpenAch(null)}
       />
 
-      {/* transient toast */}
-      {toast ? (
-        <div className="pointer-events-none fixed inset-x-0 bottom-24 z-[130] flex justify-center px-4">
-          <span className="px-panel tab-animate-pop px-3 py-2 text-[0.66rem] text-cream">{toast}</span>
-        </div>
-      ) : null}
+      <Toast message={toast} />
     </div>
   );
 }

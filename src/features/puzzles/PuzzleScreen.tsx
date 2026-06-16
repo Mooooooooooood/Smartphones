@@ -13,6 +13,8 @@ import PixelTopBar from "@/components/pixel/PixelTopBar";
 import PixelPanel from "@/components/pixel/PixelPanel";
 import PixelButton from "@/components/pixel/PixelButton";
 import PixelStat from "@/components/pixel/PixelStat";
+import SegmentControl from "@/components/pixel/SegmentControl";
+import Modal from "@/components/ui/Modal";
 import ChessBuddy from "@/components/characters/ChessBuddy";
 import { fx } from "@/lib/feedback";
 import { dailyPuzzleId, isDailyPuzzleDone, markDailyPuzzleDone, DAILY_PUZZLE_BONUS } from "@/domain/training/dailyPuzzle";
@@ -154,21 +156,7 @@ export default function PuzzleScreen() {
       <ComboMeter streak={session.streak} best={session.best} />
 
       {/* Theme filters */}
-      <div className="-mx-3 overflow-x-auto px-3">
-        <div className="flex w-max gap-1.5">
-          {THEME_OPTIONS.map((opt) => {
-            const active = theme === opt.value;
-            return (
-              <button key={opt.value} type="button" onClick={() => setTheme(opt.value)}
-                className={`px-label shrink-0 rounded-[5px] border-2 px-2.5 py-1.5 text-[0.5rem] ${
-                  active ? "border-brass bg-[var(--color-ink)] text-brass" : "border-[var(--px-edge)] bg-panel text-muted2"
-                }`}>
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <SegmentControl options={THEME_OPTIONS} value={theme} onChange={setTheme} layout="scroll" />
 
       {/* Coach instruction */}
       {status !== "correct" ? (
@@ -197,16 +185,14 @@ export default function PuzzleScreen() {
 
       {/* Centered solved popup — auto-advances after 5s, or tap Next now */}
       {status === "correct" ? (
-        <div className="fixed inset-0 z-[90] grid place-items-center bg-[rgba(4,6,20,0.55)] p-4 backdrop-blur-sm" onClick={nextPuzzle}>
-          <div className="w-full max-w-[320px]" onClick={(e) => e.stopPropagation()}>
-            <RewardPanel title={`Solved — ${puzzle.answerSan ?? "correct"}`} xp={result?.xpAwarded ?? 0} tone="good" piece="knight" subtitle={ratingText}>
-              <p className="text-center text-[0.66rem] text-muted">{puzzle.explanation}</p>
-              <div className="mt-3">
-                <PixelButton onClick={nextPuzzle} tone="green">NEXT PUZZLE →</PixelButton>
-              </div>
-            </RewardPanel>
-          </div>
-        </div>
+        <Modal open onClose={nextPuzzle}>
+          <RewardPanel title={`Solved — ${puzzle.answerSan ?? "correct"}`} xp={result?.xpAwarded ?? 0} tone="good" piece="knight" subtitle={ratingText}>
+            <p className="text-center text-[0.66rem] text-muted">{puzzle.explanation}</p>
+            <div className="mt-3">
+              <PixelButton onClick={nextPuzzle} tone="green">NEXT PUZZLE →</PixelButton>
+            </div>
+          </RewardPanel>
+        </Modal>
       ) : (
         <div className="grid grid-cols-3 gap-2">
           <PixelButton onClick={showHint} disabled={hintShown} variant="secondary" size="sm">{hintShown ? "Hint ✓" : "Hint"}</PixelButton>

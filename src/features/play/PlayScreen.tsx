@@ -14,6 +14,7 @@ import PixelTopBar from "@/components/pixel/PixelTopBar";
 import PixelPanel, { type PixelHue } from "@/components/pixel/PixelPanel";
 import PixelButton from "@/components/pixel/PixelButton";
 import PixelStat from "@/components/pixel/PixelStat";
+import SegmentControl from "@/components/pixel/SegmentControl";
 import PixelCharacterFrame from "@/components/pixel/PixelCharacterFrame";
 import PixelBoardFrame from "@/components/pixel/PixelBoardFrame";
 import { RIVAL_PALETTE } from "@/components/pixel/PixelSprite";
@@ -150,20 +151,7 @@ function MatchSetup({ opponent, onStart, onBack }: { opponent: Opponent; onStart
 
       <div>
         <p className="px-label mb-1.5 text-[0.54rem] text-muted2">Choose your side</p>
-        <div className="grid grid-cols-3 gap-2">
-          {SIDES.map((s) => {
-            const active = side === s.value;
-            return (
-              <button key={s.value} type="button" onClick={() => setSide(s.value)}
-                className={`px-inset flex flex-col items-center gap-0.5 py-2.5 text-center ${active ? "!border-brass" : ""}`}
-                style={active ? { boxShadow: "inset 0 0 0 2px var(--color-brass)" } : undefined}>
-                <span className={`text-xl ${active ? "text-brass" : "text-muted"}`} aria-hidden>{s.glyph}</span>
-                <span className="px-label text-[0.5rem] text-cream">{s.label}</span>
-                <span className="text-[0.5rem] leading-tight text-muted2">{s.sub}</span>
-              </button>
-            );
-          })}
-        </div>
+        <SegmentControl options={SIDES} value={side} onChange={setSide} layout="grid" cols={3} />
       </div>
 
       <PixelButton onClick={() => onStart(side)} tone="gold">⚔ START MATCH ⚔</PixelButton>
