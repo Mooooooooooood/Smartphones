@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { levelInfo, nextStreak, todayKey, type LevelInfo } from "@/domain/progression/leveling";
+import { levelInfo, streakWithFreeze, todayKey, type LevelInfo } from "@/domain/progression/leveling";
 import { DEFAULT_PUZZLE_RATING, DEFAULT_PLAY_RATING, eloUpdate, nextRating } from "@/domain/progression/rating";
 import { bossById } from "@/content/academy";
 import type { AcademyState } from "@/domain/academy/progression";
@@ -104,6 +104,9 @@ interface ProfileState {
   coins: number;
   owned: IdSet;
 
+  // Sprint 21 — consumable inventory (hint tokens, skips, streak freeze)
+  consumables: Record<string, number>;
+
   hydrated: boolean;
 
   hydrate: () => Promise<void>;
@@ -123,7 +126,15 @@ interface ProfileState {
   addCoins: (n: number) => Promise<void>;
   /** Buy a cosmetic by id+price. Returns true if purchased (enough coins & not owned). */
   buyItem: (id: string, price: number) => Promise<boolean>;
+  /** Add N of a consumable to the inventory. */
+  addConsumable: (id: string, n: number) => Promise<void>;
+  /** Consume one of a consumable. Returns false if none are available. */
+  consumeItem: (id: string) => Promise<boolean>;
+  /** Buy a consumable (coin-guarded, repeatable). Returns true if purchased. */
+  buyConsumable: (id: string, price: number, grant?: number) => Promise<boolean>;
 }
+
+export const FREEZE_ID = "consumable-freeze";
 
 export const useProfileStore = create<ProfileState>((set, get) => {
   function persistProfile() {
@@ -137,8 +148,23 @@ export const useProfileStore = create<ProfileState>((set, get) => {
       playRating: s.playRating,
       coins: s.coins,
       owned: s.owned,
+      consumables: s.consumables,
       updatedAt: Date.now(),
     });
+  }
+
+  /**
+   * Streak after activity, spending a Streak Freeze if it would otherwise reset.
+   * Centralizes the freeze logic so every activity recorder stays consistent.
+   */
+  function bumpStreak(prevDate: string | null, prevStreak: number, today: string): number {
+    const have = (get().consumables[FREEZE_ID] ?? 0) > 0;
+    const r = streakWithFreeze(prevDate, prevStreak, have, today);
+    if (r.consumedFreeze) {
+      const c = get().consumables;
+      set({ consumables: { ...c, [FREEZE_ID]: Math.max(0, (c[FREEZE_ID] ?? 0) - 1) } });
+    }
+    return r.streak;
   }
 
   /** Apply a daily task, bump the streak (meaningful activity), and persist. */
@@ -147,7 +173,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
     const today = todayKey();
     const base = dailyForToday(s.daily, today);
     const updated = withTaskDone(base, task);
-    const newStreak = nextStreak(s.lastActiveDate, s.streak, today);
+    const newStreak = bumpStreak(s.lastActiveDate, s.streak, today);
     set({ daily: updated, streak: newStreak, lastActiveDate: today });
     await Promise.all([persistProfile(), saveDailyTraining(updated)]);
   }
@@ -168,6 +194,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
     matches: [],
     coins: 0,
     owned: {},
+    consumables: {},
     hydrated: false,
 
     hydrate: async () => {
@@ -218,6 +245,8 @@ export const useProfileStore = create<ProfileState>((set, get) => {
         matches,
         coins: profile?.coins ?? 0,
         owned: profile?.owned ?? {},
+        // Seed a small starter stash of hints/skips for first-time players.
+        consumables: profile?.consumables ?? { "consumable-hint": 3, "consumable-skip": 3 },
         // Only keep the row if it belongs to today, otherwise start fresh on demand.
         daily: daily && daily.date === today ? daily : null,
         hydrated: true,
@@ -256,7 +285,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
       set({
         xp: s.xp + xpAwarded,
         coins: s.coins + (m.outcome === "win" ? 15 : m.outcome === "draw" ? 5 : 0),
-        streak: nextStreak(s.lastActiveDate, s.streak, today),
+        streak: bumpStreak(s.lastActiveDate, s.streak, today),
         lastActiveDate: today,
         playRating: ratingAfter,
       });
@@ -273,7 +302,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
       if (completed[lessonId]) return false; // already done — never award twice
 
       const today = todayKey();
-      const newStreak = nextStreak(lastActiveDate, streak, today);
+      const newStreak = bumpStreak(lastActiveDate, streak, today);
       const newXp = xp + xpReward;
       const newCompleted: CompletedMap = { ...completed, [lessonId]: { stars, score: stars } };
 
@@ -300,7 +329,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
 
       const today = todayKey();
       const newXp = state.xp + xpAwarded;
-      const newStreak = xpAwarded > 0 ? nextStreak(state.lastActiveDate, state.streak, today) : state.streak;
+      const newStreak = xpAwarded > 0 ? bumpStreak(state.lastActiveDate, state.streak, today) : state.streak;
       const newLastActive = xpAwarded > 0 ? today : state.lastActiveDate;
 
       set({
@@ -359,7 +388,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
         set({
           xp: state.xp + xpAwarded,
           coins: state.coins + 50,
-          streak: nextStreak(state.lastActiveDate, state.streak, today),
+          streak: bumpStreak(state.lastActiveDate, state.streak, today),
           lastActiveDate: today,
           bossCleared: { ...state.bossCleared, [bossId]: true },
           bossResults: { ...state.bossResults, [bossId]: row },
@@ -389,7 +418,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
         daily: updated,
         xp: s.xp + DAILY_BONUS_XP,
         coins: s.coins + 25,
-        streak: nextStreak(s.lastActiveDate, s.streak, today),
+        streak: bumpStreak(s.lastActiveDate, s.streak, today),
         lastActiveDate: today,
       });
       await Promise.all([persistProfile(), saveDailyTraining(updated)]);
@@ -403,7 +432,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
       set({
         claimedRewards: { ...s.claimedRewards, [rewardId]: true },
         xp: s.xp + xp,
-        streak: nextStreak(s.lastActiveDate, s.streak, today),
+        streak: bumpStreak(s.lastActiveDate, s.streak, today),
         lastActiveDate: today,
       });
       await Promise.all([
@@ -423,6 +452,32 @@ export const useProfileStore = create<ProfileState>((set, get) => {
       const s = get();
       if (s.owned[id] || s.coins < price) return false;
       set({ coins: s.coins - price, owned: { ...s.owned, [id]: true } });
+      await persistProfile();
+      return true;
+    },
+
+    addConsumable: async (id, n) => {
+      if (!n) return;
+      const c = get().consumables;
+      set({ consumables: { ...c, [id]: Math.max(0, (c[id] ?? 0) + n) } });
+      await persistProfile();
+    },
+
+    consumeItem: async (id) => {
+      const c = get().consumables;
+      if ((c[id] ?? 0) <= 0) return false;
+      set({ consumables: { ...c, [id]: c[id] - 1 } });
+      await persistProfile();
+      return true;
+    },
+
+    buyConsumable: async (id, price, grant = 1) => {
+      const s = get();
+      if (s.coins < price) return false;
+      set({
+        coins: s.coins - price,
+        consumables: { ...s.consumables, [id]: (s.consumables[id] ?? 0) + grant },
+      });
       await persistProfile();
       return true;
     },

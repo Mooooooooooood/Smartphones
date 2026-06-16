@@ -37,3 +37,23 @@ export function nextStreak(prevDate: string | null, prevStreak: number, today: s
   const yesterday = todayKey(new Date(new Date(`${today}T00:00:00`).getTime() - DAY_MS));
   return prevDate === yesterday ? prevStreak + 1 : 1;
 }
+
+/**
+ * Streak after activity, honouring a Streak Freeze. If the normal rule would
+ * reset the streak (a day was missed) but the player holds a freeze AND there
+ * was an existing streak to protect, the freeze is consumed to continue the
+ * streak (+1) instead of resetting to 1.
+ */
+export function streakWithFreeze(
+  prevDate: string | null,
+  prevStreak: number,
+  hasFreeze: boolean,
+  today: string = todayKey(),
+): { streak: number; consumedFreeze: boolean } {
+  const normal = nextStreak(prevDate, prevStreak, today);
+  const wouldReset = normal === 1 && prevStreak > 0 && prevDate !== today && prevDate !== null;
+  if (wouldReset && hasFreeze) {
+    return { streak: prevStreak + 1, consumedFreeze: true };
+  }
+  return { streak: normal, consumedFreeze: false };
+}

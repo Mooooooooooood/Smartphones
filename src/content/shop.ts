@@ -16,6 +16,9 @@ export interface ShopItem {
   refId: string;
   label: string;
   price: number;
+  /** Consumables only: how many the purchase grants, and a one-line blurb. */
+  grant?: number;
+  desc?: string;
 }
 
 // --- Board skins (unchanged shape; the economy test asserts this) ---
@@ -39,6 +42,13 @@ export const COLOR_ITEMS: ShopItem[] = PLAYER_COLORS.filter((c) => c.price > 0).
   label: `${c.label} Tint`,
   price: c.price,
 }));
+
+// --- Consumables (count-based; repeatable; not in the owned set) ---
+export const CONSUMABLE_ITEMS: ShopItem[] = [
+  { id: "consumable-hint", kind: "consumable", refId: "hint", label: "Hint Tokens", price: 25, grant: 3, desc: "Reveal a puzzle hint. ×3" },
+  { id: "consumable-skip", kind: "consumable", refId: "skip", label: "Puzzle Skips", price: 20, grant: 3, desc: "Skip a puzzle without trying. ×3" },
+  { id: "consumable-freeze", kind: "consumable", refId: "freeze", label: "Streak Freeze", price: 70, grant: 1, desc: "Protects your streak if you miss a day." },
+];
 
 /** Pure purchase guard for owned-set items (mirrors the store's buyItem). */
 export function canBuy(coins: number, owned: Record<string, true>, item: ShopItem): boolean {

@@ -30,6 +30,8 @@ export interface ProfileRow {
   coins?: number;
   /** Owned cosmetic ids (Sprint 18). Optional for older rows. */
   owned?: Record<string, true>;
+  /** Consumable inventory counts (Sprint 21). Optional for older rows. */
+  consumables?: Record<string, number>;
   updatedAt: number;
 }
 

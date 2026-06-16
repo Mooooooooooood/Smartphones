@@ -89,6 +89,10 @@ export default function PuzzleScreen() {
   const nextPuzzle = usePuzzleStore((s) => s.nextPuzzle);
 
   const puzzleRating = useProfileStore((s) => s.puzzleRating);
+  const consumables = useProfileStore((s) => s.consumables);
+  const consume = useProfileStore((s) => s.consumeItem);
+  const hintCount = consumables["consumable-hint"] ?? 0;
+  const skipCount = consumables["consumable-skip"] ?? 0;
 
   const searchParams = useSearchParams();
   const themeParam = searchParams.get("theme");
@@ -203,9 +207,9 @@ export default function PuzzleScreen() {
         </Modal>
       ) : (
         <div className="grid grid-cols-3 gap-2">
-          <PixelButton onClick={showHint} disabled={hintShown} variant="secondary" size="sm">{hintShown ? "Hint ✓" : "Hint"}</PixelButton>
+          <PixelButton onClick={async () => { if (hintShown) return; if (await consume("consumable-hint")) showHint(); }} disabled={hintShown || hintCount <= 0} variant="secondary" size="sm">{hintShown ? "Hint ✓" : `Hint (${hintCount})`}</PixelButton>
           <PixelButton onClick={resetPuzzle} variant="secondary" size="sm">Reset</PixelButton>
-          <PixelButton onClick={nextPuzzle} variant="secondary" size="sm">Skip →</PixelButton>
+          <PixelButton onClick={async () => { if (await consume("consumable-skip")) nextPuzzle(); }} disabled={skipCount <= 0} variant="secondary" size="sm">{`Skip (${skipCount})`}</PixelButton>
         </div>
       )}
     </div>

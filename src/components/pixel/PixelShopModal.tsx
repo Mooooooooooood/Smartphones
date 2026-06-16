@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useProfileStore } from "@/state/profileStore";
-import { SHOP_ITEMS, COLOR_ITEMS, type ShopKind } from "@/content/shop";
+import { SHOP_ITEMS, COLOR_ITEMS, CONSUMABLE_ITEMS, type ShopKind } from "@/content/shop";
 import { BOARD_SKINS, useBoardSkinId, setBoardSkinId } from "@/lib/boardSkin";
 import { PLAYER_COLORS, usePlayerColor, setPlayerColor, type PlayerColorId } from "@/lib/playerColor";
 import { CoinIcon } from "@/components/pixel/PixelIcon";
@@ -11,6 +11,7 @@ import { fx } from "@/lib/feedback";
 const TABS: { kind: ShopKind; label: string }[] = [
   { kind: "board", label: "Boards" },
   { kind: "color", label: "Colors" },
+  { kind: "consumable", label: "Items" },
 ];
 
 /** Mini board-skin swatch preview. */
@@ -28,6 +29,8 @@ export default function PixelShopModal({ open, onClose }: { open: boolean; onClo
   const coins = useProfileStore((s) => s.coins);
   const owned = useProfileStore((s) => s.owned);
   const buyItem = useProfileStore((s) => s.buyItem);
+  const buyConsumable = useProfileStore((s) => s.buyConsumable);
+  const consumables = useProfileStore((s) => s.consumables);
   const equippedSkin = useBoardSkinId();
   const equippedColor = usePlayerColor();
   const [tab, setTab] = useState<ShopKind>("board");
@@ -99,6 +102,30 @@ export default function PixelShopModal({ open, onClose }: { open: boolean; onClo
                   />
                 );
               })}
+            </ul>
+          </div>
+        ) : null}
+
+        {tab === "consumable" ? (
+          <div className="px-panel px-3 py-3">
+            <p className="px-label text-[0.56rem] text-brass">Items</p>
+            <p className="mt-0.5 text-[0.6rem] text-muted2">Helpful boosts. Buy as many as you like.</p>
+            <ul className="mt-2 space-y-1.5">
+              {CONSUMABLE_ITEMS.map((item) => (
+                <li key={item.id} className="px-inset flex items-center gap-2.5 px-2.5 py-2">
+                  <span className="px-inset flex h-7 w-7 shrink-0 items-center justify-center text-[0.8rem]" aria-hidden>{item.refId === "hint" ? "💡" : item.refId === "skip" ? "⏭" : "❄"}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="px-label block truncate text-[0.6rem] text-cream">{item.label}</span>
+                    <span className="block truncate text-[0.48rem] text-muted2">{item.desc}</span>
+                  </span>
+                  <span className="px-label shrink-0 text-[0.5rem] text-muted2">×{consumables[item.id] ?? 0}</span>
+                  <button type="button" disabled={coins < item.price}
+                    onClick={async () => { const ok = await buyConsumable(item.id, item.price, item.grant ?? 1); if (ok) fx.chest(); }}
+                    className={`px-label flex shrink-0 items-center gap-1 rounded-[5px] border-2 border-[var(--px-edge)] px-2 py-1 text-[0.52rem] active:translate-y-0.5 ${coins >= item.price ? "bg-brass text-[color:var(--color-on-accent)]" : "bg-[var(--color-ink)] text-muted2 opacity-60"}`}>
+                    <CoinIcon size={11} />{item.price}
+                  </button>
+                </li>
+              ))}
             </ul>
           </div>
         ) : null}
