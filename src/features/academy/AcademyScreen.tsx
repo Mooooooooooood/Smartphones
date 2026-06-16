@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useProfileStore, academyStateFrom } from "@/state/profileStore";
 import { lessonsForTier, tierMeta } from "@/content/academy";
+import { tierTheme } from "@/content/academy/tierThemes";
 import {
   lessonStatus,
   bossStatus,
@@ -76,6 +77,7 @@ function TierWorld({
   });
   const pts = ANCHORS.slice(0, lessons.length).map((a) => `${a.l} ${100 - a.b}`);
   const pathD = `M ${pts.join(" L ")}`;
+  const theme = tierTheme(tier);
 
   return (
     <div className="w-full shrink-0 space-y-2 px-0.5">
@@ -101,7 +103,7 @@ function TierWorld({
 
       {/* Map */}
       <PixelPanel hue={unlocked ? "green" : "purple"} className="relative overflow-hidden p-0">
-        <div className={`relative h-[560px] w-full ${unlocked ? "" : "opacity-60 grayscale"}`} style={{ background: "linear-gradient(180deg, #8ed0e8 0%, #6fb8d8 9%, #62c47e 20%, #4aa863 48%, #34904f 78%, #277a40 100%)" }}>
+        <div className={`relative h-[560px] w-full ${unlocked ? "" : "opacity-60 grayscale"}`} style={{ background: theme.sky }}>
           {/* distant sky decor */}
           <CastleFar size={86} className="absolute left-1/2 top-2 -translate-x-1/2 opacity-90" />
           <Cloud className="absolute left-3 top-4 tab-drift" scale={0.8} />
@@ -122,11 +124,11 @@ function TierWorld({
           <Flower className="absolute" style={{ right: "20%", bottom: "12%" }} size={14} petal="#ffd24a" />
           <Flower className="absolute" style={{ left: "60%", bottom: "8%" }} size={13} petal="#b48cff" />
           {/* pond */}
-          <div className="absolute" style={{ right: "6%", bottom: "32%", width: 50, height: 26, background: "radial-gradient(circle at 40% 35%, #8fd6ef, #2f7fb0)", borderRadius: "50%", border: "2px solid #1f5a82" }} aria-hidden />
+          <div className="absolute" style={{ right: "6%", bottom: "32%", width: 50, height: 26, background: theme.pond, borderRadius: "50%", border: `2px solid ${theme.pondBorder}` }} aria-hidden />
 
           <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
-            <path d={pathD} fill="none" stroke="#c9a35f" strokeWidth={5} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-            <path d={pathD} fill="none" stroke="#e8c98a" strokeWidth={5} strokeLinejoin="round" strokeLinecap="round" strokeDasharray="0.1 9" vectorEffect="non-scaling-stroke" />
+            <path d={pathD} fill="none" stroke={theme.pathStroke} strokeWidth={5} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+            <path d={pathD} fill="none" stroke={theme.pathDash} strokeWidth={5} strokeLinejoin="round" strokeLinecap="round" strokeDasharray="0.1 9" vectorEffect="non-scaling-stroke" />
           </svg>
 
           {/* Final trial */}
