@@ -109,7 +109,108 @@ export const TIER1_BOSS: BossChallenge = {
   ],
 };
 
-export const BOSSES: BossChallenge[] = [TIER0_BOSS, TIER1_BOSS];
+/** Tier 2 Trial — five positional questions. Pass 4/5. */
+export const TIER2_BOSS: BossChallenge = {
+  id: "tier-2",
+  tier: 2,
+  title: "Tier 2 Trial",
+  subtitle: "Prove your Strategy",
+  passScore: 4,
+  xpReward: 250,
+  concepts: ["The Centre", "Development", "King Safety", "Open Files", "Pawn Weaknesses"],
+  questions: [
+    {
+      question: "Why is controlling the centre so important?",
+      choices: [
+        "Central pieces and pawns control more of the board",
+        "It is required by the rules",
+        "It immediately wins material",
+        "Edges are dangerous",
+      ],
+      correctIndex: 0,
+    },
+    {
+      question: "In the opening you should…",
+      choices: [
+        "Move only pawns",
+        "Develop a new knight or bishop toward the centre each move",
+        "Bring the queen out at once",
+        "March the king up",
+      ],
+      correctIndex: 1,
+    },
+    {
+      question: "Castling early is good because it…",
+      choices: ["wins a pawn", "gets the king safe and connects the rooks", "promotes a pawn", "is forced"],
+      correctIndex: 1,
+    },
+    {
+      question: "A rook is strongest on…",
+      choices: ["a file blocked by its own pawns", "an open file", "the first rank forever", "the a-file only"],
+      correctIndex: 1,
+    },
+    {
+      question: "An isolated pawn is one that…",
+      choices: [
+        "has no friendly pawn on either neighbouring file",
+        "is about to promote",
+        "sits on the edge",
+        "is defended by a rook",
+      ],
+      correctIndex: 0,
+    },
+  ],
+};
+
+/** Tier 3 Trial — five endgame questions. Pass 4/5. */
+export const TIER3_BOSS: BossChallenge = {
+  id: "tier-3",
+  tier: 3,
+  title: "Tier 3 Trial",
+  subtitle: "Prove your Endgames",
+  passScore: 4,
+  xpReward: 300,
+  concepts: ["King Activity", "Opposition", "Rule of the Square", "King & Pawn", "Basic Mates"],
+  questions: [
+    {
+      question: "In an endgame, your king should be…",
+      choices: ["hidden in the corner", "centralised and active", "traded off", "left on the back rank"],
+      correctIndex: 1,
+    },
+    {
+      question: "You hold the opposition when…",
+      choices: [
+        "the kings are one square apart and it's your opponent to move",
+        "your king is in check",
+        "you have more pawns",
+        "your king is on the edge",
+      ],
+      correctIndex: 0,
+    },
+    {
+      question: "The rule of the square tells you whether…",
+      choices: ["a king can catch a passed pawn", "you may castle", "a pawn is isolated", "a bishop is bad"],
+      correctIndex: 0,
+    },
+    {
+      question: "When escorting a passed pawn, your king belongs…",
+      choices: ["behind the pawn", "in front of the pawn, leading it", "in the corner", "anywhere"],
+      correctIndex: 1,
+    },
+    {
+      question: "To checkmate with king and queen, you must…",
+      choices: [
+        "use the queen alone",
+        "bring your king up to support the queen",
+        "give checks forever",
+        "promote a second pawn",
+      ],
+      correctIndex: 1,
+    },
+  ],
+};
+
+export const BOSSES: BossChallenge[] = [TIER0_BOSS, TIER1_BOSS, TIER2_BOSS, TIER3_BOSS];
 
 export function bossById(id: string): BossChallenge | undefined {
   return BOSSES.find((b) => b.id === id);

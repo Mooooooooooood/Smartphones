@@ -25,7 +25,7 @@ import RewardModal from "@/components/ui/RewardModal";
 
 const MID_REWARD_ID = "tier0-mid";
 const MID_REWARD_XP = 40;
-const TIERS = [0, 1];
+const TIERS = [0, 1, 2, 3];
 
 const ANCHORS = [
   { l: 50, b: 4 }, { l: 27, b: 15 }, { l: 70, b: 24 }, { l: 31, b: 35 },

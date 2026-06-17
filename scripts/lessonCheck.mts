@@ -7,7 +7,7 @@
  * Run with:  npm run test:lessons
  */
 import { Chess } from "chess.js";
-import { TIER0_LESSONS } from "../src/content/academy/tier0.ts";
+import { ALL_LESSONS } from "../src/content/academy/index.ts";
 import {
   hasBoardInteraction,
   isMoveCorrect,
@@ -15,6 +15,15 @@ import {
   type LessonStep,
   type MakeMoveStep,
 } from "../src/domain/academy/lessonSteps.ts";
+
+/** Lessons whose make-move is claimed to be checkmate — verified below. */
+const MATE_LESSONS = new Set([
+  "checkmate",
+  "t1-removing-the-defender",
+  "t1-mate-in-one",
+  "t3-queen-mate",
+  "t3-rook-mate",
+]);
 
 let pass = 0;
 let fail = 0;
@@ -38,10 +47,15 @@ function firstUci(step: MakeMoveStep): string {
   return Array.isArray(step.correctUci) ? step.correctUci[0] : step.correctUci;
 }
 
-for (const lesson of TIER0_LESSONS) {
+for (const lesson of ALL_LESSONS) {
   const steps = lesson.steps ?? [];
   ok(`${lesson.id}: has steps`, steps.length > 0);
+  ok(`${lesson.id}: opens with an intro`, steps[0]?.type === "intro");
   ok(`${lesson.id}: has a board interaction`, hasBoardInteraction(steps as LessonStep[]));
+  ok(
+    `${lesson.id}: ends with a checkpoint`,
+    ["multiple-choice", "true-false"].includes(steps[steps.length - 1]?.type),
+  );
 
   for (const step of steps as LessonStep[]) {
     if (step.type === "board-demo" || step.type === "tap-square" || step.type === "tap-piece" || step.type === "make-move") {
@@ -93,10 +107,10 @@ for (const lesson of TIER0_LESSONS) {
         ok(`${lesson.id}: validator accepts from-to`, isMoveCorrect(step, from + to));
 
         // lesson-specific outcomes
-        if (lesson.id === "checkmate") ok("checkmate: move is mate", game.isCheckmate());
-        if (lesson.id === "promotion") {
+        if (MATE_LESSONS.has(lesson.id)) ok(`${lesson.id}: move is checkmate`, game.isCheckmate());
+        if (lesson.id === "promotion" || lesson.id === "t3-promotion") {
           const piece = game.get(to as never);
-          ok("promotion: a queen now stands on the last rank", piece?.type === "q");
+          ok(`${lesson.id}: a queen now stands on the last rank`, piece?.type === "q");
         }
       }
     }

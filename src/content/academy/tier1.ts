@@ -28,6 +28,15 @@ export const TIER1_LESSONS: Lesson[] = [
     },
     xpReward: 60,
     relatedPuzzleTheme: "undefended-capture",
+    fen: "4k3/8/2n5/3q4/5r2/8/8/4K3 w - - 0 1",
+    boardCaption: "Queen 9, rook 5, knight 3 — the queen is the prize.",
+    guide: "queen",
+    steps: [
+      { type: "intro", guide: "queen", title: "What's it worth?", text: "Vera here. Before you can win material you must know its worth: pawn 1, knight and bishop 3, rook 5 — and me, the queen, a mighty 9." },
+      { type: "board-demo", fen: "4k3/8/2n5/3q4/5r2/8/8/4K3 w - - 0 1", highlights: ["c6", "d5", "f4"], prompt: "Rank these three pieces by value.", caption: "Knight 3, rook 5, queen 9 — the queen is worth the most.", guide: "queen" },
+      { type: "tap-piece", fen: "4k3/8/2n5/3q4/5r2/8/8/4K3 w - - 0 1", prompt: "Tap the most valuable piece on the board.", targets: ["d5"], successText: "The queen — nine points, the strongest piece.", hint: "Worth more than a rook or a knight.", guide: "queen" },
+      { type: "multiple-choice", prompt: "You can take a rook but lose your bishop doing so. Is that a good trade?", choices: ["No, never trade", "Yes — 5 for 3 wins material", "Only if you are losing", "It is an even trade"], correctIndex: 1, successText: "Right — 5 for 3 wins the exchange.", guide: "queen" },
+    ],
   },
   {
     id: "t1-hanging-pieces",
@@ -182,6 +191,13 @@ export const TIER1_LESSONS: Lesson[] = [
     fen: "4k3/4n3/3P4/8/8/8/8/4R1K1 w - - 0 1",
     boardCaption: "The e7-knight is pinned by the rook — dxe7 wins it.",
     relatedPuzzleTheme: "pin",
+    guide: "rook",
+    steps: [
+      { type: "intro", guide: "rook", title: "Frozen in place", text: "Bramble here. A pinned piece can't move — stepping aside would expose something more valuable behind it. So pile on and win it." },
+      { type: "board-demo", fen: "4k3/4n3/3P4/8/8/8/8/4R1K1 w - - 0 1", highlights: ["e1", "e7", "e8"], prompt: "The rook stares down the e-file: knight, then king.", caption: "The e7 knight is pinned to its king — it legally cannot move.", guide: "rook" },
+      { type: "make-move", fen: "4k3/4n3/3P4/8/8/8/8/4R1K1 w - - 0 1", correctUci: "d6e7", prompt: "The knight can't run. Win it — capture with your pawn!", successText: "dxe7! The pinned knight had no escape.", failureText: "Capture the pinned knight with your d6 pawn.", hint: "Pawn d6 takes e7.", guide: "rook" },
+      { type: "multiple-choice", prompt: "A knight is pinned to its king. What can you do?", choices: ["Nothing, pins are harmless", "Attack the knight again to win it", "The knight can still jump away", "Only give check"], correctIndex: 1, successText: "Right — pile onto a pinned piece and win it.", guide: "rook" },
+    ],
   },
   {
     id: "t1-skewers",
@@ -210,6 +226,13 @@ export const TIER1_LESSONS: Lesson[] = [
     fen: "3q4/8/8/8/3k4/8/8/R5K1 w - - 0 1",
     boardCaption: "Rd1+ skewers the king to the queen behind it.",
     relatedPuzzleTheme: "skewer",
+    guide: "queen",
+    steps: [
+      { type: "intro", guide: "queen", title: "The pin, reversed", text: "Vera here. A skewer hits the valuable piece in front. It must move — and you snap up whatever was hiding behind it." },
+      { type: "board-demo", fen: "3q4/8/8/8/3k4/8/8/R5K1 w - - 0 1", highlights: ["d4", "d8"], prompt: "King in front, queen behind — both on the d-file.", caption: "Check the king and it must step aside, exposing the queen.", guide: "queen" },
+      { type: "make-move", fen: "3q4/8/8/8/3k4/8/8/R5K1 w - - 0 1", correctUci: "a1d1", prompt: "Skewer the king to the queen — check down the d-file!", successText: "Rd1+! The king moves and the queen drops.", failureText: "Put your rook on the d-file with check.", hint: "Rook a1 to d1.", guide: "queen" },
+      { type: "multiple-choice", prompt: "How does a skewer differ from a pin?", choices: ["It only uses knights", "The more valuable piece is in front and must move", "It never gives check", "There is no difference"], correctIndex: 1, successText: "Exactly — valuable piece in front, forced to move.", guide: "queen" },
+    ],
   },
   {
     id: "t1-discovered-attacks",
@@ -238,6 +261,13 @@ export const TIER1_LESSONS: Lesson[] = [
     fen: "2q1k3/8/8/8/4N3/8/8/4R1K1 w - - 0 1",
     boardCaption: "Nd6+ is a discovered double check — then Nxc8 wins the queen.",
     relatedPuzzleTheme: "discovered-attack",
+    guide: "knight",
+    steps: [
+      { type: "intro", guide: "knight", title: "Move one, unleash another", text: "Gallop! Slide one piece away and the piece behind it springs to life. Do both at once and the opponent can't answer everything." },
+      { type: "board-demo", fen: "2q1k3/8/8/8/4N3/8/8/4R1K1 w - - 0 1", highlights: ["e1", "e4", "e8"], prompt: "The rook hides behind the knight on the e-file.", caption: "Jump the knight away and the rook's attack is revealed.", guide: "knight" },
+      { type: "make-move", fen: "2q1k3/8/8/8/4N3/8/8/4R1K1 w - - 0 1", correctUci: "e4d6", prompt: "Leap the knight away with check — and discover the rook!", successText: "Nd6+! Double check — the king must move, then Nxc8 wins the queen.", failureText: "Find the knight jump that checks AND uncovers the rook.", hint: "Knight e4 to d6.", guide: "knight" },
+      { type: "multiple-choice", prompt: "What powers a discovered attack?", choices: ["A piece moving aside to reveal another's attack", "Castling", "Promoting a pawn", "A pin"], correctIndex: 0, successText: "Right — one move, two attackers.", guide: "knight" },
+    ],
   },
   {
     id: "t1-removing-the-defender",
@@ -266,6 +296,13 @@ export const TIER1_LESSONS: Lesson[] = [
     fen: "3r2k1/5ppp/8/8/8/8/8/3R2K1 w - - 0 1",
     boardCaption: "Rxd8# removes the lone defender and mates.",
     relatedPuzzleTheme: "remove-defender",
+    guide: "rook",
+    steps: [
+      { type: "intro", guide: "rook", title: "Take out the guard", text: "Bramble again. One defender often holds everything together. Remove it and the prize it protected simply falls." },
+      { type: "board-demo", fen: "3r2k1/5ppp/8/8/8/8/8/3R2K1 w - - 0 1", highlights: ["d8"], prompt: "What is the only thing guarding Black's back rank?", caption: "The d8 rook is the lone defender — trade it off.", guide: "rook" },
+      { type: "make-move", fen: "3r2k1/5ppp/8/8/8/8/8/3R2K1 w - - 0 1", correctUci: "d1d8", prompt: "Remove the defender — capture the rook on d8!", successText: "Rxd8#! With the guard gone, it's mate.", failureText: "Capture the defending rook on d8.", hint: "Rook d1 takes d8.", guide: "rook" },
+      { type: "multiple-choice", prompt: "A rook is the only piece guarding the back rank. What is the plan?", choices: ["Ignore it", "Remove or trade that rook, then mate", "Offer a draw", "Push a pawn"], correctIndex: 1, successText: "Remove the defender — then strike.", guide: "rook" },
+    ],
   },
   {
     id: "t1-mate-in-one",
@@ -294,5 +331,12 @@ export const TIER1_LESSONS: Lesson[] = [
     fen: "6k1/5ppp/8/8/8/8/8/R5K1 w - - 0 1",
     boardCaption: "Ra8# — the king is trapped by its own pawns.",
     relatedPuzzleTheme: "mate-in-1",
+    guide: "king",
+    steps: [
+      { type: "intro", guide: "king", title: "The finishing blow", text: "Cassius here. Every tactic aims at this moment: a check the king cannot escape, block, or capture. Find mate in one." },
+      { type: "board-demo", fen: "6k1/5ppp/8/8/8/8/8/R5K1 w - - 0 1", highlights: ["g8", "f7", "g7", "h7"], prompt: "Where can the black king run?", caption: "Boxed in by its own pawns — the back rank is the weakness.", guide: "king" },
+      { type: "make-move", fen: "6k1/5ppp/8/8/8/8/8/R5K1 w - - 0 1", correctUci: "a1a8", prompt: "Deliver mate — rook to the back rank!", successText: "Ra8#! The king's own pawns seal its fate.", failureText: "Strike the 8th rank where the king is trapped.", hint: "Rook a1 all the way to a8.", guide: "king" },
+      { type: "multiple-choice", prompt: "What defines checkmate?", choices: ["The king is in check with no legal move", "The queen is captured", "A pawn promotes", "The king is in the centre"], correctIndex: 0, successText: "In check with no escape — game over!", guide: "king" },
+    ],
   },
 ];
