@@ -24,8 +24,8 @@ export const TIER3_LESSONS: Lesson[] = [
     ],
     quiz: {
       question: "How should you use your king in an endgame?",
-      choices: ["Keep it in the corner", "Centralise it and use it to fight", "Never move it", "Trade it off"],
-      correctIndex: 1,
+      choices: ["Keep it in the corner", "Trade it off", "Never move it", "Centralise it and use it to fight"],
+      correctIndex: 3,
     },
     xpReward: 80,
     fen: "8/4k3/8/8/8/8/4K3/8 w - - 0 1",
@@ -35,7 +35,7 @@ export const TIER3_LESSONS: Lesson[] = [
       { type: "intro", guide: "king", title: "Time to lead", text: "Cassius here. In the endgame I stop hiding and start fighting. Bring your king out — it's one of your strongest pieces now." },
       { type: "board-demo", fen: "8/4k3/8/8/8/8/4K3/8 w - - 0 1", highlights: ["e2", "e4", "e5"], prompt: "Almost nothing left on the board.", caption: "No danger to the king — so march it up toward the centre.", guide: "king" },
       { type: "make-move", fen: "8/4k3/8/8/8/8/4K3/8 w - - 0 1", correctUci: "e2e3", prompt: "Step the king toward the centre.", successText: "The king strides forward — exactly right in an endgame.", failureText: "Advance your king up the board (e2 to e3).", hint: "King e2 to e3.", guide: "king" },
-      { type: "multiple-choice", prompt: "How should you use your king in an endgame?", choices: ["Keep it in the corner", "Centralise it and use it to fight", "Never move it", "Trade it off"], correctIndex: 1, successText: "An active king wins endgames.", guide: "king" },
+      { type: "multiple-choice", prompt: "How should you use your king in an endgame?", choices: ["Centralise it and use it to fight", "Keep it in the corner", "Never move it", "Trade it off"], correctIndex: 0, successText: "An active king wins endgames.", guide: "king" },
     ],
   },
   {
@@ -53,8 +53,8 @@ export const TIER3_LESSONS: Lesson[] = [
     ],
     quiz: {
       question: "You 'have the opposition' when…",
-      choices: ["Your king is on the edge", "The kings are one square apart and it's your opponent to move", "You have more pawns", "Your king is in check"],
-      correctIndex: 1,
+      choices: ["Your king is on the edge", "You have more pawns", "The kings are one square apart and it's your opponent to move", "Your king is in check"],
+      correctIndex: 2,
     },
     xpReward: 80,
     fen: "8/3k4/8/8/8/3K4/8/8 w - - 0 1",
@@ -82,8 +82,8 @@ export const TIER3_LESSONS: Lesson[] = [
     ],
     quiz: {
       question: "The rule of the square tells you…",
-      choices: ["Which pawn to promote", "Whether a king can catch a passed pawn", "How to castle", "The value of a rook"],
-      correctIndex: 1,
+      choices: ["Which pawn to promote", "The value of a rook", "How to castle", "Whether a king can catch a passed pawn"],
+      correctIndex: 3,
     },
     xpReward: 80,
     fen: "8/8/8/8/7P/8/8/k6K w - - 0 1",
@@ -93,7 +93,7 @@ export const TIER3_LESSONS: Lesson[] = [
       { type: "intro", guide: "pawn", title: "A pawn's footrace", text: "Pip here! When my pawn pal makes a run for it, the square trick tells you instantly if the king can catch it. Spoiler: often it can't." },
       { type: "board-demo", fen: "8/8/8/8/7P/8/8/k6K w - - 0 1", highlights: ["h4", "h8", "a1"], prompt: "The pawn runs up the h-file; the king is stuck on a1.", caption: "The king is far outside the pawn's square — the pawn will queen.", guide: "pawn" },
       { type: "tap-square", fen: "8/8/8/8/7P/8/8/k6K w - - 0 1", prompt: "Tap the square the running pawn is racing to.", targets: ["h8"], successText: "h8 — the promotion square the king can't reach in time.", hint: "Follow the h-pawn straight up to the last rank.", guide: "pawn" },
-      { type: "multiple-choice", prompt: "The rule of the square tells you…", choices: ["Which pawn to promote", "Whether a king can catch a passed pawn", "How to castle", "The value of a rook"], correctIndex: 1, successText: "Catch it or queen it — the square decides.", guide: "pawn" },
+      { type: "multiple-choice", prompt: "The rule of the square tells you…", choices: ["Whether a king can catch a passed pawn", "Which pawn to promote", "How to castle", "The value of a rook"], correctIndex: 0, successText: "Catch it or queen it — the square decides.", guide: "pawn" },
     ],
   },
   {
@@ -111,8 +111,8 @@ export const TIER3_LESSONS: Lesson[] = [
     ],
     quiz: {
       question: "In a king-and-pawn ending, your king should be…",
-      choices: ["Behind the pawn", "In front of the pawn, leading it", "In the corner", "Anywhere — it doesn't matter"],
-      correctIndex: 1,
+      choices: ["Behind the pawn", "In the corner", "In front of the pawn, leading it", "Anywhere — it doesn't matter"],
+      correctIndex: 2,
     },
     xpReward: 80,
     fen: "8/8/8/3k4/8/3P4/3K4/8 w - - 0 1",
@@ -140,8 +140,8 @@ export const TIER3_LESSONS: Lesson[] = [
     ],
     quiz: {
       question: "A pawn reaching the last rank usually becomes a…",
-      choices: ["Second king", "Queen", "Pawn again", "Bishop"],
-      correctIndex: 1,
+      choices: ["Second king", "Bishop", "Pawn again", "Queen"],
+      correctIndex: 3,
     },
     xpReward: 80,
     fen: "8/2P5/8/8/8/8/k7/6K1 w - - 0 1",
@@ -151,7 +151,7 @@ export const TIER3_LESSONS: Lesson[] = [
       { type: "intro", guide: "queen", title: "A new queen is born", text: "Vera here. March that brave pawn to the end of the board and crown it — preferably into a queen like me." },
       { type: "board-demo", fen: "8/2P5/8/8/8/8/k7/6K1 w - - 0 1", highlights: ["c7", "c8"], prompt: "One step to glory.", caption: "Reaching c8, the pawn must become a new piece.", guide: "queen" },
       { type: "make-move", fen: "8/2P5/8/8/8/8/k7/6K1 w - - 0 1", correctUci: "c7c8q", prompt: "Promote the pawn to a queen!", successText: "c8=Q! A brand-new queen.", failureText: "Push the c7 pawn to c8 and make it a queen.", hint: "Pawn c7 to c8.", guide: "queen" },
-      { type: "multiple-choice", prompt: "A pawn reaching the last rank usually becomes a…", choices: ["Second king", "Queen", "Pawn again", "Bishop"], correctIndex: 1, successText: "A queen — the strongest choice.", guide: "queen" },
+      { type: "multiple-choice", prompt: "A pawn reaching the last rank usually becomes a…", choices: ["Queen", "Second king", "Pawn again", "Bishop"], correctIndex: 0, successText: "A queen — the strongest choice.", guide: "queen" },
     ],
   },
   {
@@ -169,8 +169,8 @@ export const TIER3_LESSONS: Lesson[] = [
     ],
     quiz: {
       question: "To mate with king and queen, you must…",
-      choices: ["Only use the queen", "Bring your king up to support the queen", "Give checks forever", "Promote another pawn"],
-      correctIndex: 1,
+      choices: ["Only use the queen", "Give checks forever", "Bring your king up to support the queen", "Promote another pawn"],
+      correctIndex: 2,
     },
     xpReward: 90,
     fen: "k7/8/1QK5/8/8/8/8/8 w - - 0 1",
@@ -198,8 +198,8 @@ export const TIER3_LESSONS: Lesson[] = [
     ],
     quiz: {
       question: "Mating with king and rook relies on…",
-      choices: ["The rook alone", "Your king controlling the escape squares while the rook checks", "Endless checks", "A second rook"],
-      correctIndex: 1,
+      choices: ["The rook alone", "A second rook", "Endless checks", "Your king controlling the escape squares while the rook checks"],
+      correctIndex: 3,
     },
     xpReward: 90,
     fen: "7k/R7/6K1/8/8/8/8/8 w - - 0 1",
@@ -209,7 +209,7 @@ export const TIER3_LESSONS: Lesson[] = [
       { type: "intro", guide: "rook", title: "The ladder mate", text: "Bramble here. King and rook is a team effort: my king takes away the escapes, then the rook slams down for mate along the edge." },
       { type: "board-demo", fen: "7k/R7/6K1/8/8/8/8/8 w - - 0 1", highlights: ["h8", "g7", "h7"], prompt: "Your king already guards g7 and h7.", caption: "All escapes are covered — the rook delivers mate on the 8th rank.", guide: "rook" },
       { type: "make-move", fen: "7k/R7/6K1/8/8/8/8/8 w - - 0 1", correctUci: "a7a8", prompt: "Deliver mate — rook to the back rank!", successText: "Ra8#! The king has no escape — a clean rook mate.", failureText: "Check along the 8th rank where the king can't escape.", hint: "Rook a7 to a8.", guide: "rook" },
-      { type: "multiple-choice", prompt: "Mating with king and rook relies on…", choices: ["The rook alone", "Your king controlling the escape squares while the rook checks", "Endless checks", "A second rook"], correctIndex: 1, successText: "Teamwork — king and rook together.", guide: "rook" },
+      { type: "multiple-choice", prompt: "Mating with king and rook relies on…", choices: ["Your king controlling the escape squares while the rook checks", "The rook alone", "Endless checks", "A second rook"], correctIndex: 0, successText: "Teamwork — king and rook together.", guide: "rook" },
     ],
   },
 ];

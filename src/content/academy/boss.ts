@@ -37,11 +37,11 @@ export const TIER0_BOSS: BossChallenge = {
       question: "When your king is in check, what must you do?",
       choices: [
         "Castle immediately",
-        "Get out of check this move",
-        "Offer a draw",
         "Promote a pawn",
+        "Offer a draw",
+        "Get out of check this move",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
     },
     {
       question: "Castling is illegal when…",
@@ -78,18 +78,18 @@ export const TIER1_BOSS: BossChallenge = {
   questions: [
     {
       question: "An enemy bishop sits on a square no piece defends. What is it?",
-      choices: ["Pinned", "Hanging — take it for free", "Skewered", "Protected"],
-      correctIndex: 1,
-    },
-    {
-      question: "A knight attacks the king and queen at once. This tactic is a…",
-      choices: ["Pin", "Skewer", "Fork", "Zwischenzug"],
+      choices: ["Pinned", "Skewered", "Hanging — take it for free", "Protected"],
       correctIndex: 2,
     },
     {
+      question: "A knight attacks the king and queen at once. This tactic is a…",
+      choices: ["Pin", "Skewer", "Zwischenzug", "Fork"],
+      correctIndex: 3,
+    },
+    {
       question: "A knight can't move because its king would be exposed. It is…",
-      choices: ["Forked", "Absolutely pinned", "Hanging", "Skewered"],
-      correctIndex: 1,
+      choices: ["Absolutely pinned", "Forked", "Hanging", "Skewered"],
+      correctIndex: 0,
     },
     {
       question: "You check the king along a file; it steps aside and you grab the rook behind it. That's a…",
@@ -99,12 +99,12 @@ export const TIER1_BOSS: BossChallenge = {
     {
       question: "Checkmate in one means…",
       choices: [
-        "a check the king cannot escape, block, or capture",
-        "winning the queen",
         "any check",
+        "winning the queen",
+        "a check the king cannot escape, block, or capture",
         "promoting a pawn",
       ],
-      correctIndex: 0,
+      correctIndex: 2,
     },
   ],
 };
@@ -122,22 +122,22 @@ export const TIER2_BOSS: BossChallenge = {
     {
       question: "Why is controlling the centre so important?",
       choices: [
-        "Central pieces and pawns control more of the board",
+        "Edges are dangerous",
         "It is required by the rules",
         "It immediately wins material",
-        "Edges are dangerous",
+        "Central pieces and pawns control more of the board",
       ],
-      correctIndex: 0,
+      correctIndex: 3,
     },
     {
       question: "In the opening you should…",
       choices: [
-        "Move only pawns",
         "Develop a new knight or bishop toward the centre each move",
+        "Move only pawns",
         "Bring the queen out at once",
         "March the king up",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
     },
     {
       question: "Castling early is good because it…",
@@ -146,18 +146,18 @@ export const TIER2_BOSS: BossChallenge = {
     },
     {
       question: "A rook is strongest on…",
-      choices: ["a file blocked by its own pawns", "an open file", "the first rank forever", "the a-file only"],
-      correctIndex: 1,
+      choices: ["a file blocked by its own pawns", "the first rank forever", "an open file", "the a-file only"],
+      correctIndex: 2,
     },
     {
       question: "An isolated pawn is one that…",
       choices: [
-        "has no friendly pawn on either neighbouring file",
+        "is defended by a rook",
         "is about to promote",
         "sits on the edge",
-        "is defended by a rook",
+        "has no friendly pawn on either neighbouring file",
       ],
-      correctIndex: 0,
+      correctIndex: 3,
     },
   ],
 };
@@ -174,38 +174,38 @@ export const TIER3_BOSS: BossChallenge = {
   questions: [
     {
       question: "In an endgame, your king should be…",
-      choices: ["hidden in the corner", "centralised and active", "traded off", "left on the back rank"],
-      correctIndex: 1,
+      choices: ["centralised and active", "hidden in the corner", "traded off", "left on the back rank"],
+      correctIndex: 0,
     },
     {
       question: "You hold the opposition when…",
       choices: [
-        "the kings are one square apart and it's your opponent to move",
         "your king is in check",
+        "the kings are one square apart and it's your opponent to move",
         "you have more pawns",
         "your king is on the edge",
       ],
-      correctIndex: 0,
+      correctIndex: 1,
     },
     {
       question: "The rule of the square tells you whether…",
-      choices: ["a king can catch a passed pawn", "you may castle", "a pawn is isolated", "a bishop is bad"],
-      correctIndex: 0,
+      choices: ["a pawn is isolated", "you may castle", "a king can catch a passed pawn", "a bishop is bad"],
+      correctIndex: 2,
     },
     {
       question: "When escorting a passed pawn, your king belongs…",
-      choices: ["behind the pawn", "in front of the pawn, leading it", "in the corner", "anywhere"],
-      correctIndex: 1,
+      choices: ["behind the pawn", "anywhere", "in the corner", "in front of the pawn, leading it"],
+      correctIndex: 3,
     },
     {
       question: "To checkmate with king and queen, you must…",
       choices: [
-        "use the queen alone",
         "bring your king up to support the queen",
+        "use the queen alone",
         "give checks forever",
         "promote a second pawn",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
     },
   ],
 };

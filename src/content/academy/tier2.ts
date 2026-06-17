@@ -24,8 +24,8 @@ export const TIER2_LESSONS: Lesson[] = [
     ],
     quiz: {
       question: "Why fight for the centre?",
-      choices: ["It looks nice", "Central pieces and pawns control more of the board", "It wins material instantly", "It is required by the rules"],
-      correctIndex: 1,
+      choices: ["It looks nice", "It wins material instantly", "Central pieces and pawns control more of the board", "It is required by the rules"],
+      correctIndex: 2,
     },
     xpReward: 70,
     fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
@@ -53,8 +53,8 @@ export const TIER2_LESSONS: Lesson[] = [
     ],
     quiz: {
       question: "Good opening development means…",
-      choices: ["Moving pawns only", "Bringing knights and bishops out toward the centre", "Marching the king up", "Trading every piece"],
-      correctIndex: 1,
+      choices: ["Moving pawns only", "Trading every piece", "Marching the king up", "Bringing knights and bishops out toward the centre"],
+      correctIndex: 3,
     },
     xpReward: 70,
     fen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
@@ -64,7 +64,7 @@ export const TIER2_LESSONS: Lesson[] = [
       { type: "intro", guide: "bishop", title: "Wake your army", text: "Bea here. Pawns alone can't win — bring your knights and bishops out to fight. A knight toward the centre is a great first developer." },
       { type: "board-demo", fen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2", highlights: ["g1", "f3", "e5"], prompt: "The g1 knight wants an active square.", caption: "Nf3 develops a piece AND attacks the e5 pawn.", guide: "bishop" },
       { type: "make-move", fen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2", correctUci: "g1f3", prompt: "Develop your knight to its best square.", successText: "Nf3! Developed and attacking e5.", failureText: "Bring the g1 knight out to f3.", hint: "Knight g1 to f3.", guide: "bishop" },
-      { type: "multiple-choice", prompt: "Good opening development means…", choices: ["Moving pawns only", "Bringing knights and bishops out toward the centre", "Marching the king up", "Trading every piece"], correctIndex: 1, successText: "Exactly — get your pieces into the game.", guide: "bishop" },
+      { type: "multiple-choice", prompt: "Good opening development means…", choices: ["Bringing knights and bishops out toward the centre", "Moving pawns only", "Marching the king up", "Trading every piece"], correctIndex: 0, successText: "Exactly — get your pieces into the game.", guide: "bishop" },
     ],
   },
   {
@@ -82,8 +82,8 @@ export const TIER2_LESSONS: Lesson[] = [
     ],
     quiz: {
       question: "Why castle early?",
-      choices: ["To win a pawn", "To get the king safe and connect the rooks", "It is the only legal move", "To promote faster"],
-      correctIndex: 1,
+      choices: ["To win a pawn", "It is the only legal move", "To get the king safe and connect the rooks", "To promote faster"],
+      correctIndex: 2,
     },
     xpReward: 70,
     fen: "rnbqk2r/pppp1ppp/5n2/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 1",
@@ -111,8 +111,8 @@ export const TIER2_LESSONS: Lesson[] = [
     ],
     quiz: {
       question: "Where is a rook strongest?",
-      choices: ["Behind its own pawns", "On an open file", "In the corner all game", "Next to the king"],
-      correctIndex: 1,
+      choices: ["Behind its own pawns", "Next to the king", "In the corner all game", "On an open file"],
+      correctIndex: 3,
     },
     xpReward: 70,
     fen: "4r1k1/ppp2ppp/8/8/8/8/PPP2PPP/R5K1 w - - 0 1",
@@ -122,7 +122,7 @@ export const TIER2_LESSONS: Lesson[] = [
       { type: "intro", guide: "rook", title: "Give your rook a highway", text: "Bramble again. Rooks hate being hemmed in. Find a file with no pawns and slam a rook onto it." },
       { type: "board-demo", fen: "4r1k1/ppp2ppp/8/8/8/8/PPP2PPP/R5K1 w - - 0 1", highlights: ["e8", "e1"], prompt: "Which file has no pawns at all?", caption: "The e-file is wide open — whoever takes it dominates.", guide: "rook" },
       { type: "make-move", fen: "4r1k1/ppp2ppp/8/8/8/8/PPP2PPP/R5K1 w - - 0 1", correctUci: "a1e1", prompt: "Seize the open file — bring your rook to e1.", successText: "Re1! Your rook controls the open file.", failureText: "Move your a1 rook onto the open e-file (e1).", hint: "Rook a1 slides to e1.", guide: "rook" },
-      { type: "multiple-choice", prompt: "Where is a rook strongest?", choices: ["Behind its own pawns", "On an open file", "In the corner all game", "Next to the king"], correctIndex: 1, successText: "Open files — a rook's natural home.", guide: "rook" },
+      { type: "multiple-choice", prompt: "Where is a rook strongest?", choices: ["On an open file", "Behind its own pawns", "In the corner all game", "Next to the king"], correctIndex: 0, successText: "Open files — a rook's natural home.", guide: "rook" },
     ],
   },
   {
@@ -140,8 +140,8 @@ export const TIER2_LESSONS: Lesson[] = [
     ],
     quiz: {
       question: "What makes a bishop 'bad'?",
-      choices: ["It is on the queenside", "Its own pawns block its diagonals", "It has moved twice", "It is light-squared"],
-      correctIndex: 1,
+      choices: ["It is on the queenside", "It has moved twice", "Its own pawns block its diagonals", "It is light-squared"],
+      correctIndex: 2,
     },
     xpReward: 70,
     fen: "r1bqk1nr/pppp1ppp/2n5/2b1p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 1",
@@ -169,8 +169,8 @@ export const TIER2_LESSONS: Lesson[] = [
     ],
     quiz: {
       question: "What is an isolated pawn?",
-      choices: ["A pawn on the edge", "A pawn with no friendly pawn on either adjacent file", "Any passed pawn", "A doubled pawn"],
-      correctIndex: 1,
+      choices: ["A pawn on the edge", "A doubled pawn", "Any passed pawn", "A pawn with no friendly pawn on either adjacent file"],
+      correctIndex: 3,
     },
     xpReward: 70,
     fen: "4k3/pp3ppp/8/3p4/8/8/PP3PPP/4K3 w - - 0 1",
@@ -180,7 +180,7 @@ export const TIER2_LESSONS: Lesson[] = [
       { type: "intro", guide: "queen", title: "Spot the weakling", text: "Vera here. Pawns never retreat, so a weak one stays weak forever. Learn to spot the lonely, undefendable pawns — yours and theirs." },
       { type: "board-demo", fen: "4k3/pp3ppp/8/3p4/8/8/PP3PPP/4K3 w - - 0 1", highlights: ["c7", "d5", "e7"], prompt: "Look at the d5 pawn's neighbours.", caption: "No black pawn on c or e — d5 is isolated and must be guarded by pieces.", guide: "queen" },
       { type: "tap-piece", fen: "4k3/pp3ppp/8/3p4/8/8/PP3PPP/4K3 w - - 0 1", prompt: "Tap Black's isolated pawn — the one no pawn can defend.", targets: ["d5"], successText: "That's the isolated d5 pawn — a long-term target.", hint: "It's the pawn standing alone in the centre.", guide: "queen" },
-      { type: "multiple-choice", prompt: "What is an isolated pawn?", choices: ["A pawn on the edge", "A pawn with no friendly pawn on either adjacent file", "Any passed pawn", "A doubled pawn"], correctIndex: 1, successText: "No neighbours — that's isolation.", guide: "queen" },
+      { type: "multiple-choice", prompt: "What is an isolated pawn?", choices: ["A pawn with no friendly pawn on either adjacent file", "A pawn on the edge", "Any passed pawn", "A doubled pawn"], correctIndex: 0, successText: "No neighbours — that's isolation.", guide: "queen" },
     ],
   },
   {
@@ -198,8 +198,8 @@ export const TIER2_LESSONS: Lesson[] = [
     ],
     quiz: {
       question: "What is an outpost?",
-      choices: ["Any central square", "A square your pawn defends that no enemy pawn can attack", "The corner square", "A square with a rook"],
-      correctIndex: 1,
+      choices: ["Any central square", "The corner square", "A square your pawn defends that no enemy pawn can attack", "A square with a rook"],
+      correctIndex: 2,
     },
     xpReward: 70,
     fen: "r1bqk2r/ppp2ppp/2n2n2/3p4/3P4/2N2N2/PPP2PPP/R1BQK2R w KQkq - 0 1",

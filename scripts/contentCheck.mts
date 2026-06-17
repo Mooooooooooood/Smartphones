@@ -4,7 +4,7 @@
  */
 import { Chess } from "chess.js";
 import { TIER0_BOSS, TIER1_BOSS } from "../src/content/academy/boss.ts";
-import { tierMeta } from "../src/content/academy/index.ts";
+import { tierMeta, ALL_LESSONS, BOSSES } from "../src/content/academy/index.ts";
 import { TIER1_LESSONS } from "../src/content/academy/tier1.ts";
 import { hasBoardInteraction, type LessonStep } from "../src/domain/academy/lessonSteps.ts";
 import { achievementViews } from "../src/content/achievements.ts";
@@ -55,6 +55,18 @@ for (const lesson of upgraded) {
     }
   }
 }
+
+// ---- Answer-position balance (no "always B") ----
+const answerIdx: number[] = [];
+for (const l of ALL_LESSONS) {
+  answerIdx.push(l.quiz.correctIndex);
+  for (const s of l.steps ?? []) if (s.type === "multiple-choice") answerIdx.push(s.correctIndex);
+}
+for (const b of BOSSES) for (const q of b.questions) answerIdx.push(q.correctIndex);
+const counts = [0, 1, 2, 3].map((i) => answerIdx.filter((x) => x === i).length);
+const totalQ = answerIdx.length;
+ok(`answer positions: all four A–D are used (got ${counts.join("/")})`, counts.every((c) => c > 0));
+ok(`no answer position exceeds 40% (got ${counts.join("/")} of ${totalQ})`, counts.every((c) => c <= totalQ * 0.4));
 
 // ---- Achievements progress ----
 const emptyState: AcademyState = { completedLessonIds: {}, bossCleared: {} };
