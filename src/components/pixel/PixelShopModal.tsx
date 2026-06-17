@@ -91,13 +91,14 @@ export default function PixelShopModal({ open, onClose }: { open: boolean; onClo
             <p className="mt-0.5 text-[0.6rem] text-muted2">Premium colours for your hero. Free colours live in Settings.</p>
             <ul className="mt-2 space-y-1.5">
               {COLOR_ITEMS.map((item) => {
-                const swatch = PLAYER_COLORS.find((c) => c.id === item.refId)?.swatch ?? "#fff";
+                const def = PLAYER_COLORS.find((c) => c.id === item.refId);
                 return (
                   <ColorRow
                     key={item.id}
                     label={item.label}
                     price={item.price}
-                    swatch={swatch}
+                    swatch={def?.swatch ?? "#fff"}
+                    rarity={def?.rarity}
                     owned={Boolean(owned[item.id])}
                     equipped={equippedColor === item.refId}
                     afford={coins >= item.price}
@@ -161,6 +162,23 @@ export default function PixelShopModal({ open, onClose }: { open: boolean; onClo
   );
 }
 
+/** Small colour-coded rarity tag (Epic / Legendary). */
+function RarityBadge({ rarity }: { rarity?: "epic" | "legendary" }) {
+  if (!rarity) return null;
+  const legendary = rarity === "legendary";
+  return (
+    <span
+      className="px-label shrink-0 rounded-[4px] border-2 border-[var(--px-edge)] px-1.5 py-0.5 text-[0.4rem]"
+      style={{
+        background: legendary ? "var(--color-brass)" : "var(--color-lav)",
+        color: legendary ? "var(--color-on-accent)" : "var(--color-on-purple)",
+      }}
+    >
+      {legendary ? "LEGENDARY" : "EPIC"}
+    </span>
+  );
+}
+
 /** Owned/equip/buy action cluster shared by the cosmetic rows. */
 function BuyState({ price, owned, equipped, afford = true, onBuy, onEquip }: {
   price: number; owned: boolean; equipped: boolean; afford?: boolean; onBuy?: () => void; onEquip?: () => void;
@@ -184,21 +202,23 @@ function SkinRow({ refId, label, price, owned, equipped, afford = true, onBuy, o
 }) {
   const skin = BOARD_SKINS.find((s) => s.id === refId);
   return (
-    <li className="px-inset flex items-center gap-2.5 px-2.5 py-2">
+    <li className="px-inset flex items-center gap-2 px-2.5 py-2">
       {skin ? <Swatch light={skin.light} dark={skin.dark} /> : null}
       <span className="min-w-0 flex-1 px-label truncate text-[0.6rem] text-cream">{label}</span>
+      <RarityBadge rarity={skin?.rarity} />
       <BuyState price={price} owned={owned} equipped={equipped} afford={afford} onBuy={onBuy} onEquip={onEquip} />
     </li>
   );
 }
 
-function ColorRow({ label, price, swatch, owned, equipped, afford = true, onBuy, onEquip }: {
-  label: string; price: number; swatch: string; owned: boolean; equipped: boolean; afford?: boolean; onBuy?: () => void; onEquip?: () => void;
+function ColorRow({ label, price, swatch, rarity, owned, equipped, afford = true, onBuy, onEquip }: {
+  label: string; price: number; swatch: string; rarity?: "epic" | "legendary"; owned: boolean; equipped: boolean; afford?: boolean; onBuy?: () => void; onEquip?: () => void;
 }) {
   return (
-    <li className="px-inset flex items-center gap-2.5 px-2.5 py-2">
+    <li className="px-inset flex items-center gap-2 px-2.5 py-2">
       <span className="h-7 w-7 shrink-0 rounded-[5px] border-2 border-[var(--px-edge)]" style={{ background: swatch, boxShadow: "0 0 0 2px var(--px-edge)" }} />
       <span className="min-w-0 flex-1 px-label truncate text-[0.6rem] text-cream">{label}</span>
+      <RarityBadge rarity={rarity} />
       <BuyState price={price} owned={owned} equipped={equipped} afford={afford} onBuy={onBuy} onEquip={onEquip} />
     </li>
   );

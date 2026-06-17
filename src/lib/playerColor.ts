@@ -1,11 +1,12 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import type { Rarity } from "@/lib/boardSkin";
 
 /** The player's chosen avatar tint, persisted in localStorage (no DB migration). */
 export type PlayerColorId =
   | "gold" | "red" | "blue" | "green" | "purple"
-  | "ember" | "frost" | "void" | "mint";
+  | "diamond" | "void" | "lava" | "snow";
 
 export interface PlayerColorDef {
   id: PlayerColorId;
@@ -13,6 +14,8 @@ export interface PlayerColorDef {
   swatch: string;
   /** Shop price in coins (0 = free, available from the start). */
   price: number;
+  /** Rarity tier for premium tints (shown as a shop badge). */
+  rarity?: Rarity;
 }
 
 export const PLAYER_COLORS: PlayerColorDef[] = [
@@ -21,11 +24,11 @@ export const PLAYER_COLORS: PlayerColorDef[] = [
   { id: "blue", label: "Azure", swatch: "#4d8dff", price: 0 },
   { id: "green", label: "Jade", swatch: "#45d36c", price: 0 },
   { id: "purple", label: "Amethyst", swatch: "#8a6fe0", price: 0 },
-  // Premium — bought + equipped from the Shop.
-  { id: "ember", label: "Ember", swatch: "#ff7a2f", price: 120 },
-  { id: "frost", label: "Frost", swatch: "#5fd6e8", price: 140 },
-  { id: "mint", label: "Mint", swatch: "#3fd6a0", price: 160 },
-  { id: "void", label: "Void", swatch: "#6a4fa0", price: 200 },
+  // Premium legendary materials — bought + equipped from the Shop.
+  { id: "snow", label: "Snow", swatch: "#cfeeff", price: 180, rarity: "epic" },
+  { id: "diamond", label: "Diamond", swatch: "#9fe6ff", price: 300, rarity: "legendary" },
+  { id: "lava", label: "Lava", swatch: "#ff6a2a", price: 320, rarity: "legendary" },
+  { id: "void", label: "Void", swatch: "#7b54d6", price: 360, rarity: "legendary" },
 ];
 
 const FREE_IDS = new Set(PLAYER_COLORS.filter((c) => c.price === 0).map((c) => c.id));

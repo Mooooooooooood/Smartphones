@@ -21,6 +21,8 @@ function ok(name: string, cond: boolean) {
 ok("classic skin is free", BOARD_SKINS.find((s) => s.id === "classic")?.price === 0);
 ok("non-classic skins cost coins", BOARD_SKINS.filter((s) => s.id !== "classic").every((s) => s.price > 0));
 ok("every skin has light+dark colours", BOARD_SKINS.every((s) => /^#|rgb/.test(s.light) && /^#|rgb/.test(s.dark)));
+ok("every premium board has a rarity", BOARD_SKINS.filter((s) => s.price > 0).every((s) => s.rarity === "epic" || s.rarity === "legendary"));
+ok("legendary material boards exist", ["gold", "diamond", "void", "grass", "snow", "lava"].every((id) => BOARD_SKINS.some((s) => s.id === id)));
 
 // ---- Shop ----
 ok("shop excludes the free classic", SHOP_ITEMS.every((i) => i.refId !== "classic"));
@@ -45,7 +47,8 @@ ok("free colours have price 0", PLAYER_COLORS.filter((c) => ["gold", "red", "blu
 ok("premium colours cost coins", COLOR_ITEMS.length > 0 && COLOR_ITEMS.every((i) => i.price > 0 && i.kind === "color"));
 ok("colour item ids use the color- prefix", COLOR_ITEMS.every((i) => i.id === colorItemId(i.refId as never)));
 ok("free colour is owned without purchase", isColorOwned("gold", {}) === true);
-ok("premium colour needs purchase", isColorOwned("ember", {}) === false && isColorOwned("ember", { "color-ember": true }) === true);
+ok("premium colour needs purchase", isColorOwned("diamond", {}) === false && isColorOwned("diamond", { "color-diamond": true }) === true);
+ok("every premium tint has a rarity", PLAYER_COLORS.filter((c) => c.price > 0).every((c) => c.rarity === "epic" || c.rarity === "legendary"));
 
 // ---- Consumables ----
 ok("consumables are repeatable items with a grant", CONSUMABLE_ITEMS.every((i) => i.kind === "consumable" && i.price > 0 && (i.grant ?? 0) >= 1));

@@ -26,7 +26,7 @@ export const SHOP_ITEMS: ShopItem[] = BOARD_SKINS.filter((s) => s.price > 0).map
   id: `board-${s.id}`,
   kind: "board",
   refId: s.id,
-  label: `${s.label} Board`,
+  label: s.label,
   price: s.price,
 }));
 
@@ -39,7 +39,7 @@ export const COLOR_ITEMS: ShopItem[] = PLAYER_COLORS.filter((c) => c.price > 0).
   id: colorItemId(c.id),
   kind: "color",
   refId: c.id,
-  label: `${c.label} Tint`,
+  label: c.label,
   price: c.price,
 }));
 
