@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useProfileStore, academyStateFrom } from "@/state/profileStore";
 import { lessonsForTier, tierMeta } from "@/content/academy";
@@ -10,6 +10,7 @@ import {
   bossStatus,
   tierProgress,
   isTierUnlocked,
+  nextRecommended,
   type AcademyState,
 } from "@/domain/academy/progression";
 import PixelTopBar from "@/components/pixel/PixelTopBar";
@@ -222,8 +223,10 @@ export default function AcademyScreen() {
   const bossClearedMap = useProfileStore((s) => s.bossCleared);
   const claimedRewards = useProfileStore((s) => s.claimedRewards);
   const claimReward = useProfileStore((s) => s.claimReward);
+  const hydrated = useProfileStore((s) => s.hydrated);
   const [modal, setModal] = useState<{ open: boolean; xp: number }>({ open: false, xp: 0 });
   const [tierIdx, setTierIdx] = useState(0);
+  const autoTiered = useRef(false);
 
   useEffect(() => {
     void useProfileStore.getState().hydrate();
@@ -231,6 +234,18 @@ export default function AcademyScreen() {
 
   const state = academyStateFrom(completed, bossClearedMap);
   const midClaimed = Boolean(claimedRewards[MID_REWARD_ID]);
+
+  // Once progress has loaded, open on the tier the player is currently working
+  // through (the next recommended lesson/boss). One-time, so paging back to
+  // review an earlier tier isn't snapped forward.
+  useEffect(() => {
+    if (!hydrated || autoTiered.current) return;
+    autoTiered.current = true;
+    const step = nextRecommended(state);
+    const target = step.lesson?.tier ?? step.boss?.tier ?? 0;
+    setTierIdx(Math.min(Math.max(target, 0), TIERS.length - 1));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated, completed, bossClearedMap]);
 
   async function claimMidChest() {
     const got = await claimReward(MID_REWARD_ID, MID_REWARD_XP);
