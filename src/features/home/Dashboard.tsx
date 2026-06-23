@@ -8,6 +8,7 @@ import { useGameStore } from "@/state/gameStore";
 import { todayKey } from "@/domain/progression/leveling";
 import { nextRecommended, tierProgress } from "@/domain/academy/progression";
 import { dailyForToday, dailyBonusClaimable, DAILY_BONUS_COINS, DAILY_TASK_COINS } from "@/domain/training/daily";
+import { ratingTier } from "@/domain/training/ladder";
 import PixelTopBar from "@/components/pixel/PixelTopBar";
 import PixelPanel from "@/components/pixel/PixelPanel";
 import PixelButton from "@/components/pixel/PixelButton";
@@ -224,6 +225,18 @@ export default function Dashboard() {
             style={dailyPuzzleDone ? { background: "var(--color-good)", color: "var(--color-on-good)" } : { background: "var(--color-brass)", color: "var(--color-on-accent)" }}>
             {dailyPuzzleDone ? "✓" : "PLAY ›"}
           </span>
+        </PixelPanel>
+      </Link>
+
+      {/* Rated Climb — puzzles at your level, rating goes up/down */}
+      <Link href="/puzzles?climb=1" className="block active:translate-y-0.5">
+        <PixelPanel hue="purple" className="flex items-center gap-2.5 px-2.5 py-2">
+          <span className="text-[1.1rem]" aria-hidden>📈</span>
+          <div className="min-w-0 flex-1">
+            <p className="px-label text-[0.52rem] text-brass">Rated Climb</p>
+            <p className="text-[0.56rem] text-muted2">{ratingTier(puzzleRating).title} · {puzzleRating} rating</p>
+          </div>
+          <span className="px-label rounded-[5px] border-2 border-[var(--px-edge)] bg-[var(--color-lav)] px-2 py-1 text-[0.52rem] text-[color:var(--color-on-purple)]">CLIMB ›</span>
         </PixelPanel>
       </Link>
 

@@ -11,6 +11,7 @@ import { evaluateMove, fenAfterUci, isCorrectMove } from "@/domain/puzzles/puzzl
 import { loadPuzzleAttempts } from "@/data/puzzleRepository";
 import type { PuzzleAttemptRow } from "@/data/db";
 import { useProfileStore, type PuzzleResult } from "@/state/profileStore";
+import { climbQueue } from "@/domain/training/ladder";
 
 export type ThemeFilter = PuzzleTheme | "mixed";
 export type PuzzleStatus = "idle" | "wrong" | "correct";
@@ -46,6 +47,8 @@ interface PuzzleState {
   startPuzzleById: (id: string) => void;
   /** Start a Smart Review session over the given (due/missed) puzzle ids. */
   startReview: (ids: string[]) => void;
+  /** Start a Rated Climb — puzzles served near the player's rating. */
+  startClimb: () => void;
   /** Handle a board move. Returns true if the piece should stay (legal answer). */
   submitMove: (from: Square, to: Square, promotion?: PieceSymbol) => boolean;
   showHint: () => void;
@@ -117,6 +120,12 @@ export const usePuzzleStore = create<PuzzleState>((set, get) => ({
   },
 
   startReview: (ids) => set(sessionStart("mixed", ids.length ? ids : buildQueue("mixed"))),
+
+  startClimb: () => {
+    const prof = useProfileStore.getState();
+    const ids = climbQueue(BEGINNER_PUZZLES, { rating: prof.puzzleRating, solved: prof.solvedPuzzleIds });
+    set(sessionStart("mixed", ids.length ? ids : buildQueue("mixed")));
+  },
 
   submitMove: (from, to, promotion = "q") => {
     const { queue, index, status } = get();

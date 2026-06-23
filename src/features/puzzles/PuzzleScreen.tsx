@@ -19,6 +19,7 @@ import ChessBuddy from "@/components/characters/ChessBuddy";
 import { fx } from "@/lib/feedback";
 import { dailyPuzzleId, isDailyPuzzleDone, markDailyPuzzleDone, DAILY_PUZZLE_BONUS } from "@/domain/training/dailyPuzzle";
 import { loadDueReviewIds, recordReviewResult } from "@/domain/training/reviewSession";
+import { ratingTier } from "@/domain/training/ladder";
 
 const PuzzleBoard = dynamic(() => import("@/components/PuzzleBoard"), { ssr: false, loading: () => <BoardSkeleton /> });
 
@@ -89,6 +90,8 @@ export default function PuzzleScreen() {
   const nextPuzzle = usePuzzleStore((s) => s.nextPuzzle);
 
   const puzzleRating = useProfileStore((s) => s.puzzleRating);
+  const bestPuzzleRating = useProfileStore((s) => s.bestPuzzleRating);
+  const tier = ratingTier(puzzleRating);
   const consumables = useProfileStore((s) => s.consumables);
   const consume = useProfileStore((s) => s.consumeItem);
   const hintCount = consumables["consumable-hint"] ?? 0;
@@ -98,6 +101,7 @@ export default function PuzzleScreen() {
   const themeParam = searchParams.get("theme");
   const daily = searchParams.get("daily") === "1";
   const review = searchParams.get("review") === "1";
+  const climb = searchParams.get("climb") === "1";
   const applied = useRef(false);
   const dailyAwarded = useRef(false);
 
@@ -112,7 +116,9 @@ export default function PuzzleScreen() {
       await usePuzzleStore.getState().hydrate();
       if (cancelled || applied.current) return;
       applied.current = true;
-      if (review) {
+      if (climb) {
+        usePuzzleStore.getState().startClimb();
+      } else if (review) {
         const ids = await loadDueReviewIds();
         if (!cancelled) usePuzzleStore.getState().startReview(ids);
       } else if (daily) {
@@ -122,7 +128,7 @@ export default function PuzzleScreen() {
       }
     })();
     return () => { cancelled = true; };
-  }, [themeParam, daily, review]);
+  }, [themeParam, daily, review, climb]);
 
   useEffect(() => {
     if (status === "wrong") {
@@ -155,20 +161,30 @@ export default function PuzzleScreen() {
       {/* Header + stats */}
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
-          <p className="px-label text-[0.5rem] text-brass">{review ? "↻ Review Mistakes" : daily ? "★ Puzzle of the Day" : "Tactics Arena"}</p>
-          <h1 className="px-title truncate text-[1rem] text-cream">{THEME_LABELS[puzzle.theme]}</h1>
+          <p className="px-label text-[0.5rem] text-brass">{climb ? "↑ Rated Climb" : review ? "↻ Review Mistakes" : daily ? "★ Puzzle of the Day" : "Tactics Arena"}</p>
+          <h1 className="px-title truncate text-[1rem] text-cream">{climb ? tier.title : THEME_LABELS[puzzle.theme]}</h1>
         </div>
         <div className="flex shrink-0 gap-1.5">
           <PixelStat label="Rating" value={puzzleRating} tone="gold" />
-          <PixelStat label="Streak" value={session.streak} tone="good" />
+          <PixelStat label={climb ? "Best" : "Streak"} value={climb ? bestPuzzleRating : session.streak} tone={climb ? "purple" : "good"} />
         </div>
       </div>
 
-      {/* Combo meter */}
-      <ComboMeter streak={session.streak} best={session.best} />
+      {/* Ladder progress (climb) or combo meter (practice) */}
+      {climb ? (
+        <div className="px-inset px-2.5 py-2">
+          <div className="flex items-center justify-between text-[0.46rem]">
+            <span className="px-label text-brass">{tier.title}</span>
+            <span className="px-label text-muted2">{tier.nextTitle ? `${tier.toNext} to ${tier.nextTitle}` : "Top tier!"}</span>
+          </div>
+          <div className="px-track mt-1 h-2"><div className="px-track-fill" style={{ width: `${Math.round(tier.progress * 100)}%`, "--fill": "var(--color-brass)" } as React.CSSProperties} /></div>
+        </div>
+      ) : (
+        <ComboMeter streak={session.streak} best={session.best} />
+      )}
 
-      {/* Theme filters */}
-      <SegmentControl options={THEME_OPTIONS} value={theme} onChange={setTheme} layout="scroll" />
+      {/* Theme filters (practice only) */}
+      {!climb ? <SegmentControl options={THEME_OPTIONS} value={theme} onChange={setTheme} layout="scroll" /> : null}
 
       {/* Coach instruction */}
       {status !== "correct" ? (

@@ -136,3 +136,10 @@ Run through this on a real iPhone (Safari) and in desktop Chrome devtools at
 - [ ] Finish a game → **Game Review** shows **Your/Opponent accuracy %**, an **eval bar** that tracks each ply, per-move **quality tags** (Best…Blunder), and an **"Engine preferred: …"** hint on mistakes/blunders.
 - [ ] The move list dots are coloured by engine quality; stepping through plies updates the eval bar.
 - [ ] `npm run test:engine` passes (eval symmetry, mate/material, search finds mate-in-1 + free captures, analysis flags a blunder with a best move + accuracy).
+
+## Puzzle rating ladder (Sprint 24)
+- [ ] Home shows a **Rated Climb** card (tier + current rating) → opens `/puzzles?climb=1`.
+- [ ] Climb mode shows the **tier title** (Novice→Grandmaster), **Rating + Best**, and a **progress bar** to the next tier; no theme filter.
+- [ ] Solving an unseen puzzle moves the rating; early puzzles move it faster (calibrating K), and your **Best** only ever rises.
+- [ ] The climb serves puzzles **near your rating** (and gently above), skipping ones you've already solved.
+- [ ] `npm run test:ladder` (tiers/K/climb queue) and `npm run test:engine` (puzzle soundness) pass.
