@@ -5,6 +5,8 @@
 import { evaluatePosition, MATE_SCORE } from "../src/domain/chess/eval.ts";
 import { searchBestMove } from "../src/domain/chess/search.ts";
 import { analyzeGame } from "../src/domain/chess/analysis.ts";
+import { BEGINNER_PUZZLES } from "../src/content/puzzles/beginner.ts";
+import { Chess } from "chess.js";
 
 let pass = 0;
 let fail = 0;
@@ -48,6 +50,25 @@ ok("analysis returns one entry per move", analysis.perMove.length === blunderGam
 ok("the Qxf7+ blunder is flagged mistake/blunder", ["mistake", "blunder"].includes(analysis.perMove[6]?.classification));
 ok("accuracy is reported for both sides", analysis.accuracy.white >= 0 && analysis.accuracy.white <= 100 && analysis.accuracy.black >= 0 && analysis.accuracy.black <= 100);
 ok("a best-move suggestion exists for the blunder", typeof analysis.perMove[6]?.bestUci === "string" && analysis.perMove[6].bestUci.length >= 4);
+
+// ---- Puzzle soundness ----
+let allLegal = true;
+for (const p of BEGINNER_PUZZLES) {
+  try {
+    const g = new Chess(p.fen);
+    const m = g.move({ from: p.correctUci.slice(0, 2), to: p.correctUci.slice(2, 4), promotion: (p.correctUci[4] as never) ?? "q" });
+    if (!m) allLegal = false;
+  } catch { allLegal = false; }
+}
+ok("every puzzle's solution is a legal move", allLegal);
+// The new advanced (a0*) puzzles must match the engine's best move at depth 3.
+let advancedSound = true;
+for (const p of BEGINNER_PUZZLES.filter((q) => q.id.startsWith("a0"))) {
+  const best = searchBestMove(p.fen, { maxDepth: 3 });
+  if (!best || best.uci.slice(0, 4) !== p.correctUci.slice(0, 4)) advancedSound = false;
+}
+ok("advanced ladder puzzles match the engine's best move", advancedSound);
+ok("puzzle rating range now extends past 800", BEGINNER_PUZZLES.some((p) => p.rating >= 1000));
 
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail > 0) process.exit(1);

@@ -551,6 +551,68 @@ export const BEGINNER_PUZZLES: Puzzle[] = [
     categories: ["tactics", "calculation"],
     hint: "A knight check can uncover the rook behind it.",
   },
+
+  // ---------- Advanced ladder (Sprint 24) — engine-verified winning tactics ----------
+  {
+    id: "a01-backrank-rd8",
+    title: "Crash the back rank",
+    theme: "back-rank",
+    rating: 850,
+    fen: "6k1/5ppp/8/8/8/8/8/3R2K1 w - - 0 1",
+    sideToMove: "w",
+    correctUci: "d1d8",
+    answerSan: "Rd8#",
+    explanation:
+      "Rd8# is checkmate — the king is sealed in by its own f7, g7 and h7 pawns and the rook delivers the unstoppable check along the back rank.",
+    xpReward: 30,
+    categories: ["tactics", "mate"],
+    hint: "The king's own pawns leave no escape on the eighth rank.",
+  },
+  {
+    id: "a02-undefended-rxg8",
+    title: "Snatch the loose queen",
+    theme: "undefended-capture",
+    rating: 900,
+    fen: "k5q1/8/8/8/8/8/8/K5R1 w - - 0 1",
+    sideToMove: "w",
+    correctUci: "g1g8",
+    answerSan: "Rxg8+",
+    explanation:
+      "The queen on g8 is undefended, so Rxg8+ simply wins it. A rook and king then easily mate the bare king.",
+    xpReward: 30,
+    categories: ["tactics"],
+    hint: "Look down the open g-file at the unprotected queen.",
+  },
+  {
+    id: "a03-fork-nc7-rook",
+    title: "Knight's royal fork",
+    theme: "fork",
+    rating: 950,
+    fen: "r3k3/pp6/8/1N6/8/8/PP6/4K3 w - - 0 1",
+    sideToMove: "w",
+    correctUci: "b5c7",
+    answerSan: "Nc7+",
+    explanation:
+      "Nc7+ forks the king on e8 and the rook on a8. The king must move out of check, and then Nxa8 collects the rook.",
+    xpReward: 35,
+    categories: ["tactics"],
+    hint: "Find the knight check that also hits the corner rook.",
+  },
+  {
+    id: "a04-fork-nc7-queen",
+    title: "Fork the king and queen",
+    theme: "fork",
+    rating: 1100,
+    fen: "q3k3/pp6/8/1N6/8/8/PP6/4K3 w - - 0 1",
+    sideToMove: "w",
+    correctUci: "b5c7",
+    answerSan: "Nc7+",
+    explanation:
+      "Nc7+ checks the king on e8 and attacks the queen on a8 at the same time. After the king steps aside, Nxa8 wins the queen.",
+    xpReward: 45,
+    categories: ["tactics", "calculation"],
+    hint: "A knight check that the queen cannot escape.",
+  },
 ];
 
 /** Puzzles whose theme matches, in their authored order. */
