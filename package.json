@@ -21,7 +21,8 @@
     "baseline": "node scripts/screenshotBaseline.mjs",
     "shots": "node scripts/storeShots.mjs",
     "og": "node scripts/ogImage.mjs",
-    "genmusic": "node scripts/genMusic.mjs"
+    "genmusic": "node scripts/genMusic.mjs",
+    "genpuzzles": "npx --yes tsx scripts/genPuzzles.mts"
   },
   "dependencies": {
     "chess.js": "^1.4.0",

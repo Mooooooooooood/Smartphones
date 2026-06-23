@@ -8,6 +8,7 @@
  * The `correctUci` field is the canonical answer (long algebraic, e.g.
  * "a1a8"); `answerSan` is a human-friendly mirror used in explanations.
  */
+import { GENERATED_PUZZLES } from "./generated";
 
 export type PuzzleTheme =
   | "mate-in-1"
@@ -81,7 +82,7 @@ export const PUZZLE_THEMES: PuzzleTheme[] = [
   "discovered-attack",
 ];
 
-export const BEGINNER_PUZZLES: Puzzle[] = [
+const CORE_PUZZLES: Puzzle[] = [
   // ---------- Mate in 1 ----------
   {
     id: "b01-mate1-rook-backrank",
@@ -614,6 +615,9 @@ export const BEGINNER_PUZZLES: Puzzle[] = [
     hint: "A knight check that the queen cannot escape.",
   },
 ];
+
+/** Hand-authored core puzzles + the engine-generated tactics pool. */
+export const BEGINNER_PUZZLES: Puzzle[] = [...CORE_PUZZLES, ...GENERATED_PUZZLES];
 
 /** Puzzles whose theme matches, in their authored order. */
 export function puzzlesByTheme(theme: PuzzleTheme): Puzzle[] {

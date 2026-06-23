@@ -6,6 +6,7 @@ import { evaluatePosition, MATE_SCORE } from "../src/domain/chess/eval.ts";
 import { searchBestMove } from "../src/domain/chess/search.ts";
 import { analyzeGame } from "../src/domain/chess/analysis.ts";
 import { BEGINNER_PUZZLES } from "../src/content/puzzles/beginner.ts";
+import { findTactic } from "../src/domain/puzzles/tactics.ts";
 import { Chess } from "chess.js";
 
 let pass = 0;
@@ -69,6 +70,16 @@ for (const p of BEGINNER_PUZZLES.filter((q) => q.id.startsWith("a0"))) {
 }
 ok("advanced ladder puzzles match the engine's best move", advancedSound);
 ok("puzzle rating range now extends past 800", BEGINNER_PUZZLES.some((p) => p.rating >= 1000));
+
+// Generated (g*) puzzles must each re-verify as a unique static tactic.
+const generated = BEGINNER_PUZZLES.filter((p) => p.id.startsWith("g0") || p.id.startsWith("g1") || p.id.startsWith("g2"));
+let genSound = generated.length >= 10;
+for (const p of generated) {
+  const t = findTactic(p.fen);
+  if (!t || t.uci !== p.correctUci) genSound = false;
+}
+ok("every generated puzzle re-verifies as a unique tactic", genSound);
+ok("puzzle ids are unique", new Set(BEGINNER_PUZZLES.map((p) => p.id)).size === BEGINNER_PUZZLES.length);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail > 0) process.exit(1);
