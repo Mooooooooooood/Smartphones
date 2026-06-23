@@ -3,20 +3,21 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
+import { Chess } from "chess.js";
 import { loadMatch } from "@/data/matchRepository";
 import {
   buildReplay,
   coachComment,
   matchStats,
-  moveKind,
   type ReplayFrame,
 } from "@/domain/chess/replay";
+import { analyzeGame, type GameAnalysis, type MoveQuality } from "@/domain/chess/analysis";
+import { MATE_SCORE } from "@/domain/chess/eval";
 import type { MatchRow } from "@/data/db";
 import PixelTopBar from "@/components/pixel/PixelTopBar";
 import PixelPanel from "@/components/pixel/PixelPanel";
 import PixelButton from "@/components/pixel/PixelButton";
 import PixelStat from "@/components/pixel/PixelStat";
-import MoveChip, { KIND_STYLE } from "@/components/pixel/MoveChip";
 import ChessBuddy from "@/components/characters/ChessBuddy";
 import { BoardSkeleton } from "@/components/ui/Skeleton";
 
@@ -24,6 +25,43 @@ const LessonBoard = dynamic(() => import("@/components/LessonBoard"), {
   ssr: false,
   loading: () => <BoardSkeleton />,
 });
+
+/** Colour + label per engine move-quality class. */
+const QUALITY: Record<MoveQuality, { label: string; bg: string; fg: string }> = {
+  best: { label: "Best", bg: "var(--color-good)", fg: "var(--color-on-good)" },
+  good: { label: "Good", bg: "var(--color-sky)", fg: "var(--color-on-blue)" },
+  inaccuracy: { label: "Inaccuracy", bg: "var(--color-sun)", fg: "var(--color-on-accent)" },
+  mistake: { label: "Mistake", bg: "var(--color-peach)", fg: "#3a2618" },
+  blunder: { label: "Blunder", bg: "var(--color-bad)", fg: "var(--color-on-bad)" },
+};
+
+function QualityTag({ quality }: { quality: MoveQuality }) {
+  const q = QUALITY[quality];
+  return (
+    <span className="px-label shrink-0 rounded-[4px] border-2 border-[var(--px-edge)] px-1.5 py-0.5 text-[0.46rem]" style={{ background: q.bg, color: q.fg }}>
+      {q.label}
+    </span>
+  );
+}
+
+/** Eval bar — White's share of the bar (0..100) from a centipawn eval. */
+function evalToPct(cp: number): number {
+  if (cp >= MATE_SCORE - 1000) return 100;
+  if (cp <= -(MATE_SCORE - 1000)) return 0;
+  const clamped = Math.max(-1000, Math.min(1000, cp));
+  return 50 + (clamped / 1000) * 50;
+}
+
+/** UCI → SAN from a given position (for the best-move hint). */
+function uciToSan(fen: string, uci: string): string {
+  try {
+    const g = new Chess(fen);
+    const m = g.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: (uci[4] as never) ?? "q" });
+    return m?.san ?? uci;
+  } catch {
+    return uci;
+  }
+}
 
 function NavBtn({ children, onClick, disabled, label }: { children: React.ReactNode; onClick: () => void; disabled: boolean; label: string }) {
   return (
@@ -48,6 +86,7 @@ export default function ReviewScreen() {
 
   const [match, setMatch] = useState<MatchRow | null | undefined>(undefined);
   const [frames, setFrames] = useState<ReplayFrame[] | null>(null);
+  const [analysis, setAnalysis] = useState<GameAnalysis | null>(null);
   const [ply, setPly] = useState(0);
 
   useEffect(() => {
@@ -62,6 +101,19 @@ export default function ReviewScreen() {
       active = false;
     };
   }, [id, validId]);
+
+  // Engine analysis of the whole game (async + chunked so it never blocks).
+  useEffect(() => {
+    if (!frames || frames.length < 2) return;
+    let active = true;
+    const moves = frames.slice(1).map((f) => `${f.from}${f.to}`);
+    void analyzeGame(moves, { depth: 2 }).then((a) => {
+      if (active) setAnalysis(a);
+    });
+    return () => {
+      active = false;
+    };
+  }, [frames]);
 
   const total = frames ? frames.length - 1 : 0;
   const frame = frames ? frames[Math.min(ply, total)] : null;
@@ -127,7 +179,13 @@ export default function ReviewScreen() {
   }
 
   const lastMove = frame?.from && frame?.to ? { from: frame.from, to: frame.to } : null;
-  const kind = frame && frame.index > 0 ? moveKind(frame) : null;
+  const curMove = analysis && ply > 0 ? analysis.perMove[ply - 1] : null;
+  const evalPct = evalToPct(curMove?.evalCp ?? 0);
+  const showBest = curMove && (curMove.classification === "mistake" || curMove.classification === "blunder");
+  const bestSan = showBest && frames ? uciToSan(frames[ply - 1].fen, curMove.bestUci) : null;
+  const yourAcc = analysis ? (match.userColor === "w" ? analysis.accuracy.white : analysis.accuracy.black) : null;
+  const oppAcc = analysis ? (match.userColor === "w" ? analysis.accuracy.black : analysis.accuracy.white) : null;
+  const analyzing = !analysis && frames.length >= 2;
 
   return (
     <div className="space-y-2.5">
@@ -150,24 +208,34 @@ export default function ReviewScreen() {
         </div>
       </PixelPanel>
 
-      {/* Honest, engine-free match stats */}
-      {stats ? (
-        <div className="grid grid-cols-4 gap-1.5">
-          <PixelStat label="Moves" value={stats.moves} tone="blue" />
-          <PixelStat label="Captures" value={stats.captures} tone="gold" />
-          <PixelStat label="Checks" value={stats.checks} tone="good" />
-          <PixelStat label="Castled" value={stats.castled ? "✓" : "—"} tone={stats.castled ? "good" : "default"} />
-        </div>
-      ) : null}
+      {/* Accuracy (engine-backed) + honest stats */}
+      <div className="grid grid-cols-4 gap-1.5">
+        <PixelStat label="Your Acc" value={yourAcc !== null ? `${yourAcc}%` : analyzing ? "…" : "—"} tone="gold" />
+        <PixelStat label="Opp Acc" value={oppAcc !== null ? `${oppAcc}%` : analyzing ? "…" : "—"} tone="purple" />
+        {stats ? <PixelStat label="Captures" value={stats.captures} tone="blue" /> : null}
+        {stats ? <PixelStat label="Checks" value={stats.checks} tone="good" /> : null}
+      </div>
 
-      {/* Coach commentary for the current move */}
+      {/* Coach commentary + engine verdict for the current move */}
       {coach ? (
         <PixelPanel hue="green" className="flex items-center gap-2 px-2.5 py-2">
           <ChessBuddy piece={coach.piece} size={30} className="shrink-0" />
-          <p className="flex-1 text-[0.62rem] leading-tight text-cream">{coach.text}</p>
-          {kind ? <MoveChip kind={kind} /> : null}
+          <div className="min-w-0 flex-1">
+            <p className="text-[0.62rem] leading-tight text-cream">{coach.text}</p>
+            {bestSan ? <p className="mt-0.5 text-[0.54rem] text-brass">Engine preferred: {bestSan}</p> : null}
+          </div>
+          {curMove ? <QualityTag quality={curMove.classification} /> : null}
         </PixelPanel>
       ) : null}
+
+      {/* Eval bar (White advantage) */}
+      <div className="px-inset flex items-center gap-2 px-2 py-1.5">
+        <span className="px-label text-[0.42rem] text-muted2">Eval</span>
+        <div className="relative h-2.5 flex-1 overflow-hidden rounded-[3px] border-2 border-[var(--px-edge)] bg-[var(--color-ink)]">
+          <div className="absolute inset-y-0 left-0 bg-cream transition-[width] duration-200" style={{ width: `${evalPct}%` }} />
+          <div className="absolute inset-y-0 left-1/2 w-px bg-[var(--px-edge)]" />
+        </div>
+      </div>
 
       {/* Board */}
       <div className="px-board-frame">
@@ -211,7 +279,7 @@ export default function ReviewScreen() {
                             className={`flex items-center gap-1 rounded-[4px] px-1 py-0.5 ${ply === mi ? "bg-[var(--color-ink)] font-bold text-brass" : "text-cream"}`}
                           >
                             <span>{frames[mi].san}</span>
-                            <span className="h-1.5 w-1.5 rounded-[2px]" style={{ background: KIND_STYLE[moveKind(frames[mi])].bg }} aria-hidden />
+                            {analysis?.perMove[mi - 1] ? <span className="h-1.5 w-1.5 rounded-[2px]" style={{ background: QUALITY[analysis.perMove[mi - 1].classification].bg }} aria-hidden /> : null}
                           </button>
                         ) : null}
                       </td>

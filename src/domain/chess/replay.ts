@@ -127,8 +127,9 @@ export interface MatchStats {
 }
 
 /**
- * Tally honest, engine-free stats for the player's own moves. We never compute
- * "accuracy" or "best move" because there's no evaluation — only what happened.
+ * Tally simple count stats for the player's own moves (captures, checks, …).
+ * Engine evaluation (accuracy, best move, blunder tags) lives in analysis.ts;
+ * these are just the factual tallies shown alongside it.
  */
 export function matchStats(frames: ReplayFrame[], userColor: "w" | "b"): MatchStats {
   let moves = 0;
