@@ -1,10 +1,12 @@
 import { Chess } from "chess.js";
 import type { PieceSymbol, Square } from "chess.js";
+import { searchRootMoves } from "./search";
 
 /**
- * Friendly beginner bot. It only ever chooses from chess.js's legal move list,
- * so it can never make an illegal move. Pure and testable — pass a custom `rng`
- * for deterministic tests.
+ * Bot opponents. Move legality always comes from chess.js, so a bot can never
+ * play an illegal move. Strength is real: `chooseOpponentMove` runs the homegrown
+ * search at the opponent's `depth`, then weakens by `skill` so beginners still
+ * get winnable games. Pure + testable — pass a custom `rng` for determinism.
  */
 
 export type BotPersonality = "random" | "cautious" | "tactical";
@@ -13,6 +15,51 @@ export interface BotMove {
   from: Square;
   to: Square;
   promotion?: PieceSymbol;
+}
+
+export interface BotStrength {
+  /** Search depth (1–4). Higher = stronger and slower. */
+  depth: number;
+  /** 0 = plays near-random, 1 = always the engine's best move. */
+  skill: number;
+}
+
+function uciToMove(uci: string): BotMove {
+  return { from: uci.slice(0, 2) as Square, to: uci.slice(2, 4) as Square, promotion: (uci[4] as PieceSymbol) || undefined };
+}
+
+/**
+ * Engine-backed move for an opponent of a given strength. Searches at `depth`,
+ * then applies `skill`-based weakening: weak bots occasionally play an outright
+ * random move and otherwise pick from a wider, softmax-weighted band of top
+ * moves; strong bots (skill 1) always play the best move.
+ */
+export function chooseOpponentMove(
+  fen: string,
+  { depth, skill }: BotStrength,
+  rng: () => number = Math.random,
+): BotMove | null {
+  const { moves } = searchRootMoves(fen, { maxDepth: Math.max(1, depth) });
+  if (moves.length === 0) return null;
+
+  // Weak bots sometimes just blunder a random legal move.
+  const blunderRate = Math.max(0, (1 - skill)) * 0.35;
+  if (rng() < blunderRate) return uciToMove(moves[Math.floor(rng() * moves.length)].uci);
+
+  // Otherwise sample from the top-K, softmax-weighted by score (temperature rises
+  // as skill falls). skill = 1 collapses to always-best.
+  const k = Math.max(1, Math.min(moves.length, Math.round(1 + (1 - skill) * 5)));
+  const top = moves.slice(0, k);
+  const temp = 40 + (1 - skill) * 260; // centipawns
+  const best = top[0].scoreCp;
+  const weights = top.map((m) => Math.exp((m.scoreCp - best) / temp));
+  const sum = weights.reduce((a, b) => a + b, 0);
+  let r = rng() * sum;
+  for (let i = 0; i < top.length; i++) {
+    r -= weights[i];
+    if (r <= 0) return uciToMove(top[i].uci);
+  }
+  return uciToMove(top[0].uci);
 }
 
 const VALUE: Record<string, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };

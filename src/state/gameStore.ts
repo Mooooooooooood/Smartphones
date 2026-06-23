@@ -2,7 +2,7 @@ import { create } from "zustand";
 import type { Chess } from "chess.js";
 import type { Color, Square } from "chess.js";
 import { createGame, legalTargets, snapshot, tryMove } from "@/domain/chess/engine";
-import { chooseBotMove } from "@/domain/chess/bot";
+import { chooseOpponentMove } from "@/domain/chess/bot";
 import type { GameSnapshot } from "@/domain/chess/types";
 import { loadActiveGame, saveActiveGame } from "@/data/gameRepository";
 import { opponentById } from "@/content/opponents";
@@ -159,7 +159,7 @@ export const useGameStore = create<GameState>((set, get) => {
       return;
     }
     const opp = opponentById(s.opponentId);
-    const mv = chooseBotMove(g.fen(), opp?.personality ?? "random");
+    const mv = chooseOpponentMove(g.fen(), { depth: opp?.depth ?? 1, skill: opp?.skill ?? 0.1 });
     if (!mv) {
       set({ botThinking: false });
       return;

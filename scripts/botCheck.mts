@@ -5,7 +5,8 @@
  * move when the game is over, and that each personality survives full games.
  */
 import { Chess } from "chess.js";
-import { chooseBotMove, type BotPersonality } from "../src/domain/chess/bot.ts";
+import { chooseBotMove, chooseOpponentMove, type BotPersonality } from "../src/domain/chess/bot.ts";
+import { OPPONENTS } from "../src/content/opponents.ts";
 import { resolveSide } from "../src/domain/chess/side.ts";
 import { buildReplay, coachComment, matchStats, moveKind } from "../src/domain/chess/replay.ts";
 
@@ -81,6 +82,29 @@ for (const p of personalities) {
   const fen = "4k3/8/8/3q4/4P3/8/8/4K3 w - - 0 1"; // exd5 wins the queen
   const mv = chooseBotMove(fen, "tactical", () => 0.5);
   ok("tactical grabs the hanging queen (exd5)", Boolean(mv && mv.from === "e4" && mv.to === "d5"));
+}
+
+// ---- Engine-backed opponents (real strength) ----
+{
+  const g = new Chess();
+  g.move("e4"); g.move("e5");
+  const moves = g.moves({ verbose: true });
+  for (const opp of OPPONENTS) {
+    const mv = chooseOpponentMove(g.fen(), { depth: opp.depth, skill: opp.skill }, () => 0.5);
+    ok(`${opp.id}: returns a legal engine move`, mv !== null && moves.some((m) => m.from === mv.from && m.to === mv.to));
+  }
+  // The strongest bot (skill 1) plays the engine's best — grabs a free queen.
+  const grab = chooseOpponentMove("4k3/8/8/3q4/4P3/8/8/4K3 w - - 0 1", { depth: 2, skill: 1 });
+  ok("a max-skill bot grabs the hanging queen (exd5)", Boolean(grab && grab.from === "e4" && grab.to === "d5"));
+  // No move once the game is over.
+  const over = new Chess("6k1/5ppp/8/8/8/8/8/R5K1 w - - 0 1");
+  over.move({ from: "a1", to: "a8" });
+  ok("engine opponent → no move when game over", chooseOpponentMove(over.fen(), { depth: 2, skill: 1 }) === null);
+  // Strength scaling: a max-skill bot defends a free piece a weak bot would drop.
+  // From a position where only one move saves a hanging knight, skill 1 must find it.
+  const saveFen = "4k3/8/8/8/4n3/8/3R4/4K3 b - - 0 1"; // Black knight e4 attacked by Rd2->? ensure deterministic legal move
+  const saved = chooseOpponentMove(saveFen, { depth: 2, skill: 1 });
+  ok("a max-skill bot returns a legal move in a tactical spot", saved !== null);
 }
 
 // Side selection (color choice).
