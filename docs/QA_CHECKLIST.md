@@ -129,3 +129,10 @@ Run through this on a real iPhone (Safari) and in desktop Chrome devtools at
 - [ ] Achievements show a "!" when claimable; claiming grants coins with a celebration; can't double-claim.
 - [ ] **Puzzle of the Day** card on Home → solving gives bonus coins + marks done; same puzzle all day.
 - [ ] Coins + owned cosmetics survive Export → Import (they're in the profile backup).
+
+## Engine: real opponents + post-game analysis (Sprint 23)
+- [ ] Bots scale by strength — Pip plays loosely; **Onyx/Sable** punish hanging pieces and basic tactics.
+- [ ] Bot replies stay snappy (≈ under a second); the "thinking" state shows while it searches.
+- [ ] Finish a game → **Game Review** shows **Your/Opponent accuracy %**, an **eval bar** that tracks each ply, per-move **quality tags** (Best…Blunder), and an **"Engine preferred: …"** hint on mistakes/blunders.
+- [ ] The move list dots are coloured by engine quality; stepping through plies updates the eval bar.
+- [ ] `npm run test:engine` passes (eval symmetry, mate/material, search finds mate-in-1 + free captures, analysis flags a blunder with a best move + accuracy).
