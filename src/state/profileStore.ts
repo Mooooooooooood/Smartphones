@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { levelInfo, streakWithFreeze, todayKey, type LevelInfo } from "@/domain/progression/leveling";
-import { DEFAULT_PUZZLE_RATING, DEFAULT_PLAY_RATING, eloUpdate, nextRating } from "@/domain/progression/rating";
+import { DEFAULT_PUZZLE_RATING, DEFAULT_PLAY_RATING, eloUpdate, nextRating, provisionalK } from "@/domain/progression/rating";
 import { bossById } from "@/content/academy";
 import type { AcademyState } from "@/domain/academy/progression";
 import {
@@ -87,6 +87,8 @@ interface ProfileState {
 
   // Sprint 3 — puzzle progress
   puzzleRating: number;
+  /** Peak puzzle rating ever reached (Sprint 24). */
+  bestPuzzleRating: number;
   solvedPuzzleIds: IdSet;
   attemptedPuzzleIds: IdSet;
 
@@ -147,6 +149,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
       streak: s.streak,
       lastActiveDate: s.lastActiveDate,
       puzzleRating: s.puzzleRating,
+      bestPuzzleRating: s.bestPuzzleRating,
       playRating: s.playRating,
       coins: s.coins,
       owned: s.owned,
@@ -192,6 +195,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
     lastActiveDate: null,
     completed: {},
     puzzleRating: DEFAULT_PUZZLE_RATING,
+    bestPuzzleRating: DEFAULT_PUZZLE_RATING,
     solvedPuzzleIds: {},
     attemptedPuzzleIds: {},
     bossCleared: {},
@@ -244,6 +248,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
         lastActiveDate: profile?.lastActiveDate ?? null,
         completed,
         puzzleRating: profile?.puzzleRating ?? DEFAULT_PUZZLE_RATING,
+        bestPuzzleRating: profile?.bestPuzzleRating ?? profile?.puzzleRating ?? DEFAULT_PUZZLE_RATING,
         solvedPuzzleIds,
         attemptedPuzzleIds,
         bossCleared,
@@ -331,7 +336,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
       const firstSolve = args.correct && !state.solvedPuzzleIds[args.puzzleId];
 
       const ratingAfter = firstAttempt
-        ? nextRating(ratingBefore, args.puzzleRating, args.correct)
+        ? nextRating(ratingBefore, args.puzzleRating, args.correct, provisionalK(Object.keys(state.attemptedPuzzleIds).length))
         : ratingBefore;
       const xpAwarded = firstSolve ? args.xpReward : 0;
 
@@ -346,6 +351,7 @@ export const useProfileStore = create<ProfileState>((set, get) => {
         streak: newStreak,
         lastActiveDate: newLastActive,
         puzzleRating: ratingAfter,
+        bestPuzzleRating: Math.max(state.bestPuzzleRating, ratingAfter),
         attemptedPuzzleIds: { ...state.attemptedPuzzleIds, [args.puzzleId]: true },
         solvedPuzzleIds: args.correct
           ? { ...state.solvedPuzzleIds, [args.puzzleId]: true }

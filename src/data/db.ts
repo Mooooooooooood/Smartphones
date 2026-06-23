@@ -24,6 +24,8 @@ export interface ProfileRow {
   lastActiveDate: string | null; // local day key, e.g. "2026-06-09"
   /** Puzzle rating (Sprint 3). Optional for rows written before v3. */
   puzzleRating?: number;
+  /** Highest puzzle rating ever reached (Sprint 24). Optional for older rows. */
+  bestPuzzleRating?: number;
   /** Play (bot match) rating (Sprint 7). Optional for older rows. */
   playRating?: number;
   /** Spendable coin balance (Sprint 18). Optional for older rows. */

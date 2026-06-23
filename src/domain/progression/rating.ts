@@ -18,6 +18,17 @@ export const PUZZLE_RATING_FLOOR = 100;
 /** Development factor. Beginners move faster than seasoned players would. */
 const K_FACTOR = 32;
 
+/**
+ * A calibrating K-factor: a player's first puzzles move their rating fast so it
+ * finds the right level quickly, then settles for stability. `attempts` is how
+ * many distinct puzzles they've already rated.
+ */
+export function provisionalK(attempts: number): number {
+  if (attempts < 15) return 48;
+  if (attempts < 40) return 32;
+  return 24;
+}
+
 /** Elo expected score for the player against a puzzle of `puzzleRating`. */
 export function expectedScore(playerRating: number, puzzleRating: number): number {
   return 1 / (1 + 10 ** ((puzzleRating - playerRating) / 400));
