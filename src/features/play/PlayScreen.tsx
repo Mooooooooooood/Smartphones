@@ -68,55 +68,85 @@ function RoundArrow({ hue }: { hue: PixelHue }) {
   );
 }
 
+/** Difficulty bands so the (now six) opponents stay scannable. */
+const OPP_GROUPS: { label: string; test: (rating: number) => boolean }[] = [
+  { label: "Learners", test: (r) => r <= 450 },
+  { label: "Challengers", test: (r) => r > 450 && r <= 1000 },
+  { label: "Masters", test: (r) => r > 1000 },
+];
+
+function OppRow({ o, onChoose }: { o: Opponent; onChoose: (id: string) => void }) {
+  return (
+    <button type="button" onClick={() => onChoose(o.id)} className="block w-full text-left active:translate-y-0.5">
+      <div className="px-inset flex items-center gap-2 px-2 py-1.5">
+        <PixelCharacterFrame hue={PIECE_HUE[o.piece] as "blue"} size={34} className="shrink-0">
+          <ChessBuddy piece={o.piece} size={26} palette={o.rival ? RIVAL_PALETTE : undefined} />
+        </PixelCharacterFrame>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <span className="truncate px-label text-[0.6rem] text-cream">{o.name}</span>
+            {o.recommended ? <span className="px-label rounded-[4px] border-2 border-[var(--px-edge)] bg-good px-1 py-0.5 text-[0.4rem] text-[color:var(--color-on-good)]">Start</span> : null}
+            {o.rival ? <span className="px-label rounded-[4px] border-2 border-[var(--px-edge)] bg-bad px-1 py-0.5 text-[0.4rem] text-[color:var(--color-on-bad)]">Rival</span> : null}
+          </div>
+          <span className="px-label text-[0.44rem] text-muted2">{o.level} · +{o.xpReward} XP</span>
+        </div>
+        <span className="px-inset shrink-0 px-1.5 py-0.5 text-[0.5rem] font-bold text-brass">~{o.rating}</span>
+        <span className="shrink-0 text-[0.7rem] text-brass" aria-hidden>›</span>
+      </div>
+    </button>
+  );
+}
+
 function OpponentSelect({ onChoose, onPractice }: { onChoose: (id: string) => void; onPractice: () => void }) {
+  const playRating = useProfileStore((s) => s.playRating);
+  const quick = [...OPPONENTS].sort((a, b) => Math.abs(a.rating - playRating) - Math.abs(b.rating - playRating))[0];
+
   return (
     <div className="space-y-2.5">
       <PixelTopBar />
-      <h1 className="px-title px-1 text-[1.4rem] leading-tight">Choose Your Challenger</h1>
-      <p className="px-1 text-[0.62rem] text-muted">Battle the guide cast — they only play legal moves.</p>
+      <h1 className="px-title px-1 text-[1.3rem] leading-tight">Play a Match</h1>
 
-      <div className="space-y-2.5">
-        {OPPONENTS.map((o) => (
-          <button key={o.id} type="button" onClick={() => onChoose(o.id)} className="block w-full text-left active:translate-y-0.5">
-            <PixelPanel hue={PIECE_HUE[o.piece]} glow={o.rival ? "reward" : undefined} className="flex items-center gap-2.5 px-2.5 py-2.5">
-              <PixelCharacterFrame hue={PIECE_HUE[o.piece] as "blue"} size={52} className="shrink-0">
-                <ChessBuddy piece={o.piece} size={42} palette={o.rival ? RIVAL_PALETTE : undefined} />
-              </PixelCharacterFrame>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <h2 className="truncate px-label text-[0.7rem] text-cream">{o.name}</h2>
-                  <span className="px-inset shrink-0 px-1 py-0.5 text-[0.5rem] font-bold text-muted">~{o.rating}</span>
-                </div>
-                <div className="mt-0.5 flex items-center gap-1.5">
-                  <span className="px-label text-[0.46rem] text-brass">{o.level}</span>
-                  <span className="px-label text-[0.46rem] text-good">+{o.xpReward} XP</span>
-                  {o.recommended ? (
-                    <span className="px-label rounded-[4px] border-2 border-[var(--px-edge)] bg-good px-1 py-0.5 text-[0.42rem] text-[color:var(--color-on-good)]">Start Here</span>
-                  ) : null}
-                  {o.rival ? (
-                    <span className="px-label rounded-[4px] border-2 border-[var(--px-edge)] bg-bad px-1 py-0.5 text-[0.42rem] text-[color:var(--color-on-bad)]">Rival</span>
-                  ) : null}
-                </div>
-                <p className="mt-0.5 truncate text-[0.6rem] text-muted2">{o.line}</p>
-              </div>
-              <RoundArrow hue={PIECE_HUE[o.piece]} />
-            </PixelPanel>
-          </button>
-        ))}
+      {/* Quick Match — matched to the player's level */}
+      <button type="button" onClick={() => onChoose(quick.id)} className="block w-full active:translate-y-0.5">
+        <PixelPanel hue="gold" rivets className="flex items-center gap-2.5 px-3 py-2.5">
+          <div className="px-inset flex h-12 w-12 shrink-0 items-center justify-center">
+            <ChessBuddy piece={quick.piece} size={36} palette={quick.rival ? RIVAL_PALETTE : undefined} />
+          </div>
+          <div className="min-w-0 flex-1 text-left">
+            <p className="px-label text-[0.6rem] text-brass">⚔ Quick Match</p>
+            <p className="truncate text-[0.56rem] text-muted2">Face {quick.name} — matched to your level (~{playRating})</p>
+          </div>
+          <RoundArrow hue="gold" />
+        </PixelPanel>
+      </button>
 
-        <button type="button" onClick={onPractice} className="block w-full text-left active:translate-y-0.5">
-          <PixelPanel hue="gray" className="flex items-center gap-2.5 px-2.5 py-2.5">
-            <PixelCharacterFrame hue="gray" size={48} className="shrink-0">
-              <ChessBuddy piece="bishop" size={38} />
-            </PixelCharacterFrame>
-            <div className="min-w-0 flex-1">
-              <h2 className="px-label text-[0.7rem] text-cream">Practice Board</h2>
-              <p className="text-[0.6rem] text-muted2">Free play — move both sides yourself</p>
+      {/* Full roster, grouped by difficulty + compact */}
+      <PixelPanel hue="none" label="Or pick an opponent" className="space-y-2 px-2.5 pb-2.5 pt-3">
+        {OPP_GROUPS.map((g) => {
+          const list = OPPONENTS.filter((o) => g.test(o.rating));
+          if (!list.length) return null;
+          return (
+            <div key={g.label} className="space-y-1">
+              <p className="px-label px-0.5 text-[0.46rem] text-muted2">{g.label}</p>
+              {list.map((o) => <OppRow key={o.id} o={o} onChoose={onChoose} />)}
             </div>
-            <RoundArrow hue="gray" />
-          </PixelPanel>
-        </button>
-      </div>
+          );
+        })}
+      </PixelPanel>
+
+      {/* Practice — free play */}
+      <button type="button" onClick={onPractice} className="block w-full text-left active:translate-y-0.5">
+        <div className="px-inset flex items-center gap-2 px-2 py-1.5">
+          <PixelCharacterFrame hue="gray" size={34} className="shrink-0">
+            <ChessBuddy piece="bishop" size={26} />
+          </PixelCharacterFrame>
+          <div className="min-w-0 flex-1">
+            <span className="px-label text-[0.6rem] text-cream">Practice Board</span>
+            <p className="text-[0.44rem] text-muted2">Free play — move both sides yourself</p>
+          </div>
+          <span className="shrink-0 text-[0.7rem] text-brass" aria-hidden>›</span>
+        </div>
+      </button>
     </div>
   );
 }
