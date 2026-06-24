@@ -5,8 +5,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:static": "BUILD_STATIC=1 next build",
+    "cap:sync": "npm run build:static && npx --yes cap sync",
     "start": "next start",
     "lint": "eslint",
+    "test:a11y": "npx --yes tsx scripts/a11yCheck.mts",
     "test:rules": "npx --yes tsx scripts/chessRulesCheck.mts",
     "test:bot": "npx --yes tsx scripts/botCheck.mts",
     "test:pwa": "npx --yes tsx scripts/pwaCheck.mts",
@@ -35,6 +38,10 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/cli": "^8.4.1",
+    "@capacitor/core": "^8.4.1",
+    "@capacitor/ios": "^8.4.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
