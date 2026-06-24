@@ -1,4 +1,4 @@
-# The Rang — Retro Chess Quest
+# Pawnquest — Retro Chess Quest
 
 **Learn chess as a pixel quest.** A cozy retro pixel-art chess adventure for
 mobile — an Academy, daily puzzles with Smart Review, and replayable battles

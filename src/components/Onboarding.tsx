@@ -32,7 +32,7 @@ type Slide =
   | { kind: "setup" };
 
 const SLIDES: Slide[] = [
-  { kind: "info", art: <CapedHero size={72} />, title: "Welcome to The Rang", body: "Learn chess as a cozy pixel adventure. First, let's set you up." },
+  { kind: "info", art: <CapedHero size={72} />, title: "Welcome to Pawnquest", body: "Learn chess as a cozy pixel adventure. First, let's set you up." },
   { kind: "setup" },
   { kind: "info", art: <ChessBuddy piece="pawn" size={64} />, title: "1 · Learn in Academy", body: "Follow the world map. Each stage teaches a move with a quick hands-on board." },
   { kind: "info", art: <ChessBuddy piece="knight" size={64} />, title: "2 · Puzzles & Battles", body: "Sharpen tactics in the Puzzle arena, then challenge the guide cast in Play." },

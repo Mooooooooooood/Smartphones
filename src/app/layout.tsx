@@ -22,11 +22,11 @@ const body = Pixelify_Sans({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
-  applicationName: "The Rang",
-  title: { default: "The Rang — Retro Chess Quest", template: "%s · The Rang" },
+  applicationName: "Pawnquest",
+  title: { default: "Pawnquest — Retro Chess Quest", template: "%s · Pawnquest" },
   description: "A retro pixel-art chess adventure — lessons, puzzles, and battles.",
   manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "The Rang" },
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Pawnquest" },
   icons: {
     icon: [
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
@@ -36,15 +36,15 @@ export const metadata: Metadata = {
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
   openGraph: {
-    title: "The Rang — Retro Chess Quest",
+    title: "Pawnquest — Retro Chess Quest",
     description: "Learn chess as a pixel quest — an Academy, daily puzzles, and battles. Fully offline.",
     type: "website",
-    siteName: "The Rang",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "The Rang — Learn chess as a pixel quest" }],
+    siteName: "Pawnquest",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Pawnquest — Learn chess as a pixel quest" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "The Rang — Retro Chess Quest",
+    title: "Pawnquest — Retro Chess Quest",
     description: "Learn chess as a pixel quest — an Academy, daily puzzles, and battles. Fully offline.",
     images: ["/og-image.png"],
   },

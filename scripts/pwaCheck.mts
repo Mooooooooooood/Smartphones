@@ -26,8 +26,8 @@ function check(desc: string, got: unknown, want: unknown) {
 
 // ---- Manifest ----
 const manifest = JSON.parse(readFileSync(join(root, "public/manifest.webmanifest"), "utf8"));
-check("manifest name is The Rang", manifest.name, "The Rang");
-check("manifest short_name is The Rang", manifest.short_name, "The Rang");
+check("manifest name is Pawnquest", manifest.name, "Pawnquest");
+check("manifest short_name is Pawnquest", manifest.short_name, "Pawnquest");
 check("manifest has description", typeof manifest.description === "string" && manifest.description.length > 0, true);
 check("manifest start_url is /", manifest.start_url, "/");
 check("manifest scope is /", manifest.scope, "/");

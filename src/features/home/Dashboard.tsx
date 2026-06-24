@@ -138,9 +138,9 @@ export default function Dashboard() {
           {/* guide characters flanking the wordmark */}
           <ChessBuddy piece="rook" size={40} className="tab-bob absolute bottom-0 left-1.5" />
           <ChessBuddy piece="knight" size={32} className="absolute bottom-0 right-2" />
-          <h1 className="px-title relative flex items-baseline gap-1 leading-none">
-            <span className="text-[0.95rem]">The</span>
-            <span className="text-[2.3rem]">Rang</span>
+          <h1 className="px-title relative flex items-baseline leading-none">
+            <span className="text-[1.7rem]">Pawn</span>
+            <span className="text-[1.7rem] text-brass">quest</span>
           </h1>
         </div>
 

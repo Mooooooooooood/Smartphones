@@ -67,7 +67,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8"/>
   <span class="rivet bl"></span><span class="rivet br"></span>
   <div class="left">
     <div class="eyebrow">&#9733; RETRO CHESS QUEST</div>
-    <h1 class="wordmark">The <span>Rang</span></h1>
+    <h1 class="wordmark">Pawn<span>quest</span></h1>
     <p class="tag">Learn chess as a pixel quest.</p>
     <div class="features">Academy &middot; Daily Puzzles &middot; Battles</div>
     <div class="pill">&#9759; WORKS OFFLINE &middot; NO ADS</div>

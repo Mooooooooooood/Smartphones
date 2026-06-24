@@ -15,7 +15,7 @@ const FEATURES: { piece: BuddyPiece; title: string; desc: string }[] = [
 ];
 
 const SHOTS = [
-  { src: "/screenshots/home.png", alt: "The Rang home screen" },
+  { src: "/screenshots/home.png", alt: "Pawnquest home screen" },
   { src: "/screenshots/puzzles.png", alt: "Tactics puzzle screen" },
   { src: "/screenshots/play.png", alt: "Playing a match" },
 ];
@@ -29,9 +29,9 @@ export default function AboutPage() {
           style={{ background: "linear-gradient(180deg, var(--sky-1), var(--sky-2))" }}>
           <ChessBuddy piece="knight" size={40} className="absolute left-3 bottom-0" />
           <span className="tab-twinkle absolute right-4 top-1.5 text-[0.7rem] text-sun" aria-hidden>✦</span>
-          <h1 className="px-title flex items-baseline gap-1 leading-none">
-            <span className="text-[0.95rem]">The</span>
-            <span className="text-[2.1rem]">Rang</span>
+          <h1 className="px-title flex items-baseline leading-none">
+            <span className="text-[1.6rem]">Pawn</span>
+            <span className="text-[1.6rem] text-brass">quest</span>
           </h1>
         </div>
         <p className="mt-2 text-[0.66rem] leading-snug text-cream">Learn chess as a pixel quest.</p>
@@ -72,7 +72,7 @@ export default function AboutPage() {
       <PixelPanel hue="green" className="px-2.5 py-2.5 text-center">
         <p className="px-label text-[0.56rem] text-good">Play like an app</p>
         <p className="mt-1 text-[0.54rem] leading-snug text-muted2">
-          In Safari, tap <span className="text-cream">Share</span> → <span className="text-cream">Add to Home Screen</span> to install The Rang.
+          In Safari, tap <span className="text-cream">Share</span> → <span className="text-cream">Add to Home Screen</span> to install Pawnquest.
           It works fully offline and your progress stays on your device.
         </p>
       </PixelPanel>

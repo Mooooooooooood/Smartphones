@@ -214,7 +214,7 @@ export default function ProfileScreen() {
         <span className="flex items-center justify-center gap-2"><GearGlyph size={14} /> SETTINGS ›</span>
       </PixelButton>
 
-      <Link href="/about" className="px-label mx-auto block w-fit pt-1 text-[0.5rem] text-muted2">About The Rang ›</Link>
+      <Link href="/about" className="px-label mx-auto block w-fit pt-1 text-[0.5rem] text-muted2">About Pawnquest ›</Link>
 
       <PixelSettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <NameEditModal open={nameOpen} onClose={() => setNameOpen(false)} />

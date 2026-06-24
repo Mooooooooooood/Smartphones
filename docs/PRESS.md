@@ -1,15 +1,15 @@
-# The Rang — Press Kit
+# Pawnquest — Press Kit
 
 > **Learn chess as a pixel quest.** A cozy retro pixel-art chess adventure for
 > mobile — lessons, daily puzzles, and battles, fully offline.
 
 ## One-liner
-The Rang turns learning chess into a charming 8-bit RPG: study bite-size
+Pawnquest turns learning chess into a charming 8-bit RPG: study bite-size
 lessons, solve a fresh puzzle every day, and battle characterful guide bots —
 all on your phone, all offline, no accounts and no ads.
 
 ## Description (short)
-The Rang is a mobile-first chess-learning game styled like a cozy arcade RPG.
+Pawnquest is a mobile-first chess-learning game styled like a cozy arcade RPG.
 An Academy teaches you from the pieces up; a Tactics Arena sharpens your eye with
 original puzzles; a Smart Review quietly resurfaces the puzzles you got wrong so
 they actually stick. Play guide characters, then replay the game move-by-move
@@ -48,4 +48,4 @@ Next.js (App Router) · React · TypeScript · Tailwind · Zustand · IndexedDB
 (Dexie) · chess.js · react-chessboard. No server, no backend.
 
 ## Contact
-The Rang — built in controlled sprints. See `README.md` for build instructions.
+Pawnquest — built in controlled sprints. See `README.md` for build instructions.

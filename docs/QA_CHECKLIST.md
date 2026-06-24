@@ -1,4 +1,4 @@
-# The Rang — Manual QA Checklist
+# Pawnquest — Manual QA Checklist
 
 Run through this on a real iPhone (Safari) and in desktop Chrome devtools at
 **390px** and **430px** widths. Tick each item before a release.

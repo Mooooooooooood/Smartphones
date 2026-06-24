@@ -1,5 +1,5 @@
 /**
- * The Rang guide characters. The cast metadata lives here; the visual is a
+ * Pawnquest guide characters. The cast metadata lives here; the visual is a
  * pixel-art sprite (see PixelSprite) so every `<ChessBuddy>` across the app
  * renders as a retro mascot automatically.
  */

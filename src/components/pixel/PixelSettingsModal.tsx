@@ -170,9 +170,9 @@ export default function PixelSettingsModal({ open, onClose }: { open: boolean; o
 
         {/* Install */}
         <div className="px-panel space-y-1.5 px-3 py-3">
-          <p className="px-label text-[0.5rem] text-brass">Add The Rang to your iPhone</p>
+          <p className="px-label text-[0.5rem] text-brass">Add Pawnquest to your iPhone</p>
           <ol className="space-y-0.5 text-[0.6rem] leading-relaxed text-muted">
-            <li>1. Open The Rang in <span className="text-cream">Safari</span>.</li>
+            <li>1. Open Pawnquest in <span className="text-cream">Safari</span>.</li>
             <li>2. Tap <span className="text-cream">Share</span> (square with an arrow).</li>
             <li>3. Choose <span className="text-cream">Add to Home Screen</span>.</li>
             <li>4. Tap <span className="text-cream">Add</span> — it opens like an app.</li>
@@ -196,7 +196,7 @@ export default function PixelSettingsModal({ open, onClose }: { open: boolean; o
         {/* About */}
         <div className="px-panel space-y-1 px-3 py-3">
           <p className="px-label text-[0.5rem] text-brass">About</p>
-          <p className="text-[0.6rem] leading-relaxed text-muted">The Rang is a retro pixel-art chess adventure — learn the moves, solve puzzles, and battle the guide cast. Progress is saved privately on your device.</p>
+          <p className="text-[0.6rem] leading-relaxed text-muted">Pawnquest is a retro pixel-art chess adventure — learn the moves, solve puzzles, and battle the guide cast. Progress is saved privately on your device.</p>
           <div className="flex items-center justify-between pt-0.5 text-[0.56rem] text-muted2">
             <span>Version {APP_VERSION}</span>
             <Link href="/" onClick={onClose} className="text-brass">Home</Link>

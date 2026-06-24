@@ -1,7 +1,7 @@
 import type { BuddyPiece } from "@/components/characters/ChessBuddy";
 
 /**
- * The Rang guide cast — each guide has a colour identity, a home section, and a
+ * Pawnquest guide cast — each guide has a colour identity, a home section, and a
  * role, so characters never appear at random. Gold is the player; red is the
  * elite rival. This registry is the single source of truth for "who owns what".
  */
