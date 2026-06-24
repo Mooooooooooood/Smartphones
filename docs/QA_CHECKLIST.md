@@ -150,3 +150,15 @@ Run through this on a real iPhone (Safari) and in desktop Chrome devtools at
 - [ ] A correct book move advances with its teaching note; a wrong move snaps back with "not the book move".
 - [ ] Completing the line shows "Line complete!" and awards coins **once** (a re-play doesn't re-award).
 - [ ] `npm run test:openings` passes (lines legal, learner colour correct, moves are not engine blunders).
+
+## Production hardening: accessibility & packaging (Sprint 28)
+- [ ] Tab through any screen with a keyboard — every focusable control shows a
+      visible focus ring (blue, or ink on gold). Mouse/touch users see no ring.
+- [ ] On load, pressing Tab first reveals a **Skip to content** link that jumps
+      focus past the chrome into the main region.
+- [ ] Modals close with the **Escape** key, not only the backdrop tap.
+- [ ] Name inputs (onboarding + rename) are announced by a screen reader.
+- [ ] `npm run test:a11y` passes (focus/skip/sr-only/reduced-motion + packaging).
+- [ ] `npm run build:static` emits `out/` (48 static pages, SW, manifest).
+- [ ] Native shell: `npx cap add ios|android` → `npm run cap:sync` →
+      `npx cap open …` launches Pawnquest. See `docs/PACKAGING.md`.
