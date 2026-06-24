@@ -26,6 +26,9 @@
     "shots": "node scripts/storeShots.mjs",
     "og": "node scripts/ogImage.mjs",
     "genmusic": "node scripts/genMusic.mjs",
+    "genicon": "npx --yes tsx scripts/genIconArt.mts",
+    "genicons": "npx --yes tsx scripts/genIcons.mts",
+    "genfavicon": "npx --yes tsx scripts/genFavicon.mts",
     "genpuzzles": "npx --yes tsx scripts/genPuzzles.mts"
   },
   "dependencies": {
