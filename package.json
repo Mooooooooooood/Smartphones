@@ -18,6 +18,7 @@
     "test:review": "npx --yes tsx scripts/reviewCheck.mts",
     "test:engine": "npx --yes tsx scripts/engineCheck.mts",
     "test:ladder": "npx --yes tsx scripts/ladderCheck.mts",
+    "test:openings": "npx --yes tsx scripts/openingCheck.mts",
     "baseline": "node scripts/screenshotBaseline.mjs",
     "shots": "node scripts/storeShots.mjs",
     "og": "node scripts/ogImage.mjs",

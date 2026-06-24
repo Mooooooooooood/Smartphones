@@ -228,6 +228,18 @@ export default function Dashboard() {
         </PixelPanel>
       </Link>
 
+      {/* Opening Trainer — learn repertoires move by move */}
+      <Link href="/openings" className="block active:translate-y-0.5">
+        <PixelPanel hue="blue" className="flex items-center gap-2.5 px-2.5 py-2">
+          <span className="text-[1.1rem]" aria-hidden>📖</span>
+          <div className="min-w-0 flex-1">
+            <p className="px-label text-[0.52rem] text-brass">Opening Trainer</p>
+            <p className="text-[0.56rem] text-muted2">Learn the Italian, London &amp; Scandinavian</p>
+          </div>
+          <span className="px-label rounded-[5px] border-2 border-[var(--px-edge)] bg-[var(--color-sky)] px-2 py-1 text-[0.52rem] text-[color:var(--color-on-blue)]">LEARN ›</span>
+        </PixelPanel>
+      </Link>
+
       {/* Rated Climb — puzzles at your level, rating goes up/down */}
       <Link href="/puzzles?climb=1" className="block active:translate-y-0.5">
         <PixelPanel hue="purple" className="flex items-center gap-2.5 px-2.5 py-2">

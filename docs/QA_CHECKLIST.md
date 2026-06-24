@@ -143,3 +143,10 @@ Run through this on a real iPhone (Safari) and in desktop Chrome devtools at
 - [ ] Solving an unseen puzzle moves the rating; early puzzles move it faster (calibrating K), and your **Best** only ever rises.
 - [ ] The climb serves puzzles **near your rating** (and gently above), skipping ones you've already solved.
 - [ ] `npm run test:ladder` (tiers/K/climb queue) and `npm run test:engine` (puzzle soundness) pass.
+
+## Opening Trainer (Sprint 26)
+- [ ] Home shows an **Opening Trainer** card → `/openings` lists the Italian, London (White) and Scandinavian (Black) with Learned badges.
+- [ ] Opening a repertoire shows a board; the **opponent's book replies auto-play**, and you play your colour's moves.
+- [ ] A correct book move advances with its teaching note; a wrong move snaps back with "not the book move".
+- [ ] Completing the line shows "Line complete!" and awards coins **once** (a re-play doesn't re-award).
+- [ ] `npm run test:openings` passes (lines legal, learner colour correct, moves are not engine blunders).
