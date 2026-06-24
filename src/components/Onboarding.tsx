@@ -81,6 +81,7 @@ export default function Onboarding() {
                 maxLength={14}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your name"
+                aria-label="Hero name"
                 className="px-inset mt-3 w-full bg-transparent px-3 py-2.5 text-center text-[0.85rem] text-cream outline-none"
                 style={{ fontFamily: "var(--font-body)" }}
               />

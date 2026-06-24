@@ -68,8 +68,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className="min-h-full">
+        <a href="#main" className="skip-link">Skip to content</a>
         <div id="tabiya-root" className="mx-auto flex min-h-dvh w-full max-w-md flex-col">
-          <main className="flex-1 px-3.5 pb-[84px] pt-[max(0.85rem,env(safe-area-inset-top))]">{children}</main>
+          <main id="main" tabIndex={-1} className="flex-1 px-3.5 pb-[84px] pt-[max(0.85rem,env(safe-area-inset-top))]">{children}</main>
           <PixelBottomNav />
         </div>
         <PixelShell />

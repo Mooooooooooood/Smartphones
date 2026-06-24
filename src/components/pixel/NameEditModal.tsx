@@ -26,6 +26,7 @@ export default function NameEditModal({ open, onClose }: { open: boolean; onClos
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") save(); }}
             placeholder="Player"
+            aria-label="Player name"
             className="px-inset mt-3 w-full bg-transparent px-3 py-2.5 text-center text-[0.85rem] text-cream outline-none"
             style={{ fontFamily: "var(--font-body)" }}
           />

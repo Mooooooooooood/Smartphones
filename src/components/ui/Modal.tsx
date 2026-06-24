@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import type { ReactNode } from "react";
 
 /**
@@ -22,11 +23,19 @@ export default function Modal({
   z?: number;
   className?: string;
 }) {
+  useEffect(() => {
+    if (!open || !onClose) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
   if (!open) return null;
   return (
     <div
       className="fixed inset-0 grid place-items-center bg-[rgba(4,6,20,0.55)] p-4 backdrop-blur-sm"
       style={{ zIndex: z }}
+      role="presentation"
       onClick={dismissOnBackdrop ? onClose : undefined}
     >
       <div className={`w-full max-w-[320px] ${className}`} onClick={(e) => e.stopPropagation()}>

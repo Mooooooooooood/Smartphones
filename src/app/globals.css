@@ -528,7 +528,9 @@ body::before {
 .tab-drift { animation: tab-drift 9s ease-in-out infinite alternate; }
 
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
   .tab-skeleton::after,
+  .tab-shimmer,
   .tab-animate-pop,
   .tab-animate-rise,
   .tab-flame-icon,
@@ -539,5 +541,58 @@ body::before {
   .tab-twinkle,
   .tab-drift,
   .tab-navbounce,
-  .tab-shake { animation: none; }
+  .tab-shake { animation: none !important; }
+  /* Keep width/opacity transitions instant for motion-sensitive users. */
+  .px-track-fill { transition: none; }
+}
+
+/* ============================================================
+   ACCESSIBILITY — focus, skip link, screen-reader utilities
+   ============================================================ */
+
+/* Visible keyboard / switch focus ring on every interactive element.
+   Mouse/touch users never see it (:focus-visible), so the retro look is
+   untouched while keyboard users finally get a clear focus indicator. */
+:where(a, button, input, select, textarea, [tabindex], [role="button"]):focus-visible {
+  outline: 3px solid var(--color-sky);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+/* On gold/brass surfaces the blue ring can blend in — use ink for contrast. */
+.px-btn:focus-visible,
+[style*="--color-brass"]:focus-visible {
+  outline-color: var(--px-edge);
+}
+
+/* Visually hide content but keep it for screen readers. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip-to-content link: off-screen until focused, then pinned top-centre. */
+.skip-link {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  z-index: 100;
+  transform: translate(-50%, -120%);
+  background: var(--color-brass);
+  color: var(--color-on-accent);
+  border: 2px solid var(--px-edge);
+  border-radius: 0 0 6px 6px;
+  padding: 0.5rem 1rem;
+  font-family: var(--font-press), monospace;
+  font-size: 0.6rem;
+  transition: transform 0.15s ease;
+}
+.skip-link:focus {
+  transform: translate(-50%, 0);
 }

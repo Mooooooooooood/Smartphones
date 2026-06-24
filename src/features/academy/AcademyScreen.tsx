@@ -146,7 +146,7 @@ function TierWorld({
           </Link>
 
           {/* Treasure */}
-          <button type="button" onClick={midReady ? onClaimMid : undefined} className="absolute" style={{ right: "8%", bottom: "44%" }}>
+          <button type="button" onClick={midReady ? onClaimMid : undefined} aria-label={midReady ? "Claim mid-tier treasure reward" : "Mid-tier treasure (locked)"} className="absolute" style={{ right: "8%", bottom: "44%" }}>
             <div className="flex flex-col items-center">
               <PixelOrnateChest state={tier === 0 && midClaimed ? "open" : midReady ? "ready" : "locked"} size={44} />
               <span className="px-label rounded-[3px] border border-[var(--px-edge)] bg-[#5a3a18] px-1 text-[0.5rem] text-[#ffe0a0]">Treasure</span>
