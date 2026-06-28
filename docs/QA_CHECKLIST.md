@@ -162,3 +162,15 @@ Run through this on a real iPhone (Safari) and in desktop Chrome devtools at
 - [ ] `npm run build:static` emits `out/` (48 static pages, SW, manifest).
 - [ ] Native shell: `npx cap add ios|android` → `npm run cap:sync` →
       `npx cap open …` launches Pawnquest. See `docs/PACKAGING.md`.
+
+## Opening Trainer: branching + review (Sprint 29)
+- [ ] Openings list shows 6 repertoires; branching ones show "· N lines".
+- [ ] In a branching opening (e.g. Italian), restart a few times — the opponent
+      plays different sound replies and the coached line adapts.
+- [ ] A wrong learner move shows "not the book move"; the correct one advances
+      and the last move is highlighted.
+- [ ] Finishing a line marks it Learned (+40 coins first time) and, with >1 line,
+      prompts "Drill again" to see the other variations.
+- [ ] After learning, the opening shows "↻ REVIEW" on the list and the home card
+      shows "N openings due for review" once its review interval elapses.
+- [ ] `npm run test:openings` passes (every variation legal, learner moves sound).
