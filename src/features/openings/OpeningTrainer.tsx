@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Chess, type Square } from "chess.js";
-import type { Opening } from "@/content/openings";
-import { isLearnerTurn } from "@/content/openings";
+import type { Opening, OpeningNode } from "@/content/openings";
+import { isLearnerTurn, candidatesAt, enumeratePaths, variationCount } from "@/content/openings";
 import { useProfileStore } from "@/state/profileStore";
 import { markOpeningLearned } from "@/lib/openingProgress";
+import { recordOpeningRep } from "@/lib/openingReview";
 import { fx } from "@/lib/feedback";
 import PixelTopBar from "@/components/pixel/PixelTopBar";
 import PixelPanel from "@/components/pixel/PixelPanel";
@@ -23,37 +24,50 @@ const REWARD = 40;
 export default function OpeningTrainer({ opening }: { opening: Opening }) {
   const router = useRouter();
   const [fen, setFen] = useState(START_FEN);
-  const [ply, setPly] = useState(0);
+  const [path, setPath] = useState<OpeningNode[]>([]);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(null);
   const rewarded = useRef(false);
 
-  const total = opening.line.length;
-  const done = ply >= total;
+  const maxLen = useMemo(() => Math.max(...enumeratePaths(opening.tree).map((p) => p.length)), [opening]);
+  const variations = useMemo(() => variationCount(opening), [opening]);
+
+  const ply = path.length;
+  const candidates = candidatesAt(opening, path);
+  const done = candidates.length === 0;
   const learnerToMove = !done && isLearnerTurn(opening, ply);
-  const note = learnerToMove ? opening.line[ply].note : ply > 0 ? opening.line[ply - 1].note : undefined;
+  const note = learnerToMove ? candidates[0]?.note : undefined;
 
   function restart() {
     rewarded.current = false;
     setFen(START_FEN);
-    setPly(0);
+    setPath([]);
     setFeedback(null);
+    setLastMove(null);
   }
 
-  // Auto-play the opponent's book replies.
+  // Auto-play the opponent's book reply — randomly among sound variations.
   useEffect(() => {
-    if (done || isLearnerTurn(opening, ply)) return;
+    if (done || learnerToMove) return;
     const t = setTimeout(() => {
+      const replies = candidatesAt(opening, path);
+      const reply = replies[Math.floor(Math.random() * replies.length)];
       const g = new Chess(fen);
-      const m = g.move(opening.line[ply].san);
-      if (m) { setFen(g.fen()); setPly((p) => p + 1); }
+      const m = g.move(reply.san);
+      if (m) {
+        setFen(g.fen());
+        setLastMove({ from: m.from, to: m.to });
+        setPath((p) => [...p, reply]);
+      }
     }, 650);
     return () => clearTimeout(t);
-  }, [ply, done, fen, opening]);
+  }, [done, learnerToMove, opening, path, fen]);
 
-  // Completion reward (side-effect only — no setState).
+  // Completion: record a spaced-repetition rep; reward the first time learned.
   useEffect(() => {
     if (!done || rewarded.current) return;
     rewarded.current = true;
+    recordOpeningRep(opening.id, true);
     if (markOpeningLearned(opening.id)) {
       fx.chest();
       void useProfileStore.getState().addCoins(REWARD);
@@ -68,9 +82,11 @@ export default function OpeningTrainer({ opening }: { opening: Opening }) {
     let san: string | null = null;
     try { san = probe.move({ from, to, promotion: "q" })?.san ?? null; } catch { san = null; }
     if (!san) return false;
-    if (san === opening.line[ply].san) {
+    const match = candidates.find((c) => c.san === san);
+    if (match) {
       setFen(probe.fen());
-      setPly((p) => p + 1);
+      setLastMove({ from, to });
+      setPath((p) => [...p, match]);
       setFeedback(null);
       fx.correct();
       return true;
@@ -102,7 +118,11 @@ export default function OpeningTrainer({ opening }: { opening: Opening }) {
           <ChessBuddy piece={opening.guide} size={32} className="tab-bob shrink-0" />
           <div className="min-w-0 flex-1">
             <p className="px-label text-[0.56rem] text-good">Line complete! 🎉</p>
-            <p className="text-[0.58rem] text-muted2">You have learned the main line of the {opening.name}. Play it in your next game!</p>
+            <p className="text-[0.58rem] text-muted2">
+              {variations > 1
+                ? "Nice — that's one variation. Drill again to see how the opponent's other replies are met."
+                : `You have learned the main line of the ${opening.name}. Play it in your next game!`}
+            </p>
           </div>
         </PixelPanel>
       ) : (
@@ -116,21 +136,21 @@ export default function OpeningTrainer({ opening }: { opening: Opening }) {
 
       {/* Progress */}
       <div className="px-inset flex items-center gap-2 px-2.5 py-1.5">
-        <span className="px-label text-[0.46rem] text-muted2">Move {Math.min(ply + (done ? 0 : 1), total)}/{total}</span>
-        <div className="px-track h-2 flex-1"><div className="px-track-fill" style={{ width: `${Math.round((ply / total) * 100)}%`, "--fill": "var(--color-good)" } as React.CSSProperties} /></div>
+        <span className="px-label text-[0.46rem] text-muted2">Move {ply}</span>
+        <div className="px-track h-2 flex-1"><div className="px-track-fill" style={{ width: `${Math.round((ply / maxLen) * 100)}%`, "--fill": "var(--color-good)" } as React.CSSProperties} /></div>
         {learnerToMove ? <span className="px-label text-[0.46rem] text-brass">Your turn</span> : null}
       </div>
 
       {/* Board */}
       <div className="px-board-frame">
         <div className="tabiya-board-wrap overflow-hidden rounded-[4px]">
-          <TrainerBoard fen={fen} orientation={opening.side} onMove={onMove} disabled={!learnerToMove} />
+          <TrainerBoard fen={fen} orientation={opening.side} onMove={onMove} disabled={!learnerToMove} lastMove={lastMove} />
         </div>
       </div>
 
       {/* Actions */}
       <div className="grid grid-cols-2 gap-2">
-        <PixelButton onClick={restart} variant="secondary" size="sm">↺ Restart</PixelButton>
+        <PixelButton onClick={restart} variant="secondary" size="sm">{done && variations > 1 ? "↺ Drill again" : "↺ Restart"}</PixelButton>
         <PixelButton onClick={() => router.push("/openings")} tone={done ? "green" : undefined} variant={done ? "solid" : "secondary"} size="sm">{done ? "More openings →" : "Back"}</PixelButton>
       </div>
     </div>

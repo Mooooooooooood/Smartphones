@@ -23,6 +23,8 @@ import { displayName, usePlayerName, usePlayerPiece } from "@/lib/playerIdentity
 import { pieceTitle } from "@/content/pieceUnlocks";
 import { useDailyPuzzleDone } from "@/domain/training/dailyPuzzle";
 import { missedPuzzleIds } from "@/domain/training/srs";
+import { useLearnedOpenings } from "@/lib/openingProgress";
+import { useOpeningReviewCards, dueOpeningIds } from "@/lib/openingReview";
 import { fx } from "@/lib/feedback";
 
 function QuestRow({ label, done, coin }: { label: string; done: boolean; coin: number }) {
@@ -89,6 +91,9 @@ export default function Dashboard() {
   const dailyRaw = useProfileStore((s) => s.daily);
   const claimDailyBonus = useProfileStore((s) => s.claimDailyBonus);
   const matches = useProfileStore((s) => s.matches);
+  const learnedOpenings = useLearnedOpenings();
+  const openingCards = useOpeningReviewCards();
+  const openingsDue = dueOpeningIds(learnedOpenings, openingCards).length;
 
   useEffect(() => {
     void usePuzzleStore.getState().hydrate();
@@ -234,9 +239,9 @@ export default function Dashboard() {
           <span className="text-[1.1rem]" aria-hidden>📖</span>
           <div className="min-w-0 flex-1">
             <p className="px-label text-[0.52rem] text-brass">Opening Trainer</p>
-            <p className="text-[0.56rem] text-muted2">Learn the Italian, London &amp; Scandinavian</p>
+            <p className="text-[0.56rem] text-muted2">{openingsDue > 0 ? `↻ ${openingsDue} opening${openingsDue === 1 ? "" : "s"} due for review` : "Learn 6 repertoires with branching lines"}</p>
           </div>
-          <span className="px-label rounded-[5px] border-2 border-[var(--px-edge)] bg-[var(--color-sky)] px-2 py-1 text-[0.52rem] text-[color:var(--color-on-blue)]">LEARN ›</span>
+          <span className="px-label rounded-[5px] border-2 border-[var(--px-edge)] bg-[var(--color-sky)] px-2 py-1 text-[0.52rem] text-[color:var(--color-on-blue)]">{openingsDue > 0 ? "REVIEW ›" : "LEARN ›"}</span>
         </PixelPanel>
       </Link>
 
