@@ -13,9 +13,20 @@ const KEY = "rang-openings-srs";
 const listeners = new Set<() => void>();
 const EMPTY: Record<string, ReviewCard> = {};
 
+// Cache the parsed snapshot so useSyncExternalStore gets a STABLE reference when
+// the stored string is unchanged — returning a fresh object each call triggers
+// an infinite render loop ("getSnapshot should be cached").
+let cacheRaw: string | null = null;
+let cacheVal: Record<string, ReviewCard> = EMPTY;
+
 function read(): Record<string, ReviewCard> {
   if (typeof localStorage === "undefined") return EMPTY;
-  try { return JSON.parse(localStorage.getItem(KEY) ?? "{}") || EMPTY; } catch { return EMPTY; }
+  let raw: string;
+  try { raw = localStorage.getItem(KEY) ?? "{}"; } catch { return EMPTY; }
+  if (raw === cacheRaw) return cacheVal;
+  cacheRaw = raw;
+  try { cacheVal = JSON.parse(raw) || EMPTY; } catch { cacheVal = EMPTY; }
+  return cacheVal;
 }
 
 function write(cards: Record<string, ReviewCard>) {

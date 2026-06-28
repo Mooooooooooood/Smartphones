@@ -11,9 +11,20 @@ const KEY = "rang-openings-learned";
 const listeners = new Set<() => void>();
 const EMPTY: Record<string, true> = {};
 
+// Cache the parsed snapshot so useSyncExternalStore gets a STABLE reference when
+// the stored string is unchanged (otherwise it loops: "getSnapshot should be
+// cached"). A new reference is only produced when the data actually changes.
+let cacheRaw: string | null = null;
+let cacheVal: Record<string, true> = EMPTY;
+
 function read(): Record<string, true> {
   if (typeof localStorage === "undefined") return EMPTY;
-  try { return JSON.parse(localStorage.getItem(KEY) ?? "{}") || EMPTY; } catch { return EMPTY; }
+  let raw: string;
+  try { raw = localStorage.getItem(KEY) ?? "{}"; } catch { return EMPTY; }
+  if (raw === cacheRaw) return cacheVal;
+  cacheRaw = raw;
+  try { cacheVal = JSON.parse(raw) || EMPTY; } catch { cacheVal = EMPTY; }
+  return cacheVal;
 }
 
 export function isOpeningLearned(id: string): boolean {
