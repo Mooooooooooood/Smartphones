@@ -3,6 +3,7 @@ import type { Chess } from "chess.js";
 import type { Color, Square } from "chess.js";
 import { createGame, legalTargets, snapshot, tryMove } from "@/domain/chess/engine";
 import { chooseOpponentMove } from "@/domain/chess/bot";
+import { searchBestMove } from "@/domain/chess/search";
 import type { GameSnapshot } from "@/domain/chess/types";
 import { loadActiveGame, saveActiveGame } from "@/data/gameRepository";
 import { opponentById } from "@/content/opponents";
@@ -31,6 +32,10 @@ interface GameState {
   userMoveCount: number;
   hydrated: boolean;
 
+  /** Engine-suggested move for the side to move (cleared on any board change). */
+  hint: { from: Square; to: Square } | null;
+  hintThinking: boolean;
+
   // Sprint 7 — match mode
   mode: PlayMode;
   opponentId: string | null;
@@ -46,6 +51,7 @@ interface GameState {
   move: (from: Square, to: Square) => boolean;
   clearSelection: () => void;
   clearNotice: () => void;
+  requestHint: () => void;
   reset: () => void;
   undo: () => void;
   hydrate: () => Promise<void>;
@@ -64,6 +70,15 @@ function clearBotTimer() {
   if (botTimer) {
     clearTimeout(botTimer);
     botTimer = null;
+  }
+}
+
+/** Pending hint computation — cancelled whenever the board changes under it. */
+let hintTimer: ReturnType<typeof setTimeout> | null = null;
+function clearHintTimer() {
+  if (hintTimer) {
+    clearTimeout(hintTimer);
+    hintTimer = null;
   }
 }
 
@@ -108,12 +123,15 @@ export const useGameStore = create<GameState>((set, get) => {
     const moves = s.snap.history.length;
     const before = useProfileStore.getState().playRating;
     // Show the recap immediately; fill in the reward once persisted.
+    clearHintTimer();
     set({
       matchSaved: true,
       matchEndTime: Date.now(),
       botThinking: false,
       selected: null,
       targets: [],
+      hint: null,
+      hintThinking: false,
       result: { outcome, reason, moves, xpAwarded: 0, ratingBefore: before, ratingAfter: before, pending: true },
     });
 
@@ -166,7 +184,7 @@ export const useGameStore = create<GameState>((set, get) => {
     }
     tryMove(g, mv.from, mv.to, mv.promotion);
     const snap = snapshot(g);
-    set({ snap, botThinking: false, selected: null, targets: [] });
+    set({ snap, botThinking: false, selected: null, targets: [], hint: null });
     void saveActiveGame(snap.pgn);
     if (g.isGameOver()) void finalizeMatch();
   }
@@ -187,9 +205,10 @@ export const useGameStore = create<GameState>((set, get) => {
 
   /** Apply a successful user move's side effects (snapshot, persist, bot reply). */
   function afterUserMove() {
+    clearHintTimer();
     const g = get().game;
     const snap = snapshot(g);
-    set({ snap, selected: null, targets: [], notice: null, userMoveCount: get().userMoveCount + 1 });
+    set({ snap, selected: null, targets: [], notice: null, hint: null, hintThinking: false, userMoveCount: get().userMoveCount + 1 });
     void saveActiveGame(snap.pgn);
     if (get().mode === "bot") {
       if (g.isGameOver()) void finalizeMatch();
@@ -210,6 +229,9 @@ export const useGameStore = create<GameState>((set, get) => {
     notice: null,
     userMoveCount: 0,
     hydrated: false,
+
+    hint: null,
+    hintThinking: false,
 
     mode: "idle",
     opponentId: null,
@@ -272,11 +294,37 @@ export const useGameStore = create<GameState>((set, get) => {
     clearSelection: () => set({ selected: null, targets: [] }),
     clearNotice: () => set({ notice: null }),
 
+    requestHint: () => {
+      const s = get();
+      if (s.hint) {
+        set({ hint: null }); // tap again to dismiss
+        return;
+      }
+      if (s.hintThinking || s.game.isGameOver() || !isUserTurn()) return;
+      clearHintTimer();
+      set({ hintThinking: true });
+      // Defer the search a tick so the button press paints before we think.
+      hintTimer = setTimeout(() => {
+        hintTimer = null;
+        const cur = get();
+        if (cur.game.isGameOver() || !isUserTurn()) {
+          set({ hintThinking: false });
+          return;
+        }
+        const best = searchBestMove(cur.game.fen(), { maxDepth: 3, nodeBudget: 120000, timeMs: 700 });
+        set({
+          hintThinking: false,
+          hint: best ? { from: best.uci.slice(0, 2) as Square, to: best.uci.slice(2, 4) as Square } : null,
+        });
+      }, 30);
+    },
+
     reset: () => {
       clearBotTimer();
+      clearHintTimer();
       const game = createGame();
       const snap = snapshot(game);
-      set({ game, snap, selected: null, targets: [], botThinking: false });
+      set({ game, snap, selected: null, targets: [], botThinking: false, hint: null, hintThinking: false });
       void saveActiveGame(snap.pgn);
     },
 
@@ -285,8 +333,9 @@ export const useGameStore = create<GameState>((set, get) => {
       if (mode === "bot") return; // matches aren't take-backs
       const undone = game.undo();
       if (!undone) return;
+      clearHintTimer();
       const snap = snapshot(game);
-      set({ snap, selected: null, targets: [] });
+      set({ snap, selected: null, targets: [], hint: null, hintThinking: false });
       void saveActiveGame(snap.pgn);
     },
 
@@ -303,6 +352,7 @@ export const useGameStore = create<GameState>((set, get) => {
 
     startMatch: (opponentId, side = "w") => {
       clearBotTimer();
+      clearHintTimer();
       const userColor = resolveSide(side);
       set({
         ...freshMatchState(),
@@ -311,6 +361,8 @@ export const useGameStore = create<GameState>((set, get) => {
         userColor,
         botThinking: false,
         result: null,
+        hint: null,
+        hintThinking: false,
         matchStartTime: Date.now(),
         matchEndTime: null,
         matchSaved: false,
@@ -322,12 +374,14 @@ export const useGameStore = create<GameState>((set, get) => {
 
     startPractice: () => {
       clearBotTimer();
-      set({ mode: "practice", opponentId: null, botThinking: false, result: null });
+      clearHintTimer();
+      set({ mode: "practice", opponentId: null, botThinking: false, result: null, hint: null, hintThinking: false });
     },
 
     exitMatch: () => {
       clearBotTimer();
-      set({ mode: "idle", botThinking: false });
+      clearHintTimer();
+      set({ mode: "idle", botThinking: false, hint: null, hintThinking: false });
     },
 
     resignMatch: () => {

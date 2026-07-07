@@ -112,6 +112,10 @@ export function evaluatePosition(input: Chess | string): number {
   return staticEval(game);
 }
 
+/** Passed-pawn bonus by how far the pawn has advanced (index = ranks from its own side). */
+// prettier-ignore
+const PASSED_BONUS = [0, 10, 15, 25, 40, 65, 100, 0];
+
 /**
  * Material + piece-square + light positional score (White-positive), WITHOUT
  * terminal detection — the search checks checkmate/draw itself (with mate
@@ -124,6 +128,11 @@ export function staticEval(game: Chess): number {
   const bishops = { w: 0, b: 0 };
   // pawn counts per file for doubled/isolated detection
   const pawnFiles = { w: new Array<number>(8).fill(0), b: new Array<number>(8).fill(0) };
+  // most advanced pawn rows per file, for passed-pawn detection
+  const wMaxRow = new Array<number>(8).fill(-1); // White's least-advanced blocker of Black is its largest row
+  const bMinRow = new Array<number>(8).fill(8); // Black's blocker of White is its smallest row
+  const pawns: { color: Color; r: number; c: number }[] = [];
+  const rooks: { color: Color; c: number }[] = [];
 
   for (let r = 0; r < 8; r++) {
     for (let c = 0; c < 8; c++) {
@@ -138,8 +147,13 @@ export function staticEval(game: Chess): number {
       score += color === "w" ? v : -v;
 
       if (type === "b") bishops[color]++;
-      if (type === "p") pawnFiles[color][c]++;
-      else if (type !== "k") nonPawnMaterial += material;
+      if (type === "r") rooks.push({ color, c });
+      if (type === "p") {
+        pawnFiles[color][c]++;
+        pawns.push({ color, r, c });
+        if (color === "w") { if (r > wMaxRow[c]) wMaxRow[c] = r; }
+        else if (r < bMinRow[c]) bMinRow[c] = r;
+      } else if (type !== "k") nonPawnMaterial += material;
     }
   }
 
@@ -170,6 +184,25 @@ export function staticEval(game: Chess): number {
       const right = f < 7 ? pawnFiles[color][f + 1] : 0;
       if (left === 0 && right === 0) score -= sign * 14 * n; // isolated
     }
+  }
+
+  // Passed pawns — no enemy pawn ahead on the same or an adjacent file.
+  for (const p of pawns) {
+    let passed = true;
+    for (let f = Math.max(0, p.c - 1); f <= Math.min(7, p.c + 1); f++) {
+      if (p.color === "w" ? bMinRow[f] < p.r : wMaxRow[f] > p.r) { passed = false; break; }
+    }
+    if (!passed) continue;
+    // Ranks advanced from the pawn's own side: row 6..1 → 1..6 for White, row 1..6 → 1..6 for Black.
+    score += p.color === "w" ? PASSED_BONUS[7 - p.r] : -PASSED_BONUS[p.r];
+  }
+
+  // Rooks on open (no pawns) or semi-open (no own pawns) files.
+  for (const rk of rooks) {
+    const own = pawnFiles[rk.color][rk.c];
+    if (own > 0) continue;
+    const enemy = pawnFiles[rk.color === "w" ? "b" : "w"][rk.c];
+    score += (rk.color === "w" ? 1 : -1) * (enemy === 0 ? 22 : 12);
   }
 
   return score;

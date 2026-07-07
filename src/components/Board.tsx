@@ -13,11 +13,13 @@ const captureRing = BOARD_HL.captureRing;
 const selectedStyle = BOARD_HL.selected;
 const lastMoveStyle = BOARD_HL.lastMove;
 const checkStyle = BOARD_HL.check;
+const hintStyle = BOARD_HL.hint;
 
 export default function Board({ orientation = "white" }: { orientation?: "white" | "black" }) {
   const snap = useGameStore((s) => s.snap);
   const selected = useGameStore((s) => s.selected);
   const targets = useGameStore((s) => s.targets);
+  const hint = useGameStore((s) => s.hint);
   const game = useGameStore((s) => s.game);
   const selectSquare = useGameStore((s) => s.selectSquare);
   const grab = useGameStore((s) => s.grab);
@@ -35,6 +37,10 @@ export default function Board({ orientation = "white" }: { orientation?: "white"
   }
   if (selected) {
     styles[selected] = { ...(styles[selected] ?? {}), ...selectedStyle };
+  }
+  if (hint) {
+    styles[hint.from] = { ...(styles[hint.from] ?? {}), ...hintStyle };
+    styles[hint.to] = { ...(styles[hint.to] ?? {}), ...hintStyle };
   }
   if (snap.status === "check" || snap.status === "checkmate") {
     const king = findKing(game, snap.turn);

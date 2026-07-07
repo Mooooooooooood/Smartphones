@@ -174,3 +174,17 @@ Run through this on a real iPhone (Safari) and in desktop Chrome devtools at
 - [ ] After learning, the opening shows "↻ REVIEW" on the list and the home card
       shows "N openings due for review" once its review interval elapses.
 - [ ] `npm run test:openings` passes (every variation legal, learner moves sound).
+
+## Engine v2 + hints (Sprint 30)
+- [ ] Bot replies are noticeably faster; **Onyx** (now depth 4) still answers
+      within ~2s and punishes mistakes harder than Sable.
+- [ ] Practice Board shows a **💡 Hint** button; tapping it highlights the
+      engine's suggested from/to squares in blue, tapping again dismisses it.
+- [ ] In a bot match, **Hint** sits between Resign and Flip; it is disabled
+      while the bot is thinking and the highlight clears as soon as you move.
+- [ ] **Rematch** after playing Black starts the new game with you as Black
+      (it used to flip you back to White).
+- [ ] Game Review analysis (depth 3) finishes within a few seconds for a
+      typical game and still tags obvious blunders.
+- [ ] `npm run test:engine` passes (30 checks — adds mate-in-2, transposition
+      determinism, budget fallback, passed-pawn + open-file eval terms).

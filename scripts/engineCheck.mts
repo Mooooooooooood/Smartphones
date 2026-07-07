@@ -3,7 +3,7 @@
  * post-game analysis. Run: npm run test:engine
  */
 import { evaluatePosition, MATE_SCORE } from "../src/domain/chess/eval.ts";
-import { searchBestMove } from "../src/domain/chess/search.ts";
+import { searchBestMove, searchRootMoves } from "../src/domain/chess/search.ts";
 import { analyzeGame } from "../src/domain/chess/analysis.ts";
 import { BEGINNER_PUZZLES } from "../src/content/puzzles/beginner.ts";
 import { findTactic } from "../src/domain/puzzles/tactics.ts";
@@ -38,6 +38,33 @@ const start = searchBestMove(START, { maxDepth: 2 });
 ok("returns a legal move from the start", !!start && /^[a-h][1-8][a-h][1-8][qrbn]?$/.test(start.uci));
 ok("search is deterministic", searchBestMove(START, { maxDepth: 2 })?.uci === start?.uci);
 ok("no move when the game is already over", searchBestMove("rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3", { maxDepth: 2 }) === null);
+
+// ---- Iterative deepening + transposition table (Sprint 30) ----
+// A ladder mate-in-2: 1.Ra7 (any) 2.Rb8#. Depth 3 must see the forced mate.
+const mate2 = searchBestMove("7k/8/8/8/8/8/R7/1R5K w - - 0 1", { maxDepth: 3 });
+ok("finds a forced mate-in-2 at depth 3", (mate2?.scoreCp ?? 0) > MATE_SCORE - 100);
+ok("search reports the completed depth", searchBestMove(START, { maxDepth: 3 })?.depth === 3);
+// Root list: every legal move exactly once, scored best-first.
+const rootList = searchRootMoves(START, { maxDepth: 2 });
+ok("root list scores all 20 opening moves", rootList.moves.length === 20 && new Set(rootList.moves.map((m) => m.uci)).size === 20);
+ok("root list is sorted best-first", rootList.moves.every((m, i) => i === 0 || rootList.moves[i - 1].scoreCp >= m.scoreCp));
+ok("root scores are identical across runs (TT stays deterministic)",
+  JSON.stringify(searchRootMoves(START, { maxDepth: 2 }).moves) === JSON.stringify(rootList.moves));
+// A starved budget falls back to the deepest fully-completed iteration but stays legal.
+const starved = searchRootMoves(START, { maxDepth: 5, nodeBudget: 3000 });
+ok("a tiny node budget still returns every legal move", starved.moves.length === 20);
+ok("a tiny node budget reports a shallower depth", starved.depth < 5);
+
+// ---- Eval positional terms (Sprint 30) ----
+// Same material; only the black pawn's file changes: e6 blocks White's e5 pawn,
+// g6 leaves it passed (and g6 is itself passed) — the passer bonus must show.
+const blocked = evaluatePosition("k7/8/4p3/4P3/8/8/8/K7 w - - 0 1");
+const passed = evaluatePosition("k7/8/6p1/4P3/8/8/8/K7 w - - 0 1");
+ok("a passed pawn evaluates above a blocked one", passed - blocked >= 20);
+// Same material; the white a-pawn moves off the rook's file, opening it.
+const rookClosed = evaluatePosition("k7/8/8/8/8/8/P7/R6K w - - 0 1");
+const rookOpen = evaluatePosition("k7/8/8/8/8/8/1P6/R6K w - - 0 1");
+ok("a rook on an open file evaluates higher", rookOpen - rookClosed >= 20);
 
 // ---- Analysis ----
 // White hangs the queen: 1.Qh5 g6?? loses nothing; instead play a blunder line.

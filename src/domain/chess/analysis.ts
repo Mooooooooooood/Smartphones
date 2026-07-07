@@ -32,6 +32,9 @@ export interface GameAnalysis {
 
 export interface AnalyzeOpts {
   depth?: number;
+  /** Per-ply search budgets — capped tightly so a review never crawls. */
+  nodeBudget?: number;
+  timeMs?: number;
   /** Called with progress 0..1 as plies are analysed. */
   onProgress?: (done: number, total: number) => void;
   /** Optional starting position (defaults to the standard start). */
@@ -58,7 +61,7 @@ const nextTick = () => new Promise<void>((r) => setTimeout(r, 0));
  * Async + chunked (yields every few plies) so the UI stays responsive.
  */
 export async function analyzeGame(moves: string[], opts: AnalyzeOpts = {}): Promise<GameAnalysis> {
-  const { depth = 2, onProgress, startFen } = opts;
+  const { depth = 2, nodeBudget = 80000, timeMs = 400, onProgress, startFen } = opts;
   const game = startFen ? new Chess(startFen) : new Chess();
   const perMove: MoveEval[] = [];
   const accSum = { w: 0, b: 0 };
@@ -68,7 +71,7 @@ export async function analyzeGame(moves: string[], opts: AnalyzeOpts = {}): Prom
     const uci = moves[i];
     const side = game.turn();
     const fenBefore = game.fen();
-    const { moves: scored } = searchRootMoves(fenBefore, { maxDepth: depth });
+    const { moves: scored } = searchRootMoves(fenBefore, { maxDepth: depth, nodeBudget, timeMs });
 
     const best = scored[0];
     const played = scored.find((m) => m.uci === uci) ?? scored.find((m) => m.uci.slice(0, 4) === uci.slice(0, 4));

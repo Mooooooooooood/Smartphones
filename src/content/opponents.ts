@@ -125,7 +125,7 @@ export const OPPONENTS: Opponent[] = [
     rating: 1600,
     xpReward: 100,
     personality: "tactical",
-    depth: 3,
+    depth: 4,
     skill: 1,
     line: "Few reach my board. Fewer leave with a win.",
     surface: "bg-surf-blue",

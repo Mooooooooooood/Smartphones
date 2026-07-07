@@ -250,6 +250,8 @@ export default function PlayScreen() {
   const snap = useGameStore((s) => s.snap);
   const notice = useGameStore((s) => s.notice);
   const botThinking = useGameStore((s) => s.botThinking);
+  const hintThinking = useGameStore((s) => s.hintThinking);
+  const requestHint = useGameStore((s) => s.requestHint);
   const result = useGameStore((s) => s.result);
   const opponentId = useGameStore((s) => s.opponentId);
   const userColor = useGameStore((s) => s.userColor);
@@ -352,7 +354,7 @@ export default function PlayScreen() {
       ) : null}
 
       {matchOver && result ? (
-        <MatchRecap result={result} opponent={opponent} reviewHref={!result.pending && latestMatchId ? `/play/review?id=${latestMatchId}` : undefined} onRematch={() => startMatch(opponentId!)} onChange={exitMatch} />
+        <MatchRecap result={result} opponent={opponent} reviewHref={!result.pending && latestMatchId ? `/play/review?id=${latestMatchId}` : undefined} onRematch={() => startMatch(opponentId!, userColor)} onChange={exitMatch} />
       ) : !isBot && snap.isGameOver ? (
         <PixelPanel hue="gold" className="tab-animate-pop px-4 py-3 text-center">
           <p className="px-label text-[0.5rem] text-muted2">Game over</p>
@@ -363,8 +365,11 @@ export default function PlayScreen() {
       {/* Controls */}
       {isBot ? (
         !matchOver ? (
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <PixelButton onClick={resignMatch} tone="red" size="sm">⚑ Resign</PixelButton>
+            <PixelButton onClick={requestHint} disabled={hintThinking || !myTurn || botThinking} tone="gold" size="sm">
+              {hintThinking ? "…" : "💡 Hint"}
+            </PixelButton>
             <PixelButton onClick={() => setFlip((f) => !f)} tone="blue" size="sm">⇅ Flip</PixelButton>
           </div>
         ) : null

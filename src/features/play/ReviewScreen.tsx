@@ -107,7 +107,7 @@ export default function ReviewScreen() {
     if (!frames || frames.length < 2) return;
     let active = true;
     const moves = frames.slice(1).map((f) => `${f.from}${f.to}`);
-    void analyzeGame(moves, { depth: 2 }).then((a) => {
+    void analyzeGame(moves, { depth: 3 }).then((a) => {
       if (active) setAnalysis(a);
     });
     return () => {
